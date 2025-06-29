@@ -7,8 +7,8 @@ import "leaflet/dist/leaflet.css";
 
 // Fix for missing marker icon
 const markerIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
-  iconSize: [25, 41],
+  iconUrl: "/assets/icons/marker.png",
+  iconSize: [30, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
 });
