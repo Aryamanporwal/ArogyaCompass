@@ -32,7 +32,7 @@ export default function Home() {
       <div className="mb-5">
         <h1 className="text-2xl font-bold mb-1 text-left">Hi there...</h1>
         <p className="text-base text-dark-600 text-left">
-          Get started with your appointment journey.
+          Get started with your appointment journey
         </p>
       </div>
 
