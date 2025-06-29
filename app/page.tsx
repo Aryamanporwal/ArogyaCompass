@@ -10,50 +10,57 @@ export default function Home() {
   return (
     <div className="flex h-screen w-full bg-background text-foreground">
       {/* Left: Form Section */}
-      <section className="flex w-full max-w-[600px] flex-col justify-center px-8 py-10 sm:px-12 md:px-16 lg:px-20">
-        {/* Centered logo */}
-        <div className="flex flex-col items-center justify-center mb-10">
-          <Image
-            alt="logo"
-            src="/assets/icons/logo-full.png"
-            height={240}
-            width={240}
-            className="h-20 sm:h-24 md:h-28 w-auto object-contain"
-          />
-        </div>
+    <section className="flex w-full max-w-[600px] flex-col justify-start px-6 pt-6 pb-4 sm:px-10 md:px-16 lg:px-20">
+      {/* Logo + Tagline */}
+    <div className="flex flex-col items-center justify-center -mt-2 mb-3">
+      <Image
+        alt="logo"
+        src="/assets/icons/logo.png"
+        height={200}
+        width={200}
+        className="h-20 sm:h-24 md:h-28 w-auto object-contain"
+      />
+      <div className="-mt-1 text-center leading-tight">
+        <h1 className="text-[1.3rem] font-bold bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-clip-text text-transparent">
+          ArogyaCompass
+        </h1>
+        <h2 className="text-sm text-blue-500 mt-0.5">Your Smart Path to Faster Care</h2>
+      </div>
+    </div>
 
-        <h1 className="text-32-bold mb-2 text-center">Hi there, ....</h1>
-        <p className="text-16-regular mb-8 text-dark-600 text-center">
+      {/* Headings */}
+      <div className="mb-5">
+        <h1 className="text-2xl font-bold mb-1 text-left">Hi there...</h1>
+        <p className="text-base text-dark-600 text-left">
           Get started with your appointment journey.
         </p>
+      </div>
 
-        {/* Form */}
-        <div className="w-full rounded-xl bg-white p-6 shadow-xl">
-          <PatientForm />
-        </div>
+      {/* Form Card */}
+      <div className="w-full rounded-xl bg-transparent p-5 shadow-md border border-dark-500">
+        <PatientForm />
+      </div>
 
-        {/* Register CTA */}
-        <div className="text-14-regular mt-6 text-dark-600 text-center">
-          Don’t have a hospital account?{" "}
-          <Link
-            href="/hospitalregistration"
-            className="text-green-500 font-medium hover:underline"
-          >
-            Register here
-          </Link>
-        </div>
+      {/* Register CTA */}
+      <div className="text-sm mt-5 text-dark-600 text-center">
+        Don’t have a hospital account?{" "}
+        <Link
+          href="/hospitalregistration"
+          className="text-green-500 font-medium hover:underline"
+        >
+          Register here
+        </Link>
+      </div>
 
-        {/* Footer */}
-        <div className="text-14-regular mt-12 flex justify-between text-dark-600">
-          <p>&copy; 2025 ArogyaCompass</p>
-          <Link
-            href="/?admin=true"
-            className="text-green-600 hover:underline"
-          >
-            Admin
-          </Link>
-        </div>
-      </section>
+      {/* Footer BELOW register link */}
+      <div className="text-xs mt-3 px-2 flex justify-between text-dark-600">
+        <p>&copy; 2025 ArogyaCompass</p>
+        <Link href="/?admin=true" className="text-green-600 hover:underline">
+          Admin
+        </Link>
+      </div>
+    </section>
+
 
       {/* Right: Map Section */}
       <div className="hidden h-full flex-1 md:flex items-center justify-center bg-muted">
