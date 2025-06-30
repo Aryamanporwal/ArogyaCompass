@@ -52,7 +52,7 @@ export default function MapView() {
       {position ? (
         <MapContainer
           center={position}
-          zoom={13}
+          zoom={16}
           scrollWheelZoom={false}
           style={{ height: "100%", width: "100%" }}
         >
