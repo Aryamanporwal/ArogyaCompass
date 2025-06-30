@@ -11,7 +11,6 @@ import { UserFormValidation } from "@/lib/validation";
 import CustomFormField, { FormFieldType } from "../ui/CustomFormField";
 import SubmitButton from "../ui/SubmitButton";
 import EmailVerifyModal from "../ui/EmailVerifyModal"; // create this
-import MapView from "../MapView";
 
 export const PatientForm = () => {
   const router = useRouter();

@@ -21,7 +21,7 @@ export const createUser = async (user: CreateUserParams) => {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     
     await resend.emails.send({
-      from: "",
+      from: "onboarding@resend.dev",
       to: user.email,
       subject: "Your Email Verification Code",
       html: `<p>Hello ${user.name},</p>
@@ -40,7 +40,7 @@ export const createUser = async (user: CreateUserParams) => {
       // For existing users, generate a new verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
       await resend.emails.send({
-        from: "verify@arogyacompass.verify.com",
+        from: "onboarding@resend.dev",
         to: user.email,
         subject: "Your Verification Code",
         html: `<p>Your verification code is: <strong>${verificationCode}</strong></p>`
