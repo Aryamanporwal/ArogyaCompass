@@ -2,7 +2,7 @@
 
 import { ID } from "node-appwrite";
 import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID } from "@/lib/appwrite.config";
-
+import { Query } from "node-appwrite";
 type Doctor = {
   Name: string;
   Email: string;
@@ -68,3 +68,37 @@ export const registerHospital = async (
     throw error;
   }
 };
+
+export const getAllHospitals = async () => {
+  try {
+    const res = await databases.listDocuments(
+      DATABASE_ID!,
+      HOSPITAL_COLLECTION_ID!,
+      [
+        Query.isNotNull("coordinates"),
+        Query.notEqual("coordinates", []),
+      ]
+    );
+
+    const hospitalsWithDoctors = await Promise.all(
+      res.documents.map(async (hospital) => {
+        const doctorsRes = await databases.listDocuments(
+          DATABASE_ID!,
+          DOCTOR_COLLECTION_ID!,
+          [Query.equal("hospitalId", hospital.$id)]
+        );
+
+        return {
+          ...hospital,
+          doctors: doctorsRes.documents,
+        };
+      })
+    );
+
+    return hospitalsWithDoctors;
+  } catch (error) {
+    console.error("❌ Error fetching hospitals:", error);
+    return [];
+  }
+};
+
