@@ -36,6 +36,7 @@ type HospitalData = {
   isVerified: boolean;
   istrueLocation: boolean;
   coordinates: [number, number] | [];
+  doctors:string[];
 };
 
 export default function HospitalForm() {
@@ -49,6 +50,7 @@ export default function HospitalForm() {
     licenseNumber: "",
     isVerified: false,
     istrueLocation: false,
+    doctors: []
   });
   const [specialities, setSpecialities] = useState<string[]>([]);
   const [hospitalLogoUrl, setHospitalLogoUrl] = useState<string>("");
@@ -97,15 +99,18 @@ export default function HospitalForm() {
   };
 
   const updateDoctor = <K extends keyof Doctor>(index: number, key: K, value: Doctor[K]) => {
-    const updated = [...doctors];
-    updated[index][key] = value;
-    setDoctors(updated);
+    const updatedDoctors = [...doctors];
+      updatedDoctors[index][key] = value;
+
+      setDoctors(updatedDoctors);
+
   };
 
-  const removeDoctor = (index: number) => {
-    if (doctors.length === 1) return;
-    setDoctors(doctors.filter((_, i) => i !== index));
-  };
+    const removeDoctor = (index: number) => {
+      if (doctors.length === 1) return;
+      setDoctors(doctors.filter((_, i) => i !== index));
+    };
+
 
   // Logo upload handlers
   const handleDoctorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -160,6 +165,7 @@ export default function HospitalForm() {
       coordinates: coordinates ?? [],
       isVerified: false,
       istrueLocation: false,
+      doctors : doctors.map((doc) => doc.Name),
     };
     try {
       await registerHospital(hospitalData, doctors);

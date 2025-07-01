@@ -30,6 +30,7 @@ type HospitalParams = {
   isVerified: boolean;
   istrueLocation: boolean;
   coordinates: number[];
+  doctors: string[],
 };
 
 
@@ -108,5 +109,4 @@ export const getAllHospitals = async () => {
     return [];
   }
 };
-
 

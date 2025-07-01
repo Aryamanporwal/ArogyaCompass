@@ -24,16 +24,12 @@ export interface HospitalMapProps {
   };
 }
 
-interface Doctor {
-  Name: string;
-}
-
 interface Hospital {
   $id?: string;
   name: string;
   address: string;
   coordinates: [number, number];
-  doctors?: Doctor[];
+  doctors?: string[];
 }
 
 export default function HospitalMap({ onLocationFetched }: HospitalMapProps) {
@@ -101,17 +97,18 @@ export default function HospitalMap({ onLocationFetched }: HospitalMapProps) {
               position={hospital.coordinates}
               icon={markerIcon}
             >
-              <Popup>
-                <strong>{hospital.name}</strong>
-                <p>{hospital.address}</p>
-                {hospital.doctors?.length && (
-                  <select className="mt-2 text-sm text-black">
-                    {hospital.doctors.map((doc, i) => (
-                      <option key={i}>{doc.Name}</option>
-                    ))}
-                  </select>
-                )}
-              </Popup>
+            <Popup>
+              <strong>{hospital.name}</strong>
+              <p>{hospital.address}</p>
+              {hospital.doctors && hospital.doctors.length > 0 && (
+                <select className="mt-2 text-sm text-black">
+                  {hospital.doctors.map((name, i) => (
+                    <option key={i}>{name}</option>
+                  ))}
+                </select>
+              )}
+            </Popup>
+
             </Marker>
           ))}
         </MapContainer>
