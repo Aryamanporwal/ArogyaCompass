@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { registerHospital, uploadDoctorLogo, uploadHospitalLogo } from "@/lib/actions/hospital.action";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 // Dynamically load HospitalMap to avoid SSR issues
 const HospitalMap = dynamic(() => import("@/components/HospitalMap"), { ssr: false });
@@ -36,11 +37,13 @@ type HospitalData = {
   isVerified: boolean;
   istrueLocation: boolean;
   coordinates: [number, number] | [];
-  doctors:string[];
+  doctors:Doctor[];
+  doctorName : string[];
 };
 
 export default function HospitalForm() {
   // Hospital state
+  const router = useRouter();
   const [hospital, setHospital] = useState<Omit<HospitalData, "logoUrl" | "specialities" | "coordinates">>({
     name: "",
     email: "",
@@ -50,7 +53,8 @@ export default function HospitalForm() {
     licenseNumber: "",
     isVerified: false,
     istrueLocation: false,
-    doctors: []
+    doctors : [],
+    doctorName : [],
   });
   const [specialities, setSpecialities] = useState<string[]>([]);
   const [hospitalLogoUrl, setHospitalLogoUrl] = useState<string>("");
@@ -165,11 +169,15 @@ export default function HospitalForm() {
       coordinates: coordinates ?? [],
       isVerified: false,
       istrueLocation: false,
-      doctors : doctors.map((doc) => doc.Name),
+      doctorName : doctors.map((doc) => doc.Name),
     };
     try {
-      await registerHospital(hospitalData, doctors);
-      alert("Hospital and doctors registered successfully!");
+      const result = await registerHospital(hospitalData, doctors);
+      alert("Hospital Created proceed to payment");
+      if (result?.hospitalId) {
+        router.push(`hospital/${result.hospitalId}/payment`);
+      }
+      
     } catch (error) {
       console.error("Registration failed:", error);
       alert("Failed to register. See console for details.");
@@ -239,9 +247,22 @@ export default function HospitalForm() {
               <span>Add another doctor</span>
             </button>
           </div>
-          <button type="submit" className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg">
-            Submit and Continue
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
+              className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg"
+            >
+              Submit and Continue
+            </button>
+
+            <button
+              type="button"
+              className="text-blue-500 font-bold ml-auto curson-pointer hover:underline"
+              onClick={() => router.push("/labRegistration")}
+            >
+              Go to Lab Registration
+            </button>
+          </div>
         </form>
       </div>
     </div>

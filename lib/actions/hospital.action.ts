@@ -30,7 +30,8 @@ type HospitalParams = {
   isVerified: boolean;
   istrueLocation: boolean;
   coordinates: number[];
-  doctors: string[],
+  doctors: Doctor[],
+  doctorName : string[]
 };
 
 
@@ -40,6 +41,7 @@ export const registerHospital = async (
 ) => {
   try {
     const hospitalId = ID.unique();
+    
 
     // Create hospital document
     const newHospital = await databases.createDocument(
@@ -65,7 +67,7 @@ export const registerHospital = async (
       );
     }
 
-    return { hospital: newHospital };
+    return { hospital: newHospital , hospitalId};
   } catch (error) {
     console.error("❌ Error creating hospital and doctors:", error);
     throw error;
