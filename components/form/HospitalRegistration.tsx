@@ -7,7 +7,7 @@ import { registerHospital } from "@/lib/actions/hospital.action";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { uploadDoctorLogo } from "@/lib/actions/hospital.action";
-
+import { uploadHospitalLogo } from "@/lib/actions/hospital.action";
 
 // Dynamically load HospitalMap to avoid SSR issues
 const HospitalMap = dynamic(() => import("@/components/HospitalMap"), {
@@ -47,6 +47,8 @@ export default function HospitalForm() {
 
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [registeredHospital, setRegisteredHospital] = useState<any>(null);
+  const [hospitalLogoUrl, setHospitalLogoUrl] = useState<string>("");
+
 
   const addDoctor = () => {
     setDoctors([
@@ -110,6 +112,33 @@ export default function HospitalForm() {
       }
     };
 
+  const handleHospitalLogoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const result = await uploadHospitalLogo(file);
+      let previewUrl: string;
+
+      if (typeof result === "string") {
+        previewUrl = result;
+      } else if (result instanceof ArrayBuffer) {
+        const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
+        previewUrl = `data:image/png;base64,${base64String}`;
+      } else {
+        throw new Error("Unexpected hospital logo upload result type");
+      }
+
+      setHospitalLogoUrl(previewUrl);
+    } catch (err) {
+      console.error("Hospital logo upload failed:", err);
+      alert("Failed to upload hospital logo.");
+    }
+  };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -120,7 +149,7 @@ export default function HospitalForm() {
       address: (document.querySelector('input[placeholder="Address"]') as HTMLInputElement).value,
       city: (document.querySelector('input[placeholder="City"]') as HTMLInputElement).value,
       licenseNumber: (document.querySelector('input[placeholder="License Number"]') as HTMLInputElement).value,
-      logoUrl: "",
+      logoUrl: hospitalLogoUrl,
       specialities: (document.querySelector('input[placeholder="Specialities (comma-separated)"]') as HTMLInputElement)?.value.split(",") || [],
       isVerified: false,
       istrueLocation: false,
@@ -167,6 +196,24 @@ export default function HospitalForm() {
             <Input required placeholder="City" />
             <Input required placeholder="License Number" />
             <Input placeholder="Specialities (comma-separated)" />
+            <div>
+            <label className="block mb-1">Hospital Image</label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleHospitalLogoUpload}
+              placeholder="Upload hospital logo"
+            />
+            {hospitalLogoUrl?.startsWith("http") && (
+              <Image
+                src={hospitalLogoUrl}
+                alt="Hospital logo"
+                width={80}
+                height={80}
+                className="mt-2 rounded"
+              />
+            )}
+          </div>
           </div>
 
           <div>
