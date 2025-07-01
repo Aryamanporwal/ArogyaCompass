@@ -5,6 +5,9 @@ import { Plus, Trash2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { registerHospital } from "@/lib/actions/hospital.action";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import { uploadDoctorLogo } from "@/lib/actions/hospital.action";
+
 
 // Dynamically load HospitalMap to avoid SSR issues
 const HospitalMap = dynamic(() => import("@/components/HospitalMap"), {
@@ -79,6 +82,33 @@ export default function HospitalForm() {
     const updated = doctors.filter((_, i) => i !== index);
     setDoctors(updated);
   };
+    const handleDoctorLogoUpload = async (
+      e: React.ChangeEvent<HTMLInputElement>,
+      index: number
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      try {
+        const result = await uploadDoctorLogo(file); // Calls the server
+        let previewUrl: string;
+        if (typeof result === "string") {
+          previewUrl = result;
+        } else if (result instanceof ArrayBuffer) {
+          // Convert ArrayBuffer to base64 data URL
+          const base64String = btoa(
+            String.fromCharCode(...new Uint8Array(result))
+          );
+          previewUrl = `data:image/png;base64,${base64String}`;
+        } else {
+          throw new Error("Unexpected logo upload result type");
+        }
+        updateDoctor(index, "logoUrl", previewUrl);
+      } catch (err) {
+        console.error("Logo upload failed:", err);
+        alert("Failed to upload logo.");
+      }
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +120,7 @@ export default function HospitalForm() {
       address: (document.querySelector('input[placeholder="Address"]') as HTMLInputElement).value,
       city: (document.querySelector('input[placeholder="City"]') as HTMLInputElement).value,
       licenseNumber: (document.querySelector('input[placeholder="License Number"]') as HTMLInputElement).value,
-      logoUrl: (document.querySelector('input[placeholder="Logo URL"]') as HTMLInputElement)?.value || "",
+      logoUrl: "",
       specialities: (document.querySelector('input[placeholder="Specialities (comma-separated)"]') as HTMLInputElement)?.value.split(",") || [],
       isVerified: false,
       istrueLocation: false,
@@ -111,6 +141,8 @@ export default function HospitalForm() {
       alert("Failed to register. See console for details.");
     }
   };
+
+
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -134,7 +166,6 @@ export default function HospitalForm() {
             <Input required placeholder="Address" />
             <Input required placeholder="City" />
             <Input required placeholder="License Number" />
-            <Input placeholder="Logo URL" />
             <Input placeholder="Specialities (comma-separated)" />
           </div>
 
@@ -199,11 +230,25 @@ export default function HospitalForm() {
                       updateDoctor(index, "licenseNumber", e.target.value)
                     }
                   />
-                  <Input
-                    placeholder="Logo URL"
-                    value={doctor.logoUrl}
-                    onChange={(e) => updateDoctor(index, "logoUrl", e.target.value)}
-                  />
+                  <div>
+                    <label className="block mb-1"> Doctor License Image</label>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleDoctorLogoUpload(e, index)}
+                      placeholder="uplaod here"
+                    />
+                    {doctor.logoUrl?.startsWith("http") && (
+                      <Image
+                        src={doctor.logoUrl}
+                        alt="Doctor Logo"
+                        width={64}
+                        height={64}
+                        className="mt-2 rounded"
+                      />
+                    )}
+                  </div>
+                  
                   <Input
                     placeholder="Speciality (comma-separated)"
                     value={doctor.speciality.join(",")}
