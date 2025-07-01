@@ -1,9 +1,9 @@
-import HospitalRegistration from '@/components/form/HospitalRegistration';
+import HospitalForm from '@/components/form/HospitalRegistration';
 import React from 'react'
 const hospitalRegister = () => {
   return (
     <div>
-        <HospitalRegistration/>
+        <HospitalForm/>
     </div>
   )
 }
