@@ -1,11 +1,12 @@
+// ✅ HospitalMap.tsx
 "use client";
 
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useEffect, useState, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { getAllHospitals } from "@/lib/actions/hospital.action";
 
-// Fix for missing marker icon
 const markerIcon = new L.Icon({
   iconUrl: "/assets/icons/hospital_marker.png",
   iconSize: [66, 66],
@@ -13,32 +14,51 @@ const markerIcon = new L.Icon({
   popupAnchor: [1, -34],
 });
 
-interface MapViewProps {
-  hospital?: {
+export interface HospitalMapProps {
+  onLocationFetched?: (coords: [number, number]) => void;
+   registeredHospital?: {
     name: string;
     address: string;
     coordinates: [number, number];
-    doctors: { Name: string }[];
+    doctors?: { Name: string }[];
   };
-  onLocationFetched?: (coords: [number, number]) => void;
 }
 
-export default function MapView({ hospital, onLocationFetched }: MapViewProps) {
+interface Doctor {
+  Name: string;
+}
+
+interface Hospital {
+  $id?: string;
+  name: string;
+  address: string;
+  coordinates: [number, number];
+  doctors?: Doctor[];
+}
+
+export default function HospitalMap({ onLocationFetched }: HospitalMapProps) {
   const [position, setPosition] = useState<[number, number] | null>(null);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const coords: [number, number] = [
-          pos.coords.latitude,
-          pos.coords.longitude,
-        ];
-        setPosition(coords);
-        if (onLocationFetched) onLocationFetched(coords);
-      });
-    }
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const coords: [number, number] = [
+        pos.coords.latitude,
+        pos.coords.longitude,
+      ];
+      setPosition(coords);
+      if (onLocationFetched) onLocationFetched(coords);
+    });
   }, [onLocationFetched]);
+
+  useEffect(() => {
+    const fetchHospitals = async () => {
+      const result = await getAllHospitals();
+      setHospitals(result as unknown as Hospital[]);
+    };
+    fetchHospitals();
+  }, []);
 
   const handleFullscreen = () => {
     if (mapRef.current) {
@@ -55,7 +75,6 @@ export default function MapView({ hospital, onLocationFetched }: MapViewProps) {
 
   return (
     <div ref={mapRef} className="relative h-full w-full">
-      {/* Expand Button */}
       <button
         onClick={handleFullscreen}
         className="absolute top-4 right-4 z-[1000] rounded-full bg-gray-500 p-2 shadow-lg hover:bg-amber-500"
@@ -75,28 +94,26 @@ export default function MapView({ hospital, onLocationFetched }: MapViewProps) {
             attribution='&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
             url={tileURL}
           />
-          <Marker
-            position={hospital?.coordinates || position}
-            icon={markerIcon}
-          >
-            <Popup>
-              {hospital ? (
-                <div>
-                  <strong>{hospital.name}</strong>
-                  <p>{hospital.address}</p>
-                  {hospital.doctors.length > 0 && (
-                    <select className="mt-2 text-sm text-black">
-                      {hospital.doctors.map((doc, i) => (
-                        <option key={i}>{doc.Name}</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-              ) : (
-                "Your current location"
-              )}
-            </Popup>
-          </Marker>
+
+          {hospitals.map((hospital, index) => (
+            <Marker
+              key={hospital.$id || index}
+              position={hospital.coordinates}
+              icon={markerIcon}
+            >
+              <Popup>
+                <strong>{hospital.name}</strong>
+                <p>{hospital.address}</p>
+                {hospital.doctors?.length && (
+                  <select className="mt-2 text-sm text-black">
+                    {hospital.doctors.map((doc, i) => (
+                      <option key={i}>{doc.Name}</option>
+                    ))}
+                  </select>
+                )}
+              </Popup>
+            </Marker>
+          ))}
         </MapContainer>
       ) : (
         <div className="flex h-full w-full items-center justify-center text-white">

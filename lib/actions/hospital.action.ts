@@ -32,6 +32,7 @@ type HospitalParams = {
   coordinates: number[];
 };
 
+
 export const registerHospital = async (
   hospitalData: HospitalParams,
   doctors: Doctor[]
@@ -94,36 +95,18 @@ export const uploadHospitalLogo = async (file: File) => {
   }
 };
 
+
 export const getAllHospitals = async () => {
   try {
-    const res = await databases.listDocuments(
-      DATABASE_ID!,
-      HOSPITAL_COLLECTION_ID!,
-      [
-        Query.isNotNull("coordinates"),
-        Query.notEqual("coordinates", []),
-      ]
-    );
+    const res = await databases.listDocuments("686137f30030ecedb50e", "68635669000de553d623", [
+      Query.limit(100), // or paginate
+    ]);
 
-    const hospitalsWithDoctors = await Promise.all(
-      res.documents.map(async (hospital) => {
-        const doctorsRes = await databases.listDocuments(
-          DATABASE_ID!,
-          DOCTOR_COLLECTION_ID!,
-          [Query.equal("hospitalId", hospital.$id)]
-        );
-
-        return {
-          ...hospital,
-          doctors: doctorsRes.documents,
-        };
-      })
-    );
-
-    return hospitalsWithDoctors;
-  } catch (error) {
-    console.error("❌ Error fetching hospitals:", error);
+    return res.documents;
+  } catch (err) {
+    console.error("Error fetching hospitals:", err);
     return [];
   }
 };
+
 
