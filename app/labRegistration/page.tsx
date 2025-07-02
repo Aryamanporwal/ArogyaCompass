@@ -1,8 +1,10 @@
 import React from 'react'
-
+import LabForm from '@/components/form/LabRegister'
 const LabRegistration = () => {
   return (
-    <div>LabRegistration</div>
+    <div>
+      <LabForm/>
+    </div>
   )
 }
 
