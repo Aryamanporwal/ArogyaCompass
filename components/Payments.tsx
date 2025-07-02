@@ -7,6 +7,13 @@ import {
   updateLabStatus,
 } from "@/lib/actions/payment.action";
 import Image from "next/image";
+import Script from "next/script";
+
+declare global{
+  interface Window{
+    Razorpay: new (options: object) => { open: () => void };
+  }
+}
 
 const validCoupons = [
   "AROGYAFREE",
@@ -19,11 +26,11 @@ export default function Payments() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-
   const [coupon, setCoupon] = useState("");
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState<"hospital" | "lab" | null>(null);
   const [id, setId] = useState<string | null>(null);
+  const AMOUNT = (type=="hospital")?2000:1500;
 
   useEffect(() => {
     if (pathname.includes("hospital")) {
@@ -35,39 +42,79 @@ export default function Payments() {
     }
   }, [pathname, params]);
 
-  const handlePayment = async () => {
-    if (!id || !type) return;
+    const handlePayment = async () => {
+      if (!id || !type) return;
 
-    const trimmedCoupon = coupon.trim().toUpperCase();
-    if (!validCoupons.includes(trimmedCoupon)) {
-      alert("❌ Invalid coupon code");
-      return;
-    }
+      const trimmedCoupon = coupon.trim().toUpperCase();
 
-    try {
-      setLoading(true);
-      const timestamp = new Date().toISOString();
-
-      if (type === "hospital") {
-        await updateHospitalStatus(id, true, true, timestamp);
-        alert("✅ Successful payment and Verification for Hospital");
-        router.push(`/hospital/${id}/dashboard`);
-      } else if (type === "lab") {
-        await updateLabStatus(id, true, true, timestamp);
-        alert("✅ Successful payment and Verification for Lab");
-        router.push(`/lab/${id}/dashboard`);
+      // ✅ CASE 1: VALID COUPON → skip Razorpay
+      if (validCoupons.includes(trimmedCoupon)) {
+        const timestamp = new Date().toISOString();
+        if (type === "hospital") {
+          await updateHospitalStatus(id, true, true, timestamp);
+          alert("✅ Coupon applied. Hospital verified.");
+          router.push(`/hospital/${id}/dashboard`);
+        } else if (type === "lab") {
+          await updateLabStatus(id, true, true, timestamp);
+          alert("✅ Coupon applied. Lab verified.");
+          router.push(`/lab/${id}/dashboard`);
+        }
+        return; // ✅ Exit early
       }
-    } catch (err) {
-      console.error(err);
-      alert("❌ Error updating payment status");
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      // ✅ CASE 2: No or invalid coupon → initiate payment
+      try {
+        setLoading(true);
+
+        const response = await fetch("/api/payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: AMOUNT }),
+        });
+
+        const data = await response.json();
+
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          amount: AMOUNT * 100,
+          currency: "INR",
+          name: "ArogyaCompass",
+          description: "Test Transaction",
+          order_id: data.orderId,
+          handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
+            console.log("Payment Successful", response);
+            const timestamp = new Date().toISOString();
+
+            if (type === "hospital") {
+              await updateHospitalStatus(id, true, true, timestamp);
+              alert("✅ Payment successful. Hospital verified.");
+              router.push(`/hospital/${id}/dashboard`);
+            } else if (type === "lab") {
+              await updateLabStatus(id, true, true, timestamp);
+              alert("✅ Payment successful. Lab verified.");
+              router.push(`/lab/${id}/dashboard`);
+            }
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+
+        const rzp1 = new window.Razorpay(options);
+        rzp1.open();
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error during payment");
+      } finally {
+        setLoading(false);
+      }
+    };
+
 
 
 return (
   <div className="h-screen bg-[#0B0E1C] text-white flex justify-center flex-col md:flex-row items-center px-4 py-6 gap-6 overflow-hidden">
+    <Script src = "https://checkout.razorpay.com/v1/checkout.js"/>
     {/* Left: Payment Card */}
     <div className="bg-white text-black rounded-2xl shadow-lg w-[600px] p-6 flex flex-col overflow-y-auto max-h-[95vh] scrollbar-thin scrollbar-thumb-gray-300 justify center">
       {/* Logo */}

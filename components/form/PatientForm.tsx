@@ -54,7 +54,7 @@ export const PatientForm = () => {
   };
 
   const handleVerified = () => {
-    router.push(`/patients/${newUserId}/register`);
+    router.push(`/patients/${newUserId}/explore`);
   };
 
   return (
