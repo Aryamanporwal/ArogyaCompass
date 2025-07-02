@@ -67,20 +67,28 @@ export default function Payments() {
 
 
 return (
-  <div className="min-h-screen bg-[#0B0E1C] text-white flex flex-col md:flex-row items-center justify-center px-4 py-8 gap-6">
+  <div className="h-screen bg-[#0B0E1C] text-white flex justify-center flex-col md:flex-row items-center px-4 py-6 gap-6 overflow-hidden">
     {/* Left: Payment Card */}
-    <div className="bg-white text-black rounded-2xl shadow-lg w-full md:w-1/2 p-6 flex flex-col overflow-y-auto max-h-[90vh] scrollbar-thin scrollbar-thumb-gray-300">
+    <div className="bg-white text-black rounded-2xl shadow-lg w-[600px] p-6 flex flex-col overflow-y-auto max-h-[95vh] scrollbar-thin scrollbar-thumb-gray-300 justify center">
       {/* Logo */}
+    <div className="flex flex-col items-center justify-center -mt-2 mb-3">
       <Image
+        alt="logo"
         src="/assets/icons/logo.png"
-        alt="Logo"
-        width={32}
-        height={32}
-        className="mb-4"
+        height={200}
+        width={200}
+        className="h-20 sm:h-24 md:h-28 w-auto object-contain"
       />
+      <div className="-mt-1 text-center leading-tight">
+        <h1 className="text-[1.3rem] font-extrabold bg-gradient-to-r from-blue-600 via-blue-600 to-blue-400 bg-clip-text text-transparent ">
+          ArogyaCompass
+        </h1>
+        <h2 className="text-sm text-blue-400 mt-0.5 font-bold">Your Smart Path to Faster Care</h2>
+      </div>
+    </div>
 
       {/* Countdown */}
-      <div className="flex items-center justify-center text-purple-600 font-bold text-lg mb-4">
+      <div className="flex items-center justify-center text-blue-600  font-bold text-lg mb-4">
         ⏳ <span id="countdown" className="ml-2">05:00</span>
       </div>
 
@@ -102,7 +110,7 @@ return (
       </p>
 
       {/* Trust */}
-      <p className="text-sm text-gray-500 mb-4">✅ Trusted by Government</p>
+      <p className="text-sm text-gray-500 mb-4">Trusted by Government</p>
 
       {/* Coupon Section */}
       <label className="text-sm font-semibold mb-1">Do you have a coupon code?</label>
@@ -116,7 +124,7 @@ return (
       <button
         onClick={handlePayment}
         disabled={loading}
-        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded w-full mb-4 disabled:opacity-50"
+        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full mb-4 disabled:opacity-50"
       >
         {loading ? "Processing..." : "Grab the Subscription Now →"}
       </button>
@@ -138,7 +146,7 @@ return (
             <span className="text-gray-600">Automated data processing using intelligent algorithms.</span>
           </li>
           <li>
-            <span className="font-semibold">📂 Smart File Analysis</span><br />
+            <span className="font-semibold">✨ Smart File Analysis</span><br />
             <span className="text-gray-600">Upload and analyze medical files, prescriptions, or reports instantly.</span>
           </li>
           <li>
@@ -146,7 +154,7 @@ return (
             <span className="text-gray-600">Visualize performance metrics, reports, and activities with ease.</span>
           </li>
           <li>
-            <span className="font-semibold">📁 Patient Medical History</span><br />
+            <span className="font-semibold">🌐 Patient Medical History</span><br />
             <span className="text-gray-600">Access complete patient records in one click.</span>
           </li>
           <li>
@@ -166,7 +174,7 @@ return (
     </div>
 
     {/* Right: Illustration Image */}
-    <div className="w-full md:w-1/2 flex items-center justify-center p-4">
+    {/* <div className="w-full md:w-1/2 flex items-center justify-center p-4 max-h-[100vh]">
       <Image
         src="/assets/images/pay_image.png"
         alt="Pay Illustration"
@@ -174,7 +182,7 @@ return (
         height={500}
         className="object-contain rounded-2xl"
       />
-    </div>
+    </div> */}
 
     {/* Countdown Script */}
     <script dangerouslySetInnerHTML={{
