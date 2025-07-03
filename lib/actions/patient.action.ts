@@ -6,6 +6,7 @@ type ErrorWithCode = {
     code: number;
     [key: string]: unknown;
 };
+import {cookies} from "next/headers"
 
 export const createUser = async (user: CreateUserParams) => {
   const resend = new Resend('re_PFSSmak7_FrQaPKiRyRjLH8n3fQ84eBjd');
@@ -19,6 +20,14 @@ export const createUser = async (user: CreateUserParams) => {
     );
     
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const cookieStore = await cookies();
+    cookieStore.set("userId", newUser.$id, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
     
     await resend.emails.send({
       from: "onboarding@resend.dev",
@@ -39,6 +48,15 @@ export const createUser = async (user: CreateUserParams) => {
       
       // For existing users, generate a new verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const cookieStore = await cookies();
+      cookieStore.set("userId", existingUser.users[0].$id, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
       await resend.emails.send({
         from: "onboarding@resend.dev",
         to: user.email,

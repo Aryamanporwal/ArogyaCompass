@@ -6,7 +6,7 @@ import { getAllHospitals } from "@/lib/actions/hospital.action";
 import { createAppointment } from "@/lib/actions/appointment.action"
 import { useRouter } from "next/navigation";
 import { getAllLabs } from "@/lib/actions/lab.action";
-import { getUserId } from "@/lib/client-auth";
+import { getUserIdFromCookie } from "@/lib/actions/user.action";
 
 const ExploreMap = dynamic(() => import("@/components/ExploreMapView"), { ssr: false });
 
@@ -113,15 +113,9 @@ export default function PatientExplore() {
   };
 
 const handleContinue = async () => {
-    const userId = await getUserId();
-    if (!userId) {
-        alert("Please login first");
-        return;
-    }
     try {
         if (view === "hospital") {
         await createAppointment({
-            userId,
             hospitalId: selectedHospital,
             doctorName: selectedDoctor,
             city,
@@ -129,7 +123,6 @@ const handleContinue = async () => {
         });
         } else if (view === "lab") {
         await createAppointment({
-            userId,
             labId: selectedLab,
             test: selectedTests, // selectedTests must be a string[]
             city,
@@ -137,10 +130,16 @@ const handleContinue = async () => {
         });
         }
 
+       const userId = await getUserIdFromCookie(); // ✅ secure
+        if (!userId) {
+            alert("Not logged in.");
+            return;
+        }
+
         router.push(`/patients/${userId}/pdetails`);
-    } catch {
-        alert("❌ Failed to create appointment");
-    }
+        } catch {
+            alert("❌ Failed to create appointment");
+        }
     };
 
 
