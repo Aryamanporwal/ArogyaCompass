@@ -1,6 +1,6 @@
 "use server"
 import { ID, Query } from "node-appwrite"
-import { users } from "../appwrite.config"
+import { databases, users } from "../appwrite.config"
 import { Resend } from "resend"; 
 type ErrorWithCode = {
     code: number;
@@ -52,3 +52,21 @@ export const createUser = async (user: CreateUserParams) => {
     throw error;
   }
 };
+
+
+export async function  verifyPatient(userId : string){
+  try{
+    const update = await databases.updateDocument(
+      process.env.DATABASE_ID!,
+      process.env.PATIENT_COLLECTION_ID!,
+      userId,
+      {
+        isVerified : true
+      }
+    );
+    return update;
+  }catch(error){
+    console.log("Failed to Verify Patient", error);
+  }
+
+}

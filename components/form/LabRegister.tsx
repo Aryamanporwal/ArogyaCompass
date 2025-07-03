@@ -96,59 +96,64 @@ export default function LabForm() {
     }
   };
 
-  return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Map Side */}
-      <div className="w-[45%] bg-black">
+return (
+  <div className="flex flex-col md:flex-row h-screen w-full bg-background text-foreground overflow-hidden">
+    {/* Map Section */}
+    <div className="w-full md:w-[45%] bg-muted px-3 pt-4 md:px-0 md:pt-0 flex items-center justify-center">
+      <div className="w-full h-[350px] sm:h-[420px] md:h-[95%] rounded-2xl shadow-2xl overflow-hidden">
         <LabMap onLocationFetched={setCoordinates} />
       </div>
+    </div>
 
-      {/* Form Side */}
-      <div className="w-[55%] overflow-y-auto p-8 bg-gray-900 text-white">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <h2 className="text-3xl font-bold">Register Lab</h2>
+    {/* Form Section */}
+    <div className="w-full md:w-[55%] overflow-y-auto p-6 sm:p-8 bg-gray-900 text-white">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <h2 className="text-3xl font-bold text-center md:text-left">Register Lab</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input required placeholder="Lab Name" value={lab.name} onChange={e => handleLabChange("name", e.target.value)} />
-            <Input required type="email" placeholder="Email" value={lab.email} onChange={e => handleLabChange("email", e.target.value)} />
-            <Input required placeholder="Phone" value={lab.phone} onChange={e => handleLabChange("phone", e.target.value)} />
-            <Input required placeholder="Address" value={lab.address} onChange={e => handleLabChange("address", e.target.value)} />
-            <Input required placeholder="City" value={lab.city} onChange={e => handleLabChange("city", e.target.value)} />
-            <Input required placeholder="License Number" value={lab.licenseNumber} onChange={e => handleLabChange("licenseNumber", e.target.value)} />
-            <div>
-              <label className="block mb-1">Lab Image</label>
-              <Input type="file" accept="image/*" onChange={handleLogoUpload} />
-              {logoUrl && (
-                <Image src={logoUrl} alt="Lab Image" width={80} height={80} className="mt-2 rounded" />
-              )}
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input required placeholder="Lab Name" value={lab.name} onChange={e => handleLabChange("name", e.target.value)} />
+          <Input required type="email" placeholder="Email" value={lab.email} onChange={e => handleLabChange("email", e.target.value)} />
+          <Input required placeholder="Phone" value={lab.phone} onChange={e => handleLabChange("phone", e.target.value)} />
+          <Input required placeholder="Address" value={lab.address} onChange={e => handleLabChange("address", e.target.value)} />
+          <Input required placeholder="City" value={lab.city} onChange={e => handleLabChange("city", e.target.value)} />
+          <Input required placeholder="License Number" value={lab.licenseNumber} onChange={e => handleLabChange("licenseNumber", e.target.value)} />
           <div>
-            <label className="block mb-2 font-semibold">Select Tests Offered</label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {LAB_TEST_OPTIONS.map((test) => (
-                <label key={test} className="flex items-center space-x-2 text-sm">
-                  <input
-                    type="checkbox"
-                    value={test}
-                    checked={selectedTests.includes(test)}
-                    onChange={() => toggleTest(test)}
-                  />
-                  <span>{test.replace(/_/g, " ")}</span>
-                </label>
-              ))}
-            </div>
+            <label className="block mb-1 text-sm font-medium">Lab Image</label>
+            <Input type="file" accept="image/*" onChange={handleLogoUpload} />
+            {logoUrl && (
+              <Image src={logoUrl} alt="Lab Image" width={80} height={80} className="mt-2 rounded shadow" />
+            )}
           </div>
+        </div>
 
+        <div>
+          <label className="block mb-2 font-semibold">Select Tests Offered</label>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {LAB_TEST_OPTIONS.map((test) => (
+              <label key={test} className="flex items-center space-x-2 text-sm">
+                <input
+                  type="checkbox"
+                  value={test}
+                  checked={selectedTests.includes(test)}
+                  onChange={() => toggleTest(test)}
+                />
+                <span>{test.replace(/_/g, " ")}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-center md:justify-start">
           <button
             type="submit"
             className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg"
           >
             Submit and Continue
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
-  );
+  </div>
+);
+
 }

@@ -1,8 +1,11 @@
+"use client"
+import PatientExplo from '@/components/form/PatientExplore'
 import React from 'react'
-
 const  explore= () => {
   return (
-    <div>Search Hospital</div>
+    <div>
+      <PatientExplo/>
+    </div>
   )
 }
 

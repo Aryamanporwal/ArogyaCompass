@@ -30,8 +30,10 @@ type HospitalParams = {
   isVerified: boolean;
   istrueLocation: boolean;
   coordinates: number[];
-  doctors: Doctor[],
-  doctorName : string[]
+  doctors: Doctor[];
+  doctorName : string[];
+  state : string;
+  pincode : string;
 };
 
 

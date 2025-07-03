@@ -7,26 +7,35 @@ import dynamic from "next/dynamic";
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
-  return (
-    <div className="flex h-screen w-full bg-background text-foreground">
-      {/* Left: Form Section */}
-    <section className="flex w-full max-w-[600px] flex-col justify-start px-6 pt-6 pb-4 sm:px-10 md:px-16 lg:px-20">
-      {/* Logo + Tagline */}
-    <div className="flex flex-col items-center justify-center -mt-2 mb-3">
-      <Image
-        alt="logo"
-        src="/assets/icons/logo.png"
-        height={200}
-        width={200}
-        className="h-20 sm:h-24 md:h-28 w-auto object-contain"
-      />
-      <div className="-mt-1 text-center leading-tight">
-        <h1 className="text-[1.3rem] font-bold bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-clip-text text-transparent">
-          ArogyaCompass
-        </h1>
-        <h2 className="text-sm text-blue-500 mt-0.5">Your Smart Path to Faster Care</h2>
+return (
+  <div className="flex flex-col md:flex-row h-screen w-full bg-background text-foreground overflow-hidden">
+    {/* Map Section - first on mobile */}
+    <div className="w-full md:w-3/5 bg-muted px-3 pt-4 md:px-0 md:pt-0 flex items-center justify-center">
+      <div className="w-full h-[350px] sm:h-[400px] md:h-[95%] rounded-2xl shadow-2xl overflow-hidden">
+        <MapView />
       </div>
     </div>
+
+    {/* Form Section */}
+    <section className="w-full md:w-2/5 flex flex-col justify-start px-6 pt-6 pb-4 sm:px-10 md:px-12 lg:px-16 bg-background overflow-y-auto">
+      {/* Logo + Tagline */}
+      <div className="flex flex-col items-center justify-center -mt-2 mb-3">
+        <Image
+          alt="logo"
+          src="/assets/icons/logo.png"
+          height={200}
+          width={200}
+          className="h-20 sm:h-24 md:h-28 w-auto object-contain"
+        />
+        <div className="-mt-1 text-center leading-tight">
+          <h1 className="text-[1.3rem] font-bold bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-clip-text text-transparent">
+            ArogyaCompass
+          </h1>
+          <h2 className="text-sm text-blue-500 mt-0.5">
+            Your Smart Path to Faster Care
+          </h2>
+        </div>
+      </div>
 
       {/* Headings */}
       <div className="mb-5">
@@ -52,7 +61,7 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Footer BELOW register link */}
+      {/* Footer */}
       <div className="text-xs mt-3 px-2 flex justify-between text-dark-600">
         <p>&copy; 2025 ArogyaCompass</p>
         <Link href="/?admin=true" className="text-green-600 hover:underline">
@@ -60,14 +69,7 @@ export default function Home() {
         </Link>
       </div>
     </section>
+  </div>
+);
 
-
-      {/* Right: Map Section */}
-      <div className="hidden h-full flex-1 md:flex items-center justify-center bg-muted">
-        <div className="relative h-[95%] w-[95%] max-w-[1000px] rounded-2xl shadow-2xl overflow-hidden">
-          <MapView />
-        </div>
-      </div>
-    </div>
-  );
 }

@@ -11,6 +11,7 @@ import { UserFormValidation } from "@/lib/validation";
 import CustomFormField, { FormFieldType } from "../ui/CustomFormField";
 import SubmitButton from "../ui/SubmitButton";
 import EmailVerifyModal from "../ui/EmailVerifyModal"; // create this
+import { verifyPatient } from "@/lib/actions/patient.action";
 
 export const PatientForm = () => {
   const router = useRouter();
@@ -53,8 +54,15 @@ export const PatientForm = () => {
     setIsLoading(false);
   };
 
-  const handleVerified = () => {
-    router.push(`/patients/${newUserId}/explore`);
+  const handleVerified = async () => {
+    if(newUserId){
+      try{
+        verifyPatient(newUserId);
+        router.push(`/patients/${newUserId}/explore`);
+      }catch(error){
+        console.log("Failed to verify check patient.action.ts", error);
+      }
+    }
   };
 
   return (
