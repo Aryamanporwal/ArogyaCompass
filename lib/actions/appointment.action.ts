@@ -1,19 +1,29 @@
-"use server"
-import { databases } from "@/lib/appwrite.config"; // your Appwrite server SDK instance
-import { ID } from "appwrite";
+"use server";
 
-export const createAppointment = async ({ userId, hospitalId, doctorName, city, state }: {
+import { ID } from "appwrite";
+import { databases, DATABASE_ID, APPOINTMENT_COLLECTION_ID } from "@/lib/appwrite.config";
+
+// Define a type that allows either hospital or lab
+type AppointmentParams = {
   userId: string;
-  hospitalId: string;
-  doctorName: string;
   city: string;
   state: string;
-}) => {
-  await databases.createDocument("your_database_id", "Appointments", ID.unique(), {
-    userId,
-    hospitalId,
-    doctorName,
-    city,
-    state,
-  });
+  doctorName?: string;
+  hospitalId?: string;
+  labId?: string;
+  test?: string;
+};
+
+export const createAppointment = async (data: AppointmentParams) => {
+  try {
+    await databases.createDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      ID.unique(),
+      data
+    );
+  } catch (err) {
+    console.error("❌ Error creating appointment:", err);
+    throw err;
+  }
 };

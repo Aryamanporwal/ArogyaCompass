@@ -80,7 +80,7 @@ export default function LabMap({ onLocationFetched }: LabMapProps) {
           style={{ height: "100%", width: "100%" }}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
+            attribution='&copy;ArogyaCompass'
             url={tileURL}
           />
 

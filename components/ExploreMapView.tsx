@@ -14,6 +14,13 @@ interface Hospital {
   coordinates: [number, number];
   doctorName?: string[];
 }
+interface Lab{
+    $id : string;
+    name : string;
+    address : string;
+    coordinates: [number, number];
+    test?: string[];
+}
 
 const FocusOnSelectedHospital = ({
   selectedHospitalId,
@@ -32,6 +39,27 @@ const FocusOnSelectedHospital = ({
       }
     }
   }, [selectedHospitalId, hospitals, map]);
+
+  return null;
+};
+
+const FocusOnSelectedLab = ({
+  selectedLabId,
+  labs,
+}: {
+  selectedLabId?: string;
+  labs: Lab[];
+}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (selectedLabId) {
+      const selected = labs.find((l) => l.$id === selectedLabId);
+      if (selected) {
+        map.setView(selected.coordinates, 18, { animate: true });
+      }
+    }
+  }, [selectedLabId, labs, map]);
 
   return null;
 };
@@ -72,24 +100,10 @@ interface ExploreMapProps {
   view: "all" | "hospital" | "lab";
   selectedHospitalId?: string;
   userLocation: [number, number] | null;
+  selectedLabId?: string;
 }
 
-export default function ExploreMap({ view, selectedHospitalId, userLocation }: ExploreMapProps) {
-  interface Lab {
-    $id?: string;
-    name: string;
-    address: string;
-    coordinates: [number, number];
-    test?: string[];
-  }
-
-  interface Lab {
-    $id?: string;
-    name: string;
-    address: string;
-    coordinates: [number, number];
-    test?: string[];
-  }
+export default function ExploreMap({ view, selectedHospitalId, userLocation , selectedLabId}: ExploreMapProps) {
 
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [labs, setLabs] = useState<Lab[]>([]);
@@ -135,11 +149,14 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation }: E
           style={{ height: "100%", width: "100%" }}
         >
           <ResizeMap />
-          <TileLayer attribution="&copy; MapTiler" url={tileURL} />
+          <TileLayer attribution="&copy;ArogyaCompass" url={tileURL} />
              <FocusOnSelectedHospital
                 selectedHospitalId={selectedHospitalId}
                 hospitals={hospitals}
                     />
+             <FocusOnSelectedLab selectedLabId={selectedLabId}
+                labs= {labs}
+                 />
           {/* User marker */}
           <Marker position={userLocation} icon={userIcon}>
             <Popup>Your current location</Popup>
