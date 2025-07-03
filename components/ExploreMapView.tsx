@@ -1,11 +1,41 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup , useMap} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { useEffect, useState, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getAllHospitals } from "@/lib/actions/hospital.action";
 import { getAllLabs } from "@/lib/actions/lab.action";
+
+interface Hospital {
+  $id?: string;
+  name: string;
+  address: string;
+  coordinates: [number, number];
+  doctorName?: string[];
+}
+
+const FocusOnSelectedHospital = ({
+  selectedHospitalId,
+  hospitals,
+}: {
+  selectedHospitalId?: string;
+  hospitals: Hospital[];
+}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (selectedHospitalId) {
+      const selected = hospitals.find((h) => h.$id === selectedHospitalId);
+      if (selected) {
+        map.setView(selected.coordinates, 18, { animate: true });
+      }
+    }
+  }, [selectedHospitalId, hospitals, map]);
+
+  return null;
+};
+
 
 const userIcon = new L.Icon({
   iconUrl: "/assets/icons/marker.png",
@@ -38,15 +68,19 @@ const ResizeMap = () => {
   return null;
 };
 
+interface ExploreMapProps {
+  view: "all" | "hospital" | "lab";
+  selectedHospitalId?: string;
+  userLocation: [number, number] | null;
+}
 
-export default function ExploreMapView() {
-  const [position, setPosition] = useState<[number, number] | null>(null);
-  interface Hospital {
+export default function ExploreMap({ view, selectedHospitalId, userLocation }: ExploreMapProps) {
+  interface Lab {
     $id?: string;
     name: string;
     address: string;
     coordinates: [number, number];
-    doctorName?: string[];
+    test?: string[];
   }
 
   interface Lab {
@@ -56,17 +90,10 @@ export default function ExploreMapView() {
     coordinates: [number, number];
     test?: string[];
   }
-  
+
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [labs, setLabs] = useState<Lab[]>([]);
-  const [view, setView] = useState<"all" | "hospital" | "lab">("all");
   const mapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      setPosition([pos.coords.latitude, pos.coords.longitude]);
-    });
-  }, []);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -94,53 +121,27 @@ export default function ExploreMapView() {
     fetchAll();
   }, []);
 
-  const handleFullscreen = () => {
-    if (mapRef.current) {
-      if (!document.fullscreenElement) {
-        mapRef.current.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    }
-  };
-
   const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
   const tileURL = `https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;
 
   return (
     <div ref={mapRef} className="relative h-full w-full">
-      {/* Buttons */}
-      <div className="absolute top-4 right-4 z-[1000] flex gap-2">
-        <button
-          onClick={handleFullscreen}
-          className="rounded-full bg-gray-500 p-2 shadow-lg hover:bg-amber-500"
-          title="Toggle Fullscreen"
-        >
-          ⛶
-        </button>
-        <button
-          onClick={() =>
-            setView(view === "all" ? "hospital" : view === "hospital" ? "lab" : "all")
-          }
-          className="rounded-full bg-blue-600 text-white px-4 py-2 shadow-md hover:bg-blue-700"
-        >
-          Show: {view === "all" ? "Hospitals" : view === "hospital" ? "Labs" : "All"}
-        </button>
-      </div>
-
-      {position ? (
+      {userLocation ? (
         <MapContainer
-          center={position}
+          center={userLocation}
           zoom={16}
           scrollWheelZoom={false}
           className="rounded-2xl"
           style={{ height: "100%", width: "100%" }}
         >
-            <ResizeMap /> 
+          <ResizeMap />
           <TileLayer attribution="&copy; MapTiler" url={tileURL} />
-
+             <FocusOnSelectedHospital
+                selectedHospitalId={selectedHospitalId}
+                hospitals={hospitals}
+                    />
           {/* User marker */}
-          <Marker position={position} icon={userIcon}>
+          <Marker position={userLocation} icon={userIcon}>
             <Popup>Your current location</Popup>
           </Marker>
 
@@ -181,6 +182,8 @@ export default function ExploreMapView() {
                     </select>
                   )}
                 </Popup>
+               
+
               </Marker>
             ))}
         </MapContainer>
