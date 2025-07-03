@@ -135,11 +135,28 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation , se
     fetchAll();
   }, []);
 
+    const handleFullscreen = () => {
+    if (mapRef.current) {
+      if (!document.fullscreenElement) {
+        mapRef.current.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
   const tileURL = `https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;
 
   return (
     <div ref={mapRef} className="relative h-full w-full">
+    <button
+        onClick={handleFullscreen}
+        className="absolute top-4 right-4 z-[1000] rounded-full bg-gray-500 p-2 shadow-lg hover:bg-amber-500"
+        title="Toggle Fullscreen"
+      >
+        ⛶
+      </button>
       {userLocation ? (
         <MapContainer
           center={userLocation}

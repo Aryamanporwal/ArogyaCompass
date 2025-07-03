@@ -145,7 +145,7 @@ const handleContinue = async () => {
 
 
   return (
-    <div className="flex flex-col lg:flex-row w-full min-h-screen">
+    <div className="flex flex-col lg:flex-row w-full h-screen overflow-hidden">
       {/* Map Section */}
       <div className="w-full lg:w-[60%] bg-[#0B0E1C] flex items-center justify-center px-3 pt-4 lg:px-0 lg:pt-0">
         <div className="w-full h-[65vh] lg:h-[95%] rounded-2xl shadow-2xl overflow-hidden bg-[#0B0E1C]">
@@ -154,7 +154,7 @@ const handleContinue = async () => {
       </div>
 
       {/* Right Panel */}
-      <div className="w-full lg:w-[40%] bg-[#0B0E1C] text-white p-6 space-y-4">
+      <div className="w-full lg:w-[40%] bg-[#0B0E1C] text-white p-6 space-y-4 overflow-y-auto">
         <div className="flex flex-col items-center space-y-1">
         <Image
             alt="logo"
