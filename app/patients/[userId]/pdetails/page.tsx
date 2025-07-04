@@ -1,9 +1,12 @@
 import { PatientRegisterForm } from '@/components/form/PatientRegister'
 import Image from 'next/image'
-import Link from 'next/link'
 import React from 'react'
+import { getUserIdFromCookie } from "@/lib/actions/user.action";
+import { users } from "@/lib/appwrite.config";
 
-const patient_details = () => {
+const patient_details = async () => {
+    const userId = await getUserIdFromCookie();
+    const user = userId ? await users.get(userId) : null;
   return (
   <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
     {/* Map Section - first on mobile */}
@@ -44,15 +47,12 @@ const patient_details = () => {
 
       {/* Form Card */}
       <div className="w-full rounded-xl bg-transparent p-5 shadow-md border border-dark-500 flex-grow ">
-        <PatientRegisterForm />
+        {user && <PatientRegisterForm user={user} />}
       </div>
 
       {/* Footer */}
       <div className="text-xs mt-3 px-2 flex justify-between text-dark-600 shrink-0">
         <p>&copy; 2025 ArogyaCompass</p>
-        <Link href="/?admin=true" className="text-green-600 hover:underline">
-          Admin
-        </Link>
       </div>
     </section>
    <Image

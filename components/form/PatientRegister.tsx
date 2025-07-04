@@ -6,33 +6,38 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl } from "@/components/ui/form";
-import { createUser } from "@/lib/actions/patient.action";
-import { PatientFormValidation, UserFormValidation } from "@/lib/validation";
+import { PatientFormValidation } from "@/lib/validation";
 import CustomFormField, { FormFieldType } from "../ui/CustomFormField";
 import SubmitButton from "../ui/SubmitButton";
-import EmailVerifyModal from "../ui/EmailVerifyModal"; // create this
 import { RadioGroup, RadioGroupItem } from "@radix-ui/react-radio-group";
-import { GenderOptions, IdentificationTypes } from "@/lib/constants";
+import { GenderOptions, IdentificationTypes, PatientFormDefaultValues } from "@/lib/constants";
 import { Label } from "@radix-ui/react-label";
 import { getUserIdFromCookie } from "@/lib/actions/user.action";
 import { getAppointmentByUserId } from "@/lib/actions/appointment.action";
 import { SelectItem } from "../ui/select";
 import FileUpload from "../ui/FileUploader";
+import { registerPatient } from "@/lib/actions/patient.action";
 
-export const PatientRegisterForm = () => {
+export const PatientRegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [expectedCode, setExpectedCode] = useState<string | null>(null);
-  const [newUserId, setNewUserId] = useState<string | null>(null);
+//   const [newUserId, setNewUserId] = useState<string | null>(null);
   const [doctorName, setDoctorName] = useState("")
+  const [test, setTest] = useState("")
 
   const form = useForm<z.infer<typeof PatientFormValidation>>({
     resolver: zodResolver(PatientFormValidation),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      primaryPhysician: doctorName
+        ...PatientFormDefaultValues,
+        name: "",
+        email: "",
+        phone: "",
+        primaryPhysician: doctorName,
+        test: test,
+        treatmentConsent: false,
+        disclosureConsent: false,
+        privacyConsent: false,
+        identificationDocument: [],
     },
   });
 
@@ -47,6 +52,10 @@ export const PatientRegisterForm = () => {
         setDoctorName(appointment.doctorName)
         form.setValue("primaryPhysician", appointment.doctorName)
       }
+      if(appointment?.test){
+        setTest(appointment.test)
+        form.setValue("test",appointment.test)
+      }
     }
   }
 
@@ -54,26 +63,37 @@ export const PatientRegisterForm = () => {
 }, [form])
 
 
-  const onSubmit = async (values: z.infer<typeof UserFormValidation>) => {
+  const onSubmit = async (values: z.infer<typeof PatientFormValidation>) => {
     setIsLoading(true);
+     console.log("Submitting form with values: ", values);
+
+    let formData;
+
+    if(values.identificationDocument && values.identificationDocument.length>0){
+        const blobFile = new Blob([values.identificationDocument[0]],{
+            type: values.identificationDocument[0].type
+        })
+
+        formData = new FormData()
+        formData.append('blobFile', blobFile);
+        formData.append('fileName',values.identificationDocument[0].name)
+    }
+
+
     try {
-      const user = {
-        name: values.name,
-        email: values.email,
-        phone: `+${values.phone}`,
-      };
+        const userId = await getUserIdFromCookie();
+            if (!userId) {
+            throw new Error("User not logged in or userId not found in cookie");
+            }
+        const patientData = {
+            ...values,
+            userId: userId,
+            birthDate: new Date(values.birthDate),
+            identificationDocument: formData,
+        }
+        const patient = await registerPatient(patientData);
 
-      const result = await createUser(user);
-      console.log("User creation result:", result);
-
-      if (result?.user?.$id && result.code) {
-        setExpectedCode(result.code);
-        setNewUserId(result.user.$id);
-        // Show OTP modal or next step
-      } else {
-        console.error("User creation failed: Missing user ID or verification code");
-        alert("User creation failed. Please try again.");
-      }
+        if(patient) router.push(`/patients/[userId]/new-appointment`)
     } catch (error) {
       console.log(error);
     }
@@ -120,14 +140,14 @@ export const PatientRegisterForm = () => {
             <CustomFormField
                 fieldType={FormFieldType.DATE_PICKER}
                 control={form.control}
-                name="birthdate"
+                name="birthDate"
                 label="Date of Birth"
                 
             />
             <CustomFormField
                 fieldType={FormFieldType.SKELETON}
                 control={form.control}
-                name="gender"
+                name="Gender"
                 label="Gender"
                 renderSkeleton={(field) => (
                     <FormControl>
@@ -181,12 +201,22 @@ export const PatientRegisterForm = () => {
         </section>
             <div className="flex flex-col gap-6 xl:flex-row">
                 {/* doctorimage and name*/}
+                {doctorName ? (
                 <CustomFormField
                     fieldType={FormFieldType.READONLY}
                     control={form.control}
                     name="primaryPhysician"
                     label="Primary Physician"
                 />
+                ) : test ? (
+                <CustomFormField
+                    fieldType={FormFieldType.READONLY}
+                    control={form.control}
+                    name="test"
+                    label="Test Prescribed"
+                />
+                ) : null}
+
             </div>
             <div className="flex flex-col gap-6 xl:flex-row">
                 <CustomFormField
@@ -299,13 +329,13 @@ export const PatientRegisterForm = () => {
             label = "I consent to privacy policy"
         />
           <div className="pt-4">
-            <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
+            <SubmitButton isLoading={isLoading} >Get Started</SubmitButton>
           </div>
         </form>
       </Form>
-        {expectedCode && (
+        {/* {expectedCode && (
         <EmailVerifyModal expectedCode={expectedCode} onSuccess={handleVerified} />
-      )}
+      )} */}
     </>
   );
 };
