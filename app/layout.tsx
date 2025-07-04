@@ -31,7 +31,7 @@ export default function RootLayout({
       style={{ backgroundColor: '#131619' }}
       suppressHydrationWarning={true} // Optional, only if you still get warnings[6]
     >
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased overflow-hidden">
         <ThemeProvider attribute="class" defaultTheme="dark">
           {children}
         </ThemeProvider>
