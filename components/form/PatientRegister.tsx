@@ -1,12 +1,9 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Form, FormControl } from "@/components/ui/form";
-import { PatientFormValidation } from "@/lib/validation";
 import CustomFormField, { FormFieldType } from "../ui/CustomFormField";
 import SubmitButton from "../ui/SubmitButton";
 import { RadioGroup, RadioGroupItem } from "@radix-ui/react-radio-group";
@@ -25,8 +22,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
   const [doctorName, setDoctorName] = useState("")
   const [test, setTest] = useState("")
 
-  const form = useForm<z.infer<typeof PatientFormValidation>>({
-    resolver: zodResolver(PatientFormValidation),
+  const form = useForm<any>({
     defaultValues: {
         ...PatientFormDefaultValues,
         name: "",
@@ -63,42 +59,56 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
 }, [form])
 
 
-  const onSubmit = async (values: z.infer<typeof PatientFormValidation>) => {
-    setIsLoading(true);
-     console.log("Submitting form with values: ", values);
+const onSubmit = async (values: any) => {
+  setIsLoading(true);
+  console.log("Submitting form with values: ", values);
 
-    let formData;
+  let formData;
 
-    if(values.identificationDocument && values.identificationDocument.length>0){
-        const blobFile = new Blob([values.identificationDocument[0]],{
-            type: values.identificationDocument[0].type
-        })
+  if (values.identificationDocument && values.identificationDocument.length > 0) {
+    const blobFile = values.identificationDocument[0];
+    formData = new FormData();
+    formData.append("blobFile", blobFile);
+    formData.append("fileName", blobFile.name);
+  }
 
-        formData = new FormData()
-        formData.append('blobFile', blobFile);
-        formData.append('fileName',values.identificationDocument[0].name)
-    }
+  try {
+    const patientData = {
+      userId: user.$id,
+      name: values.name,
+      email: values.email,
+      phone: values.phone,
+      birthDate: new Date(values.birthDate),
+      gender: values.gender,
+      address: values.address,
+      occupation: values.occupation,
+      emergencyContactName: values.emergencyContactName,
+      emergencyContactNumber: values.emergencyContactNumber,
+      primaryPhysician: values.primaryPhysician,
+      test: values.test,
+      insuranceProvider: values.insuranceProvider,
+      insurancePolicyNumber: values.insurancePolicyNumber,
+      allergies: values.allergies,
+      currentMedication: values.currentMedication,
+      familyMedicalHistory: values.familyMedicalHistory,
+      pastMedicalHistory: values.pastMedicalHistory,
+      identificationType: values.identificationType,
+      identificationNumber: values.identificationNumber,
+      identificationDocument: formData || undefined,
+      privacyConsent: values.privacyConsent,
+      treatmentConsent: values.treatmentConsent,
+      disclosureConsent: values.disclosureConsent,
+    };
 
+    const patient = await registerPatient(patientData);
 
-    try {
-        const userId = await getUserIdFromCookie();
-            if (!userId) {
-            throw new Error("User not logged in or userId not found in cookie");
-            }
-        const patientData = {
-            ...values,
-            userId: userId,
-            birthDate: new Date(values.birthDate),
-            identificationDocument: formData,
-        }
-        const patient = await registerPatient(patientData);
+    if (patient) router.push(`/patients/${user.$id}/new-appointment`);
+  } catch (error) {
+    console.log(error);
+  }
 
-        if(patient) router.push(`/patients/[userId]/new-appointment`)
-    } catch (error) {
-      console.log(error);
-    }
-    setIsLoading(false);
-  };
+  setIsLoading(false);
+};
 
   return (
     <>
@@ -147,7 +157,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
             <CustomFormField
                 fieldType={FormFieldType.SKELETON}
                 control={form.control}
-                name="Gender"
+                name="gender"
                 label="Gender"
                 renderSkeleton={(field) => (
                     <FormControl>
@@ -238,7 +248,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
                 <CustomFormField
                     fieldType={FormFieldType.TEXTAREA}
                     control={form.control}
-                    name="Allergies"
+                    name="allergies"
                     label="Allergies (if any)"
                     placeholder="ex: Peanuts, Cilantro , Pollen"
                 />
@@ -254,7 +264,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
                 <CustomFormField
                     fieldType={FormFieldType.TEXTAREA}
                     control={form.control}
-                    name="FamilyMedicalHistory"
+                    name="familyMedicalHistory"
                     label="Family Medical History (if any)"
                     placeholder="ex: GrandFather had Vitiligo"
                 />

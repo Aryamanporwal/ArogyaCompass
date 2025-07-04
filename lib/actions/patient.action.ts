@@ -17,13 +17,14 @@ export type RegisterUserParams = {
   email: string;
   phone: string;
   birthDate: Date;
-  Gender: "Male" | "Female" | "Other";
+  gender: "Male" | "Female" | "Other";
   address: string;
   occupation: string;
   emergencyContactName: string;
   emergencyContactNumber: string;
   insuranceProvider: string;
   insurancePolicyNumber: string;
+
   identificationType?: string;
   identificationNumber?: string;
   identificationDocument?: FormData;
@@ -31,9 +32,9 @@ export type RegisterUserParams = {
   primaryPhysician?: string;
   test?: string;
 
-  Allergies?: string;
+  allergies?: string;
   currentMedication?: string;
-  FamilyMedicalHistory?: string;
+  familyMedicalHistory?: string;
   pastMedicalHistory?: string;
 
   treatmentConsent: boolean;
@@ -123,35 +124,62 @@ export async function  verifyPatient(userId : string){
 
 }
 
+export const registerPatient = async (params: RegisterUserParams) => {
+  try {
+    let fileResult;
 
-export const registerPatient = async({identificationDocument, ...patient}:
-  RegisterUserParams)=>{
-    try{
-      let file ;
-      if(identificationDocument){
-        const inputfile = identificationDocument && InputFile.fromBuffer(
-          identificationDocument?.get('blobFile') as Blob,
-          identificationDocument?.get('fileName') as string,
-        )
+    if (params.identificationDocument) {
+      const fileBuffer = params.identificationDocument.get("blobFile") as Blob;
+      const fileName = params.identificationDocument.get("fileName") as string;
 
-        file = await storage.createFile(BUCKET_ID!, ID.unique(), inputfile)
-      }
+      const arrayBuffer = await fileBuffer.arrayBuffer(); // Fix for Blob to Buffer
+      const inputFile = InputFile.fromBuffer(Buffer.from(arrayBuffer), fileName);
 
-      const newPatient = await databases.createDocument(
-        DATABASE_ID!,
-        PATIENT_COLLECTION_ID!,
-        ID.unique(),{
-          identificationDocumentId: file?.$id ? file.$id : null,
-          identificationDocumentUrl: file?.$id ?`${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${file?.$id}/view?project=${PROJECT_ID}`:null,
-          ...patient
-        }
-      )
-
-      return parseStringify(newPatient)
-    }catch(error){
-      console.log("not able to registerPatient", error)
+      fileResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
     }
-}
+
+    const doc = await databases.createDocument(
+      DATABASE_ID!,
+      PATIENT_COLLECTION_ID!,
+      ID.unique(),
+      {
+        userId: params.userId,
+        name: params.name,
+        email: params.email,
+        phone: params.phone,
+        birthDate: params.birthDate,
+        gender: params.gender,
+        address: params.address,
+        occupation: params.occupation,
+        emergencyContactName: params.emergencyContactName,
+        emergencyContactNumber: params.emergencyContactNumber,
+        insuranceProvider: params.insuranceProvider,
+        insurancePolicyNumber: params.insurancePolicyNumber,
+        identificationType: params.identificationType,
+        identificationNumber: params.identificationNumber,
+        primaryPhysician: params.primaryPhysician,
+        test: params.test,
+        allergies: params.allergies,
+        currentMedication: params.currentMedication,
+        familyMedicalHistory: params.familyMedicalHistory,
+        pastMedicalHistory: params.pastMedicalHistory,
+        treatmentConsent: params.treatmentConsent,
+        disclosureConsent: params.disclosureConsent,
+        privacyConsent: params.privacyConsent,
+        identificationDocumentId: fileResult?.$id ?? null,
+        identificationDocumentUrl: fileResult
+          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${fileResult.$id}/view?project=${PROJECT_ID}`
+          : null,
+      }
+    );
+
+    return parseStringify(doc);
+  } catch (error) {
+    console.error("registerPatient failed:", error);
+    throw error;
+  }
+};
+
 
 export const getPatient = async (userId: string) => {
   try {
@@ -167,5 +195,15 @@ export const getPatient = async (userId: string) => {
       "An error occurred while retrieving the patient details:",
       error
     );
+  }
+};
+
+
+export const getUser = async(userId : string) =>{
+  try{
+    const user = await users.get(userId);
+    return parseStringify(user);
+  }catch(error){
+    console.error("error occured during retrieving the user details " , error);
   }
 };

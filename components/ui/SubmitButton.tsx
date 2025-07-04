@@ -8,7 +8,7 @@ interface ButtonProps{
 }
 const SubmitButton = ({isLoading, className , children} : ButtonProps) => {
   return (
-    <Button type = "submit" disabled = {isLoading} className={className ?? 'bg-green-500 text-white w-full'}>
+    <Button type = "submit" disabled = {isLoading} className={className ?? 'bg-green-500 text-white w-full cursor-pointer'}>
         {isLoading ? (
             <div className='flex items-center gap-4 '>
                 <Image
