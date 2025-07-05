@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { registerHospital, uploadDoctorLogo, uploadHospitalLogo } from "@/lib/actions/hospital.action";
+import { registerHospital } from "@/lib/actions/hospital.action";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import FileUpload from "../ui/FileUploader";
+// import { InputFile } from "node-appwrite/file";
+// import { BUCKET_ID, ENDPOINT, ID, PROJECT_ID, storage } from "@/lib/appwrite.config";
 
 // Dynamically load HospitalMap to avoid SSR issues
 const HospitalMap = dynamic(() => import("@/components/HospitalMap"), { ssr: false });
@@ -19,11 +21,31 @@ type Doctor = {
   City: string;
   licenseNumber: string;
   logoUrl: string;
+  logoId: string;
+  logo?: string; 
   speciality: string[];
   isVerified: boolean;
   availability: string[];
   experience: number;
 };
+
+// type HospitalData = {
+//   name: string;
+//   email: string;
+//   phone: string;
+//   address: string;
+//   city: string;
+//   licenseNumber: string;
+//   logoUrl: string;
+//   specialities: string[];
+//   isVerified: boolean;
+//   istrueLocation: boolean;
+//   coordinates: [number, number] | [];
+//   doctors:Doctor[];
+//   doctorName : string[];
+//   state : string;
+//   pincode : string;
+// };
 
 type HospitalData = {
   name: string;
@@ -31,38 +53,43 @@ type HospitalData = {
   phone: string;
   address: string;
   city: string;
+  state: string;
+  pincode: string;
   licenseNumber: string;
-  logoUrl: string;
   specialities: string[];
+  logoUrl: string;
+  logoId: string;
+  logo?: string; // optional file name
   isVerified: boolean;
   istrueLocation: boolean;
-  coordinates: [number, number] | [];
-  doctors:Doctor[];
-  doctorName : string[];
-  state : string;
-  pincode : string;
+  coordinates: number[];
+  doctors: Doctor[];
+  doctorName: string[];
 };
 
 export default function HospitalForm() {
   // Hospital state
   const router = useRouter();
-  const [hospital, setHospital] = useState<Omit<HospitalData, "logoUrl" | "specialities" | "coordinates">>({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    licenseNumber: "",
-    isVerified: false,
-    istrueLocation: false,
-    doctors : [],
-    doctorName : [],
-    state : "",
-    pincode : "",
-  });
+const [hospital, setHospital] = useState<Omit<HospitalData, "logoUrl" | "specialities" | "coordinates">>({
+  name: "",
+  email: "",
+  phone: "",
+  address: "",
+  city: "",
+  licenseNumber: "",
+  isVerified: false,
+  istrueLocation: false,
+  doctors: [],
+  doctorName: [],
+  state: "",
+  pincode: "",
+  logoId: "",
+});
   const [specialities, setSpecialities] = useState<string[]>([]);
-  const [hospitalLogoUrl, setHospitalLogoUrl] = useState<string>("");
+  // const [hospitalLogoUrl, setHospitalLogoUrl] = useState<string>("");
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [logoFile, setLogoFile] = useState<File[]>([]);
+  const [doctorLogoFile, setDoctorLogoFile] = useState<File[]>([]);
 
   // Doctors state
   const [doctors, setDoctors] = useState<Doctor[]>([
@@ -78,6 +105,7 @@ export default function HospitalForm() {
       isVerified: false,
       availability: [],
       experience: 0,
+      logoId:"",
     },
   ]);
 
@@ -102,6 +130,7 @@ export default function HospitalForm() {
         isVerified: false,
         availability: [],
         experience: 0,
+        logoId:"",
       },
     ]);
   };
@@ -120,73 +149,106 @@ export default function HospitalForm() {
     };
 
 
-  // Logo upload handlers
-  const handleDoctorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const result = await uploadDoctorLogo(file);
-      let previewUrl: string;
-      if (typeof result === "string") {
-        previewUrl = result;
-      } else if (result instanceof ArrayBuffer) {
-        const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
-        previewUrl = `data:image/png;base64,${base64String}`;
-      } else {
-        throw new Error("Unexpected logo upload result type");
-      }
-      updateDoctor(index, "logoUrl", previewUrl);
-    } catch (err) {
-      console.error("Logo upload failed:", err);
-      alert("Failed to upload logo.");
-    }
-  };
+  // // Logo upload handlers
+  // const handleDoctorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+  //   try {
+  //     const result = await uploadDoctorLogo(file);
+  //     let previewUrl: string;
+  //     if (typeof result === "string") {
+  //       previewUrl = result;
+  //     } else if (result instanceof ArrayBuffer) {
+  //       const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
+  //       previewUrl = `data:image/png;base64,${base64String}`;
+  //     } else {
+  //       throw new Error("Unexpected logo upload result type");
+  //     }
+  //     updateDoctor(index, "logoUrl", previewUrl);
+  //   } catch (err) {
+  //     console.error("Logo upload failed:", err);
+  //     alert("Failed to upload logo.");
+  //   }
+  // };
 
-  const handleHospitalLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const result = await uploadHospitalLogo(file);
-      let previewUrl: string;
-      if (typeof result === "string") {
-        previewUrl = result;
-      } else if (result instanceof ArrayBuffer) {
-        const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
-        previewUrl = `data:image/png;base64,${base64String}`;
-      } else {
-        throw new Error("Unexpected hospital logo upload result type");
-      }
-      setHospitalLogoUrl(previewUrl);
-    } catch (err) {
-      console.error("Hospital logo upload failed:", err);
-      alert("Failed to upload hospital logo.");
-    }
-  };
+  // const handleHospitalLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+  //   try {
+  //     const result = await uploadHospitalLogo(file);
+  //     let previewUrl: string;
+  //     if (typeof result === "string") {
+  //       previewUrl = result;
+  //     } else if (result instanceof ArrayBuffer) {
+  //       const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
+  //       previewUrl = `data:image/png;base64,${base64String}`;
+  //     } else {
+  //       throw new Error("Unexpected hospital logo upload result type");
+  //     }
+  //     setHospitalLogoUrl(previewUrl);
+  //   } catch (err) {
+  //     console.error("Hospital logo upload failed:", err);
+  //     alert("Failed to upload hospital logo.");
+  //   }
+  // };
 
   // Submit handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const hospitalData: HospitalData = {
+  //     ...hospital,
+  //     logoUrl: hospitalLogoUrl,
+  //     specialities,
+  //     coordinates: coordinates ?? [],
+  //     isVerified: false,
+  //     istrueLocation: false,
+  //     doctorName : doctors.map((doc) => doc.Name),
+  //   };
+  //   try {
+  //     const result = await registerHospital(hospitalData, doctors);
+  //     alert("Hospital Created proceed to payment");
+  //     if (result?.hospitalId) {
+  //       router.push(`hospital/${result.hospitalId}/payment`);
+  //     }
+      
+  //   } catch (error) {
+  //     console.error("Registration failed:", error);
+  //     alert("Failed to register. See console for details.");
+  //   }
+  // };
+
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
     const hospitalData: HospitalData = {
       ...hospital,
-      logoUrl: hospitalLogoUrl,
+      logoUrl: "", // will be set server-side
+      logoId: "",  // will be set server-side
+      logo: "",    // will be set server-side
       specialities,
       coordinates: coordinates ?? [],
       isVerified: false,
       istrueLocation: false,
-      doctorName : doctors.map((doc) => doc.Name),
+      doctorName: doctors.map((doc) => doc.Name),
+      doctors: [], // leave empty here
     };
-    try {
-      const result = await registerHospital(hospitalData, doctors);
-      alert("Hospital Created proceed to payment");
-      if (result?.hospitalId) {
-        router.push(`hospital/${result.hospitalId}/payment`);
-      }
-      
-    } catch (error) {
-      console.error("Registration failed:", error);
-      alert("Failed to register. See console for details.");
+
+    const result = await registerHospital(hospitalData, doctors, logoFile[0], doctorLogoFile[0]);
+
+    alert("Hospital Created. Proceed to payment");
+
+    if (result?.hospitalId) {
+      router.push(`hospital/${result.hospitalId}/payment`);
     }
-  };
+  } catch (error) {
+    console.error("Registration failed:", error);
+    alert("Failed to register. See console for details.");
+  }
+};
+
+
 
 return (
   <div className="flex flex-col md:flex-row h-screen w-full bg-background text-foreground overflow-hidden">
@@ -213,10 +275,7 @@ return (
           <Input placeholder="Specialities (comma-separated)" value={specialities.join(",")} onChange={e => setSpecialities(e.target.value.split(","))} />
           <div>
             <label className="block mb-1 text-sm font-medium">Hospital Image</label>
-            <Input type="file" accept="image/*" onChange={handleHospitalLogoUpload} />
-            {hospitalLogoUrl && (
-              <Image src={hospitalLogoUrl} alt="Hospital logo" width={80} height={80} className="mt-2 rounded shadow" />
-            )}
+            <FileUpload files={logoFile} onChange={setLogoFile} />
           </div>
         </div>
 
@@ -240,11 +299,8 @@ return (
                 <Input required placeholder="City" value={doctor.City} onChange={e => updateDoctor(index, "City", e.target.value)} />
                 <Input required placeholder="License Number" value={doctor.licenseNumber} onChange={e => updateDoctor(index, "licenseNumber", e.target.value)} />
                 <div>
-                  <label className="block mb-1 text-sm font-medium">Doctor License Image</label>
-                  <Input type="file" accept="image/*" onChange={e => handleDoctorLogoUpload(e, index)} />
-                  {doctor.logoUrl && (
-                    <Image src={doctor.logoUrl} alt="Doctor Logo" width={64} height={64} className="mt-2 rounded shadow" />
-                  )}
+                  <label className="block mb-1 text-sm font-medium">Doctor Image</label>
+                  <FileUpload files={doctorLogoFile} onChange={setDoctorLogoFile} />
                 </div>
                 <Input placeholder="Speciality (comma-separated)" value={doctor.speciality.join(",")} onChange={e => updateDoctor(index, "speciality", e.target.value.split(","))} />
                 <Input placeholder="Availability (comma-separated)" value={doctor.availability.join(",")} onChange={e => updateDoctor(index, "availability", e.target.value.split(","))} />

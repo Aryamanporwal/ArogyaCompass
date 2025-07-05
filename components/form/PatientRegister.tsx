@@ -15,6 +15,7 @@ import { SelectItem } from "../ui/select";
 import FileUpload from "../ui/FileUploader";
 import { registerPatient } from "@/lib/actions/patient.action";
 
+
 export const PatientRegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);

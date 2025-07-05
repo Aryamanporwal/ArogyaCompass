@@ -6,6 +6,8 @@ import { useEffect, useState, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getAllHospitals } from "@/lib/actions/hospital.action";
+import Image from "next/image";
+
 
 const markerIcon = new L.Icon({
   iconUrl: "/assets/icons/hospital_marker.png",
@@ -13,6 +15,8 @@ const markerIcon = new L.Icon({
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
 });
+
+
 
 export interface HospitalMapProps {
   onLocationFetched?: (coords: [number, number]) => void;
@@ -30,6 +34,7 @@ interface Hospital {
   address: string;
   coordinates: [number, number];
   doctorName?: string[];
+  logoUrl: string; 
 }
 
 export default function HospitalMap({ onLocationFetched }: HospitalMapProps) {
@@ -97,17 +102,33 @@ export default function HospitalMap({ onLocationFetched }: HospitalMapProps) {
               position={hospital.coordinates}
               icon={markerIcon}
             >
-              <Popup>
-                <strong>{hospital.name}</strong>
-                <p>{hospital.address}</p>
-                {hospital.doctorName && hospital.doctorName.length > 0 && (
-                  <select className="mt-2 text-sm text-black">
-                    {hospital.doctorName.map((name, i) => (
-                      <option key={i}>{name}</option>
-                    ))}
-                  </select>
-                )}
-              </Popup>
+          <Popup>
+            <div className="flex flex-col items-center">
+              {hospital.logoUrl && (
+                <Image
+                  src={hospital.logoUrl}
+                  alt={`${hospital.name} logo`}
+                  width={96}
+                  height={96}
+                  className="mb-2 h-24 w-24 object-cover rounded-md shadow"
+                />
+              )}
+
+              <h3 className="text-base font-bold text-center">{hospital.name}</h3>
+              <p className="text-sm font-semibold text-center text-gray-700">
+                {hospital.address}
+              </p>
+
+              {hospital.doctorName && hospital.doctorName.length > 0 && (
+                <select className="mt-2 w-full text-sm text-black rounded-md p-1">
+                  {hospital.doctorName.map((name, i) => (
+                    <option key={i}>{name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </Popup>
+
 
             </Marker>
           ))}

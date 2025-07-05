@@ -5,22 +5,24 @@ export const UserFormValidation = z.object({
   phone : z.string().refine((phone) => /^\+?[1-9]\d{1,14}$/.test(phone) ,"Invalid Phone Number"),
 })
 
+// Gender enum
+export const GenderEnum = z.enum(["Male", "Female", "Other"]);
+
 export const PatientFormValidation = z.object({
-  name: z.string().min(2).max(50),
-  email: z.string().email(),
-  phone: z.string().min(10).max(15), // Simple fallback
+  name: z.string().min(2, "Name must be at least 2 characters").max(50),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone must be at least 10 digits").max(15),
 
-  primaryPhysician: z.string().optional().or(z.literal("")),
-  test: z.string().optional().or(z.literal("")),
+  birthDate: z
+  .union([
+    z.string(),
+    z.date(),
+  ])
+  .transform((val) => (typeof val === "string" ? new Date(val) : val)),
 
-  birthDate: z.preprocess(
-    (arg) => (typeof arg === "string" || arg instanceof Date ? new Date(arg) : undefined),
-    z.date()
-  ),
-
-  gender: z.enum(["Male", "Female", "Other"]),
-  address: z.string().min(5).max(500),
-  occupation: z.string().min(2).max(500),
+  gender: GenderEnum,
+  address: z.string().min(5, "Address must be at least 5 characters").max(500),
+  occupation: z.string().min(2, "Occupation must be at least 2 characters").max(100),
 
   emergencyContactName: z.string().min(2).max(50),
   emergencyContactNumber: z.string().min(10).max(15),
@@ -28,28 +30,39 @@ export const PatientFormValidation = z.object({
   insuranceProvider: z.string().min(2).max(50),
   insurancePolicyNumber: z.string().min(2).max(50),
 
-  allergies: z.string().optional(),
-  currentMedication: z.string().optional(),
-  familyMedicalHistory: z.string().optional(),
-  pastMedicalHistory: z.string().optional(),
+  allergies: z.string().optional().or(z.literal("")),
+  currentMedication: z.string().optional().or(z.literal("")),
+  familyMedicalHistory: z.string().optional().or(z.literal("")),
+  pastMedicalHistory: z.string().optional().or(z.literal("")),
 
   identificationType: z.string().optional().or(z.literal("")),
   identificationNumber: z.string().optional().or(z.literal("")),
 
-  identificationDocument: z.array(z.instanceof(File)).optional(),
+  // This handles File[] upload correctly in react-hook-form
+  identificationDocument: z
+    .any()
+    .optional()
+    .refine(
+      (files) => files === undefined || Array.isArray(files),
+      "Invalid file format"
+    ),
+
+  primaryPhysician: z.string().optional().or(z.literal("")),
+  test: z.string().optional().or(z.literal("")),
 
   treatmentConsent: z
     .boolean()
-    .refine((val) => val === true, { message: "Consent required" }),
+    .refine((val) => val === true, { message: "Treatment consent required" }),
 
   disclosureConsent: z
     .boolean()
-    .refine((val) => val === true, { message: "Consent required" }),
+    .refine((val) => val === true, { message: "Disclosure consent required" }),
 
   privacyConsent: z
     .boolean()
-    .refine((val) => val === true, { message: "Consent required" }),
+    .refine((val) => val === true, { message: "Privacy consent required" }),
 });
+
 
 
 export const CreateAppointmentSchema = z.object({

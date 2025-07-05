@@ -1,9 +1,10 @@
 "use server";
 
 import { ID } from "node-appwrite";
-import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID } from "@/lib/appwrite.config";
+import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID, ENDPOINT, BUCKET_ID, PROJECT_ID } from "@/lib/appwrite.config";
 import { Query } from "node-appwrite";
 import { storage } from "@/lib/appwrite.config";
+import { InputFile } from "node-appwrite/file";
 type Doctor = {
   Name: string;
   Email: string;
@@ -26,6 +27,8 @@ type HospitalParams = {
   city: string;
   licenseNumber: string;
   logoUrl: string;
+  logoId: string;
+  logo?: string;
   specialities: string[];
   isVerified: boolean;
   istrueLocation: boolean;
@@ -37,26 +40,83 @@ type HospitalParams = {
 };
 
 
+// export const registerHospital = async (
+//   hospitalData: HospitalParams,
+//   doctors: Doctor[]
+// ) => {
+//   try {
+//     const hospitalId = ID.unique();
+    
+
+//     // Create hospital document
+//     const newHospital = await databases.createDocument(
+//       DATABASE_ID!,
+//       HOSPITAL_COLLECTION_ID!,
+//       hospitalId,
+//       {
+//         ...hospitalData,
+//         doctors: [], // Optionally leave empty
+//       }
+//     );
+
+//     // Create doctor documents, each linked to this hospital
+//     for (const doctor of doctors) {
+//       await databases.createDocument(
+//         DATABASE_ID!,
+//         DOCTOR_COLLECTION_ID!,
+//         ID.unique(),
+//         {
+//           ...doctor,
+//           hospitalId,
+//         }
+//       );
+//     }
+
+//     return { hospital: newHospital , hospitalId};
+//   } catch (error) {
+//     console.error("❌ Error creating hospital and doctors:", error);
+//     throw error;
+//   }
+// };
 export const registerHospital = async (
   hospitalData: HospitalParams,
-  doctors: Doctor[]
+  doctors: Doctor[],
+  logoFile?: File,
+  doctorLogoFile?:File
 ) => {
   try {
     const hospitalId = ID.unique();
+
+    let logoResult;
+    if (logoFile) {
+      const arrayBuffer = await logoFile.arrayBuffer();
+      const inputFile = InputFile.fromBuffer(Buffer.from(arrayBuffer), logoFile.name);
+      logoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
+    }
+
+    let doctorLogoResult;
+    if(doctorLogoFile){
+      const arrayBuffer = await doctorLogoFile.arrayBuffer();
+      const inputFile = InputFile.fromBuffer(Buffer.from(arrayBuffer), doctorLogoFile.name);
+      doctorLogoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
+    }
     
 
-    // Create hospital document
     const newHospital = await databases.createDocument(
       DATABASE_ID!,
       HOSPITAL_COLLECTION_ID!,
       hospitalId,
       {
         ...hospitalData,
-        doctors: [], // Optionally leave empty
+        logoUrl: logoResult
+          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${logoResult.$id}/view?project=${PROJECT_ID}`
+          : null,
+        logoId: logoResult?.$id ?? null,
+        logo: logoResult?.name ?? null, // optional: store file name
+        doctors: [],
       }
     );
 
-    // Create doctor documents, each linked to this hospital
     for (const doctor of doctors) {
       await databases.createDocument(
         DATABASE_ID!,
@@ -64,12 +124,17 @@ export const registerHospital = async (
         ID.unique(),
         {
           ...doctor,
+        logoUrl: doctorLogoResult
+          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${doctorLogoResult.$id}/view?project=${PROJECT_ID}`
+          : null,
+        logoId: doctorLogoResult?.$id ?? null,
+        logo: doctorLogoResult?.name ?? null,
           hospitalId,
         }
       );
     }
 
-    return { hospital: newHospital , hospitalId};
+    return { hospital: newHospital, hospitalId };
   } catch (error) {
     console.error("❌ Error creating hospital and doctors:", error);
     throw error;
