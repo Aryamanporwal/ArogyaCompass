@@ -119,7 +119,7 @@ const onSubmit = async (values: any) => {
 
     await generateReceiptPDF(user, "/assets/icons/logo-full.png", appointment, institution);
 
-    router.push(`/patients/${user.$id}/new-appointment`);
+    router.push(`/patients/${user.$id}/directions`);
   }
 } catch (error) {
   console.log(error);
