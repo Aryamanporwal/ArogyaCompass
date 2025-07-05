@@ -4,9 +4,10 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
-import { registerLab, uploadLabLogo} from "@/lib/actions/lab.action";
+// import Image from "next/image";
+import { registerLab} from "@/lib/actions/lab.action";
 import { LAB_TEST_OPTIONS, LabTest } from "@/lib/constants/lab.constants";
+import FileUpload from "../ui/FileUploader";
 
 // Load map dynamically to avoid SSR issues
 const LabMap = dynamic(() => import("@/components/LabMap"), { ssr: false });
@@ -19,10 +20,13 @@ type LabData = {
   city: string;
   licenseNumber: string;
   logoUrl: string;
+  logoId: string;
+  logo?: string; 
   isVerified: boolean;
   istrueLocation: boolean;
   coordinates: [number, number];
   test: LabTest[];
+
 };
 
 export default function LabForm() {
@@ -36,8 +40,10 @@ export default function LabForm() {
     licenseNumber: "",
     isVerified: false,
     istrueLocation: false,
+    logoId : "",
   });
-  const [logoUrl, setLogoUrl] = useState<string>("");
+  // const [logoUrl, setLogoUrl] = useState<string>("");
+  const [logoFile, setLogoFile ] = useState<File[]>([]);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const [selectedTests, setSelectedTests] = useState<LabTest[]>([]);
 
@@ -45,25 +51,25 @@ export default function LabForm() {
     setLab((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const result = await uploadLabLogo(file);
-      // If result is ArrayBuffer, convert to base64 string
-      let logoString: string;
-      if (result instanceof ArrayBuffer) {
-        const base64String = Buffer.from(result).toString("base64");
-        logoString = `data:${file.type};base64,${base64String}`;
-      } else {
-        logoString = result as string;
-      }
-      setLogoUrl(logoString);
-    } catch (err) {
-      console.error("Lab Image upload failed:", err);
-      alert("Failed to upload logo.");
-    }
-  };
+  // const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+  //   try {
+  //     const result = await uploadLabLogo(file);
+  //     // If result is ArrayBuffer, convert to base64 string
+  //     let logoString: string;
+  //     if (result instanceof ArrayBuffer) {
+  //       const base64String = Buffer.from(result).toString("base64");
+  //       logoString = `data:${file.type};base64,${base64String}`;
+  //     } else {
+  //       logoString = result as string;
+  //     }
+  //     setLogoUrl(logoString);
+  //   } catch (err) {
+  //     console.error("Lab Image upload failed:", err);
+  //     alert("Failed to upload logo.");
+  //   }
+  // };
 
   const toggleTest = (test: LabTest) => {
     setSelectedTests((prev) =>
@@ -79,7 +85,9 @@ export default function LabForm() {
     }
     const labData: LabData = {
       ...lab,
-      logoUrl,
+      logoUrl:"",
+      logoId:"",
+      logo:"",
       coordinates: coordinates,
       test: selectedTests,
       isVerified: false,
@@ -87,7 +95,7 @@ export default function LabForm() {
     };
 
     try {
-      const result = await registerLab(labData);
+      const result = await registerLab(labData, logoFile[0]);
       alert("Lab registered successfully!");
       router.push(`/lab/${result.labId}/pay`);
     } catch (error) {
@@ -119,10 +127,7 @@ return (
           <Input required placeholder="License Number" value={lab.licenseNumber} onChange={e => handleLabChange("licenseNumber", e.target.value)} />
           <div>
             <label className="block mb-1 text-sm font-medium">Lab Image</label>
-            <Input type="file" accept="image/*" onChange={handleLogoUpload} />
-            {logoUrl && (
-              <Image src={logoUrl} alt="Lab Image" width={80} height={80} className="mt-2 rounded shadow" />
-            )}
+            <FileUpload files={logoFile} onChange={setLogoFile} />
           </div>
         </div>
 

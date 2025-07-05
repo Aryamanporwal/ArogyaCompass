@@ -6,8 +6,12 @@ import {
   DATABASE_ID,
   LAB_COLLECTION_ID,
   storage,
+  BUCKET_ID,
+  ENDPOINT,
+  PROJECT_ID,
 } from "@/lib/appwrite.config";
 import type { LabTest } from "@/lib/constants/lab.constants";
+import { InputFile } from "node-appwrite/file";
 
 type LabParams = {
   name: string;
@@ -17,6 +21,8 @@ type LabParams = {
   city: string;
   licenseNumber: string;
   logoUrl: string;
+  logoId: string;
+  logo?:string;
   isVerified: boolean;
   istrueLocation: boolean;
   coordinates: [number, number];
@@ -24,14 +30,27 @@ type LabParams = {
 };
 
 // ✅ Register lab
-export const registerLab = async (labData: LabParams) => {
+export const registerLab = async (labData: LabParams, logoFile?:File) => {
   try {
     const labId = ID.unique();
+    let logoResult;
+    if (logoFile) {
+      const arrayBuffer = await logoFile.arrayBuffer();
+      const inputFile = InputFile.fromBuffer(Buffer.from(arrayBuffer), logoFile.name);
+      logoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
+    }  
     const newLab = await databases.createDocument(
       DATABASE_ID!,
       LAB_COLLECTION_ID!,
       labId,
-      { ...labData }
+      { ...labData ,
+          logoUrl: logoResult
+          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${logoResult.$id}/view?project=${PROJECT_ID}`
+          : null,
+        logoId: logoResult?.$id ?? null,
+        logo: logoResult?.name ?? null,
+
+      }
     );
     return { lab: newLab, labId };
   } catch (error) {

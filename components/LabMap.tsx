@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getAllLabs } from "@/lib/actions/lab.action";
-
+import Image from "next/image";
 const markerIcon = new L.Icon({
   iconUrl: "/assets/icons/lab_marker.png",
   iconSize: [60, 60],
@@ -23,6 +23,7 @@ interface Lab {
   address: string;
   coordinates: [number, number];
   test: string[];
+  logoUrl:string;
 }
 
 export default function LabMap({ onLocationFetched }: LabMapProps) {
@@ -91,15 +92,28 @@ export default function LabMap({ onLocationFetched }: LabMapProps) {
               icon={markerIcon}
             >
               <Popup>
-                <strong>{lab.name}</strong>
-                <p>{lab.address}</p>
+                <div className="flex flex-col items-center">
+                {lab.logoUrl &&(
+                  <Image
+                  src = {lab.logoUrl}
+                  alt = {`${lab.name} logo`}
+                  width = {96}
+                  height = {96}
+                  className = "mb-2 h-24 w-24 object-cover rounded-md shadow"/>
+                )}
+              <h3 className="text-base font-bold text-center">{lab.name}</h3>
+              <p className="text-sm font-semibold text-center text-gray-700">
+                {lab.address}
+              </p>
+
                 {lab.test?.length > 0 && (
-                  <select className="mt-2 text-sm text-black">
+                  <select className="mt-2 text-sm text-black rounded0md p-1 w-full">
                     {lab.test.map((test, i) => (
                       <option key={i}>{test.replace(/_/g, " ")}</option>
                     ))}
                   </select>
                 )}
+                </div>
               </Popup>
             </Marker>
           ))}

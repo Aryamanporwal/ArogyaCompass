@@ -6,13 +6,14 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getAllHospitals } from "@/lib/actions/hospital.action";
 import { getAllLabs } from "@/lib/actions/lab.action";
-
+import Image from "next/image";
 interface Hospital {
   $id?: string;
   name: string;
   address: string;
   coordinates: [number, number];
   doctorName?: string[];
+  logoUrl:string;
 }
 interface Lab{
     $id : string;
@@ -20,6 +21,7 @@ interface Lab{
     address : string;
     coordinates: [number, number];
     test?: string[];
+    logoUrl:string;
 }
 
 const FocusOnSelectedHospital = ({
@@ -120,6 +122,7 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation , se
           address: doc.address,
           coordinates: doc.coordinates,
           doctorName: doc.doctorName,
+          logoUrl:doc.logoUrl,
         }))
       );
       setLabs(
@@ -129,6 +132,7 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation , se
           address: doc.address,
           coordinates: doc.coordinates,
           test: doc.test,
+          logoUrl:doc.logoUrl,
         }))
       );
     };
@@ -187,17 +191,32 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation , se
                 position={hospital.coordinates}
                 icon={hospitalIcon}
               >
-                <Popup>
-                  <strong>{hospital.name}</strong>
-                  <p>{hospital.address}</p>
-                  {(hospital.doctorName?.length ?? 0) > 0 && (
-                    <select className="mt-2 text-sm text-black">
-                      {hospital.doctorName?.map((doc: string, j: number) => (
-                        <option key={j}>{doc}</option>
-                      ))}
-                    </select>
-                  )}
-                </Popup>
+          <Popup>
+            <div className="flex flex-col items-center">
+              {hospital.logoUrl && (
+                <Image
+                  src={hospital.logoUrl}
+                  alt={`${hospital.name} logo`}
+                  width={96}
+                  height={96}
+                  className="mb-2 h-24 w-24 object-cover rounded-md shadow"
+                />
+              )}
+
+              <h3 className="text-base font-bold text-center">{hospital.name}</h3>
+              <p className="text-sm font-semibold text-center text-gray-700">
+                {hospital.address}
+              </p>
+
+              {hospital.doctorName && hospital.doctorName.length > 0 && (
+                <select className="mt-2 w-full text-sm text-black rounded-md p-1">
+                  {hospital.doctorName.map((name, i) => (
+                    <option key={i}>{name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </Popup>
               </Marker>
             ))}
 
@@ -206,8 +225,19 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation , se
             labs.map((lab, i) => (
               <Marker key={lab.$id || i} position={lab.coordinates} icon={labIcon}>
                 <Popup>
-                  <strong>{lab.name}</strong>
-                  <p>{lab.address}</p>
+                  <div className="flex flex-col items-center">
+                {lab.logoUrl &&(
+                  <Image
+                  src = {lab.logoUrl}
+                  alt = {`${lab.name} logo`}
+                  width = {96}
+                  height = {96}
+                  className = "mb-2 h-24 w-24 object-cover rounded-md shadow"/>
+                )}
+              <h3 className="text-base font-bold text-center">{lab.name}</h3>
+              <p className="text-sm font-semibold text-center text-gray-700">
+                {lab.address}
+              </p>
                   {(lab.test?.length ?? 0) > 0 && (
                     <select className="mt-2 text-sm text-black">
                       {(lab.test ?? []).map((test: string, j: number) => (
@@ -215,6 +245,7 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation , se
                       ))}
                     </select>
                   )}
+                </div>
                 </Popup>
                
 
