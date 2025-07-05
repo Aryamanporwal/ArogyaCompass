@@ -179,3 +179,9 @@ export const getAllHospitals = async () => {
   }
 };
 
+// Fetch hospital details
+export const getHospitalById = async (hospitalId: string) => {
+  const res = await databases.getDocument(DATABASE_ID!, HOSPITAL_COLLECTION_ID!, hospitalId);
+  return res;
+};
+

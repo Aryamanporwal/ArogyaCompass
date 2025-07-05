@@ -84,3 +84,10 @@ export const getAllLabs = async () => {
     return [];
   }
 };
+
+
+// Fetch lab details
+export const getLabById = async (labId: string) => {
+  const res = await databases.getDocument(DATABASE_ID!, LAB_COLLECTION_ID!, labId);
+  return res;
+};

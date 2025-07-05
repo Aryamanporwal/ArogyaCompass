@@ -14,6 +14,8 @@ import { getAppointmentByUserId } from "@/lib/actions/appointment.action";
 import { SelectItem } from "../ui/select";
 import FileUpload from "../ui/FileUploader";
 import { registerPatient } from "@/lib/actions/patient.action";
+import { generateReceiptPDF } from "@/lib/utils/generateReceipt";
+import { getHospitalById, getLabById } from "@/lib/actions/payment.action";
 
 
 export const PatientRegisterForm = ({ user }: { user: User }) => {
@@ -102,11 +104,26 @@ const onSubmit = async (values: any) => {
     };
 
     const patient = await registerPatient(patientData);
+       if (patient) {
+    const appointment = await getAppointmentByUserId(user.$id);
 
-    if (patient) router.push(`/patients/${user.$id}/new-appointment`);
-  } catch (error) {
-    console.log(error);
+    if (!appointment) throw new Error("Appointment not found");
+
+    // Fetch hospital or lab data
+    let institution = null;
+    if (appointment.hospitalId) {
+      institution = await getHospitalById(appointment.hospitalId);
+    } else if (appointment.labId) {
+      institution = await getLabById(appointment.labId);
+    }
+
+    await generateReceiptPDF(user, "/assets/icons/logo-full.png", appointment, institution);
+
+    router.push(`/patients/${user.$id}/new-appointment`);
   }
+} catch (error) {
+  console.log(error);
+}
 
   setIsLoading(false);
 };
@@ -340,7 +357,7 @@ const onSubmit = async (values: any) => {
             label = "I consent to privacy policy"
         />
           <div className="pt-4">
-            <SubmitButton isLoading={isLoading} >Get Started</SubmitButton>
+            <SubmitButton isLoading={isLoading} >Submit</SubmitButton>
           </div>
         </form>
       </Form>
