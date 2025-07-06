@@ -41,14 +41,14 @@ interface Lab {
 const STATUS_CARDS = [
   {
     key: AppointmentStatus.Done,
-    label: "Scheduled",
+    label: "previous",
     icon: "/assets/icons/appointments.svg",
     bgColor: "bg-green-700",
     iconColor: "text-green-400",
   },
   {
     key: AppointmentStatus.Pending,
-    label: "Pending",
+    label: "upcoming",
     icon: "/assets/icons/pending.svg",
     bgColor: "bg-blue-700",
     iconColor: "text-blue-400",
@@ -266,8 +266,8 @@ export default function AppointmentDashboard({ userId }: Props) {
                       };
 
                       const statusLabel = {
-                        done: "✓ Scheduled",
-                        pending: "⏳ Pending",
+                        done: "✓ Done",
+                        pending: "⏳ Upcoming",
                         cancelled: "✖ Cancelled",
                       };
 
@@ -316,8 +316,8 @@ export default function AppointmentDashboard({ userId }: Props) {
                   };
 
                   const statusLabel = {
-                    done: "✓ Scheduled",
-                    pending: "⏳ Pending",
+                    done: "✓ Done",
+                    pending: "⏳ Upcoming",
                     cancelled: "✖ Cancelled",
                   };
 
