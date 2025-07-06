@@ -171,7 +171,7 @@ return (
       <button
         onClick={handlePayment}
         disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full mb-4 disabled:opacity-50"
+        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer py-2 px-4 rounded w-full mb-4 disabled:opacity-50"
       >
         {loading ? "Processing..." : "Grab the Subscription Now →"}
       </button>

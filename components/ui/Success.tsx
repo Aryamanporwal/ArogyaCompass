@@ -147,7 +147,7 @@ const SuccessAppointment: React.FC<SuccessAppointmentProps> = ({ userId, open, o
         <div className="w-full mt-5 py-3 rounded-lg bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white font-semibold text-lg shadow transition hover:from-green-600 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300">
         <Button
             onClick={onOk}
-            className="w-full bg-transparent hover:bg-transparent text-white shadow-none text-lg font-semibold"
+            className="w-full bg-transparent cursor-pointer hover:bg-transparent text-white shadow-none text-lg font-semibold"
         >
             OK
         </Button>

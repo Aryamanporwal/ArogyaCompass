@@ -183,7 +183,7 @@ export default function MapDirections({ userId }: Props) {
           {/* Fullscreen Toggle */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="absolute top-4 right-4 bg-white text-black px-4 py-1 rounded-full shadow-md text-sm font-medium z-[1000]"
+            className="absolute top-4 right-4 cursor-pointer bg-white text-black px-4 py-1 rounded-full shadow-md text-sm font-medium z-[1000]"
           >
             {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           </button>
@@ -255,7 +255,7 @@ export default function MapDirections({ userId }: Props) {
           {isMobileView && !isFullscreen && (
             <button
               onClick={() => router.push(`/patients/${userId}/appointments`)}
-              className="absolute top-3 right-4 bg-blue-500 text-white text-sm px-3 py-1 rounded-full shadow-md z-50"
+              className="absolute cursor-pointer top-3 right-4 bg-blue-500 text-white text-sm px-3 py-1 rounded-full shadow-md z-50"
             >
               Skip
             </button>

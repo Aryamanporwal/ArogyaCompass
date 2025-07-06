@@ -286,7 +286,7 @@ return (
               <div className="flex justify-between items-center">
                 <h4 className="text-lg font-medium">Doctor #{index + 1}</h4>
                 {index > 0 && (
-                  <button type="button" onClick={() => removeDoctor(index)} className="text-red-500 hover:text-red-700">
+                  <button type="button" onClick={() => removeDoctor(index)} className="text-red-500 cursor-pointer hover:text-red-700">
                     <Trash2 />
                   </button>
                 )}
@@ -309,7 +309,7 @@ return (
             </div>
           ))}
 
-          <button type="button" onClick={addDoctor} className="mt-2 flex items-center space-x-2 text-blue-400 hover:text-blue-600">
+          <button type="button" onClick={addDoctor} className="mt-2 flex items-center space-x-2 cursor-pointer text-blue-400 hover:text-blue-600">
             <Plus />
             <span>Add another doctor</span>
           </button>
@@ -318,7 +318,7 @@ return (
         <div className="flex items-center justify-between">
           <button
             type="submit"
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg"
+            className="bg-green-500 hover:bg-green-600 text-white cursor-pointer font-semibold py-2 px-6 rounded-lg"
           >
             Submit and Continue
           </button>

@@ -279,7 +279,7 @@ const handleContinue = async () => {
                 (view === "lab" && (!selectedLab || selectedTests.length === 0))
             }
           onClick={handleContinue}
-          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md w-full disabled:opacity-40"
+          className="bg-blue-600 hover:bg-blue-700 cursor-pointer px-4 py-2 rounded-md w-full disabled:opacity-40"
         >
           Continue
         </button>

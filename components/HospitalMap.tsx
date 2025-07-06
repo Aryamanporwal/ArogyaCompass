@@ -78,7 +78,7 @@ export default function HospitalMap({ onLocationFetched }: HospitalMapProps) {
     <div ref={mapRef} className="relative h-full w-full">
       <button
         onClick={handleFullscreen}
-        className="absolute top-4 right-4 z-[1000] rounded-full bg-gray-500 p-2 shadow-lg hover:bg-amber-500"
+        className="absolute top-4 right-4 cursor-pointer z-[1000] rounded-full bg-gray-500 p-2 shadow-lg hover:bg-amber-500"
         title="Toggle Fullscreen"
       >
         ⛶

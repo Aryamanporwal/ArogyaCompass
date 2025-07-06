@@ -151,7 +151,7 @@ return (
         <div className="flex justify-center md:justify-start">
           <button
             type="submit"
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg"
+            className="bg-green-500 cursor-pointer hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg"
           >
             Submit and Continue
           </button>
