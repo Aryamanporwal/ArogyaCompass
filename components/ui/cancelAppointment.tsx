@@ -3,7 +3,7 @@ import React from 'react'
 const cancelAppointment = () => {
   return (
     <div>
-        appointment
+        cancel my appointment
     </div>
   )
 }
