@@ -17,7 +17,9 @@ import { registerPatient } from "@/lib/actions/patient.action";
 import { generateReceiptPDF } from "@/lib/utils/generateReceipt";
 import { getHospitalById, getLabById } from "@/lib/actions/payment.action";
 import SuccessAppointment from "../ui/Success";
+import { Models } from "node-appwrite";
 
+type Document = Models.Document
 
 export const PatientRegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
@@ -27,7 +29,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
   const [test, setTest] = useState("")
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const form = useForm<any>({
+  const form = useForm<Document>({
     defaultValues: {
         ...PatientFormDefaultValues,
         name: "",
@@ -64,7 +66,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
 }, [form])
 
 
-const onSubmit = async (values: any) => {
+const onSubmit = async (values: Document) => {
   setIsLoading(true);
   console.log("Submitting form with values: ", values);
 

@@ -7,6 +7,10 @@ import "leaflet/dist/leaflet.css";
 import { getAllHospitals } from "@/lib/actions/hospital.action";
 import { getAllLabs } from "@/lib/actions/lab.action";
 import Image from "next/image";
+import { Models } from "node-appwrite";
+
+type Document = Models.Document;
+
 interface Hospital {
   $id?: string;
   name: string;
@@ -15,6 +19,8 @@ interface Hospital {
   doctorName?: string[];
   logoUrl:string;
 }
+
+
 interface Lab{
     $id : string;
     name : string;
@@ -116,23 +122,23 @@ export default function ExploreMap({ view, selectedHospitalId, userLocation , se
       const fetchedHospitals = await getAllHospitals();
       const fetchedLabs = await getAllLabs();
       setHospitals(
-        fetchedHospitals.map((doc: any) => ({
+        fetchedHospitals.map((doc: Document) => ({
           $id: doc.$id,
-          name: doc.name,
-          address: doc.address,
-          coordinates: doc.coordinates,
-          doctorName: doc.doctorName,
-          logoUrl:doc.logoUrl,
+          name: doc.name as string,
+          address: doc.address as string,
+          coordinates: doc.coordinates as [number , number],
+          doctorName: doc.doctorName as string[],
+          logoUrl:doc.logoUrl as string,
         }))
       );
       setLabs(
-        fetchedLabs.map((doc: any) => ({
+        fetchedLabs.map((doc: Document) => ({
           $id: doc.$id,
-          name: doc.name,
-          address: doc.address,
-          coordinates: doc.coordinates,
-          test: doc.test,
-          logoUrl:doc.logoUrl,
+          name: doc.name as string,
+          address: doc.address as string,
+          coordinates: doc.coordinates as [number , number],
+          test: doc.test as string[],
+          logoUrl:doc.logoUrl as string,
         }))
       );
     };

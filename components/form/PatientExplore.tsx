@@ -7,6 +7,8 @@ import { createAppointment } from "@/lib/actions/appointment.action"
 import { useRouter } from "next/navigation";
 import { getAllLabs } from "@/lib/actions/lab.action";
 import { getUserIdFromCookie } from "@/lib/actions/user.action";
+import { Models } from "node-appwrite";
+type Document = Models.Document;
 
 const ExploreMap = dynamic(() => import("@/components/ExploreMapView"), { ssr: false });
 
@@ -51,8 +53,8 @@ export default function PatientExplore() {
     useEffect(() => {
         const fetchLabs = async () => {
             const rest = await getAllLabs();
-            const labs : Lab[] = rest.map((doc: any) => ({
-            $id: doc.$id,
+            const labs : Lab[] = rest.map((doc: Document) => ({
+            $id: doc.$id ,
             name: doc.name,
             city: doc.city,
             test: doc.test, // optional
@@ -66,7 +68,7 @@ export default function PatientExplore() {
     const fetch = async () => {
       const res = await getAllHospitals();
       // Map Document[] to Hospital[]
-      const hospitals: Hospital[] = res.map((doc: any) => ({
+      const hospitals: Hospital[] = res.map((doc: Document) => ({
         $id: doc.$id,
         name: doc.name,
         city: doc.city,

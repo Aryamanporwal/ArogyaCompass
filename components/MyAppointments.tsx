@@ -6,6 +6,9 @@ import { getHospitalById } from "@/lib/actions/hospital.action";
 import { getLabById } from "@/lib/actions/lab.action";
 import { getAllAppointmentsByUserId } from "@/lib/actions/appointment.action";
 import { getUserNameById } from "@/lib/actions/user.action";
+import { Models } from "node-appwrite";
+
+type Document = Models.Document;
 
 
 enum AppointmentStatus {
@@ -74,6 +77,7 @@ export default function AppointmentDashboard({ userId }: Props) {
   const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus>(AppointmentStatus.Pending);
   const [hospitalNames, setHospitalNames] = useState<Record<string, string>>({});
   const [labNames, setLabNames] = useState<Record<string, string>>({});
+  
 
         useEffect(() => {
         async function fetchAppointments() {
@@ -81,7 +85,7 @@ export default function AppointmentDashboard({ userId }: Props) {
             try {
             const rawDocs = await getAllAppointmentsByUserId(userId);
 
-            const docs: Appointment[] = rawDocs.map((doc: any) => ({
+            const docs: Appointment[] = rawDocs.map((doc: Document) => ({
                 $id: doc.$id,
                 hospitalId: doc.hospitalId,
                 doctorName: doc.doctorName,

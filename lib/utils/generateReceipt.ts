@@ -2,6 +2,8 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
+
+
 declare module "jspdf" {
   interface jsPDF {
     lastAutoTable?: {
@@ -10,11 +12,31 @@ declare module "jspdf" {
   }
 }
 
+type UserData = {
+  name: string;
+  email: string;
+  phone: string;
+};
+
+type AppointmentData = {
+  timestamp: string ;
+  hospitalId?: string;
+  labId?: string;
+  doctorName?:string;
+  test?:string;
+};
+
+type InstitutionData = {
+  name: string;
+  address: string;
+};
+
+
 export const generateReceiptPDF = async (
-  user: any,
+  user: UserData,
   logoUrl: string,
-  appointment: any,
-  institution: any
+  appointment: AppointmentData,
+  institution: InstitutionData,
 ) => {
   const doc = new jsPDF();
 

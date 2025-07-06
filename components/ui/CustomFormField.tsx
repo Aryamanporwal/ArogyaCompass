@@ -14,6 +14,10 @@ import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { Select, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ControllerRenderProps, FieldValues } from "react-hook-form";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { Textarea } from './textarea'
 
 export enum FormFieldType {
   INPUT = "input",
@@ -42,10 +46,6 @@ interface CustomProps{
 
 }
 
-import { ControllerRenderProps, FieldValues } from "react-hook-form";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { Textarea } from './textarea'
 
 const RenderField = ({
   field,
