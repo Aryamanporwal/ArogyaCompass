@@ -61,3 +61,23 @@ export const getAppointmentByUserId = async (userId: string) => {
     return null;
   }
 };
+
+
+export const getAllAppointmentsByUserId = async (userId: string) => {
+  if (!userId) throw new Error("User ID is required");
+
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+        Query.equal("userId", userId),
+        Query.orderDesc("timestamp"),
+      ]
+    );
+    return response.documents; // ✅ returns Appointment[]
+  } catch (error) {
+    console.error("❌ Error fetching all appointments:", error);
+    return [];
+  }
+};

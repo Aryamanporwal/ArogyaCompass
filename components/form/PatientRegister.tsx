@@ -16,6 +16,7 @@ import FileUpload from "../ui/FileUploader";
 import { registerPatient } from "@/lib/actions/patient.action";
 import { generateReceiptPDF } from "@/lib/utils/generateReceipt";
 import { getHospitalById, getLabById } from "@/lib/actions/payment.action";
+import SuccessAppointment from "../ui/Success";
 
 
 export const PatientRegisterForm = ({ user }: { user: User }) => {
@@ -24,6 +25,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
 //   const [newUserId, setNewUserId] = useState<string | null>(null);
   const [doctorName, setDoctorName] = useState("")
   const [test, setTest] = useState("")
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const form = useForm<any>({
     defaultValues: {
@@ -104,12 +106,24 @@ const onSubmit = async (values: any) => {
     };
 
     const patient = await registerPatient(patientData);
-       if (patient) {
-    const appointment = await getAppointmentByUserId(user.$id);
+      if (patient) {
+      // Show the modal instead of generating PDF and redirecting immediately
+        setShowSuccessModal(true);
+      }
+      } catch (error) {
+        console.log(error);
+      }
 
+  setIsLoading(false);
+};
+
+const handleSuccessOk = async () => {
+    setShowSuccessModal(false);
+
+    // Now generate the PDF and redirect
+    const appointment = await getAppointmentByUserId(user.$id);
     if (!appointment) throw new Error("Appointment not found");
 
-    // Fetch hospital or lab data
     let institution = null;
     if (appointment.hospitalId) {
       institution = await getHospitalById(appointment.hospitalId);
@@ -120,13 +134,8 @@ const onSubmit = async (values: any) => {
     await generateReceiptPDF(user, "/assets/icons/logo-full.png", appointment, institution);
 
     router.push(`/patients/${user.$id}/directions`);
-  }
-} catch (error) {
-  console.log(error);
-}
+  };
 
-  setIsLoading(false);
-};
 
   return (
     <>
@@ -364,6 +373,8 @@ const onSubmit = async (values: any) => {
         {/* {expectedCode && (
         <EmailVerifyModal expectedCode={expectedCode} onSuccess={handleVerified} />
       )} */}
+      <SuccessAppointment userId={user.$id} open={showSuccessModal} onOk={handleSuccessOk} />
+      
     </>
   );
 };

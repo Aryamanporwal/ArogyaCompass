@@ -266,7 +266,7 @@ export default function MapDirections({ userId }: Props) {
       {/* Desktop Skip Button */}
       {!isMobileView && (
         <button
-          onClick={() => router.push(`/patients/${userId}/appointments`)}
+          onClick={() => router.push(`/patients/${userId}/my-appointments`)}
           className="fixed bottom-6 left-6 z-50 bg-blue-600 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700"
         >
           Skip

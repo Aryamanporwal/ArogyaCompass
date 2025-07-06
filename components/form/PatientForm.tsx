@@ -58,7 +58,7 @@ export const PatientForm = () => {
     if(newUserId){
       try{
         verifyPatient(newUserId);
-        router.push(`/patients/${newUserId}/explore`);
+        router.push(`/patients/${newUserId}/my-appointments`);
       }catch(error){
         console.log("Failed to verify check patient.action.ts", error);
       }
