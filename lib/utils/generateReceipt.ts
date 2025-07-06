@@ -12,31 +12,31 @@ declare module "jspdf" {
   }
 }
 
-type UserData = {
-  name: string;
-  email: string;
-  phone: string;
-};
+// type UserData = {
+//   name: string;
+//   email: string;
+//   phone: string;
+// };
 
-type AppointmentData = {
-  timestamp: string ;
-  hospitalId?: string;
-  labId?: string;
-  doctorName?:string;
-  test?:string;
-};
+// type AppointmentData = {
+//   timestamp: string ;
+//   hospitalId?: string;
+//   labId?: string;
+//   doctorName?:string;
+//   test?:string;
+// };
 
-type InstitutionData = {
-  name: string;
-  address: string;
-};
+// type InstitutionData = {
+//   name: string;
+//   address: string;
+// };
 
 
 export const generateReceiptPDF = async (
-  user: UserData,
+  user: any,
   logoUrl: string,
-  appointment: AppointmentData,
-  institution: InstitutionData,
+  appointment: any,
+  institution: any,
 ) => {
   const doc = new jsPDF();
 

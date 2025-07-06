@@ -254,7 +254,7 @@ export default function MapDirections({ userId }: Props) {
           {/* Mobile Skip Button inside Info Panel */}
           {isMobileView && !isFullscreen && (
             <button
-              onClick={() => router.push(`/patients/${userId}/appointments`)}
+              onClick={() => router.push(`/patients/${userId}/my-appointments`)}
               className="absolute cursor-pointer top-3 right-4 bg-blue-500 text-white text-sm px-3 py-1 rounded-full shadow-md z-50"
             >
               Skip
@@ -267,7 +267,7 @@ export default function MapDirections({ userId }: Props) {
       {!isMobileView && (
         <button
           onClick={() => router.push(`/patients/${userId}/my-appointments`)}
-          className="fixed bottom-6 left-6 z-50 bg-blue-600 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700"
+          className="fixed  bottom-6 left-6 z-50 bg-blue-600 text-white px-4 py-2 rounded-full shadow-md hover:bg-blue-700"
         >
           Skip
         </button>
