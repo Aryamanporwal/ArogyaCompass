@@ -17,6 +17,7 @@ export const createAppointment = async (data : AppointmentParams) => {
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
     const now = new Date().toISOString();
+    const status = "pending"; 
 
   if (!userId) {
     throw new Error("User not logged in");
@@ -30,6 +31,7 @@ export const createAppointment = async (data : AppointmentParams) => {
             ...data,
             userId,
             timestamp: now,
+            status,
         }
     );
   } catch (err) {
@@ -79,5 +81,28 @@ export const getAllAppointmentsByUserId = async (userId: string) => {
   } catch (error) {
     console.error("❌ Error fetching all appointments:", error);
     return [];
+  }
+};
+
+
+export const cancelAppointment = async (appointmentId: string, reason: string) => {
+  if (!appointmentId) throw new Error("appointment ID is required");
+
+  try {
+
+    await databases.updateDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      appointmentId,
+      {
+        status: "cancelled",
+        cancelReason: reason,
+      }
+    );
+    console.log("✅ Appointment cancelled successfully");
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Error cancelling appointment:", error);
+    return { success: false, error: error };
   }
 };

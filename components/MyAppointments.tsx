@@ -7,6 +7,7 @@ import { getLabById } from "@/lib/actions/lab.action";
 import { getAllAppointmentsByUserId } from "@/lib/actions/appointment.action";
 import { getUserNameById } from "@/lib/actions/user.action";
 import { Models } from "node-appwrite";
+import  CancelAppointmentForm  from "@/components/ui/cancelAppointment";
 
 type Document = Models.Document;
 
@@ -77,9 +78,11 @@ export default function AppointmentDashboard({ userId }: Props) {
   const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus>(AppointmentStatus.Pending);
   const [hospitalNames, setHospitalNames] = useState<Record<string, string>>({});
   const [labNames, setLabNames] = useState<Record<string, string>>({});
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   
 
-        useEffect(() => {
+    useEffect(() => {
         async function fetchAppointments() {
             setLoading(true);
             try {
@@ -117,6 +120,11 @@ export default function AppointmentDashboard({ userId }: Props) {
             fetchName();
         }, [userId]);
 
+      const handleCancel = (appointmentId: string) => {
+        console.log("Open cancel form for appointment:", appointmentId);
+        setSelectedAppointmentId(appointmentId); 
+        setShowCancelForm(true); 
+      };
 
   // Fetch hospital and lab names for appointments
   useEffect(() => {
@@ -271,9 +279,16 @@ export default function AppointmentDashboard({ userId }: Props) {
 
                       const statusLabel = {
                         done: "✓ Done",
-                        pending: "⏳ Upcoming",
+                        pending: "⏳ Upcoming ",
                         cancelled: "✖ Cancelled",
                       };
+
+                      const statusCancel = {
+                        cancel : "✖ Cancel",
+                      }
+                      const cancelStyle = {
+                        cancel : "bg-red-900 text-red-400",
+                      }
 
                       return (
                         <tr key={appt.$id} className="border-b border-white/10 hover:bg-white/5 transition-all">
@@ -282,9 +297,22 @@ export default function AppointmentDashboard({ userId }: Props) {
                           <td className="py-4 px-6">{institutionName}</td>
                           <td className="py-4 px-6">{appt.doctorName || appt.test || "—"}</td>
                           <td className="py-4 px-6">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[appt.status]}`}>
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[appt.status]}`}
+                            >
                               {statusLabel[appt.status]}
                             </span>
+
+                            {statusLabel[appt.status] === "⏳ Upcoming " && (
+                              <button
+                                className={`px-4 py-1 rounded-full text-xs font-semibold ${cancelStyle.cancel}`}
+                                onClick={() => handleCancel(appt.$id)}
+                              >
+                                {statusCancel.cancel}
+                              </button>
+                            )}
+                          </div>
                           </td>
                         </tr>
                       );
@@ -325,6 +353,13 @@ export default function AppointmentDashboard({ userId }: Props) {
                     cancelled: "✖ Cancelled",
                   };
 
+                  const statusCancel = {
+                    cancel : "✖ Cancel",
+                  }
+                  const cancelStyle = {
+                    cancel : "bg-red-900 text-red-400",
+                  }
+
                   return (
                     <div key={appt.$id} className="bg-[#111418]/70 ring-1 ring-white/10 rounded-xl p-4 shadow-xl backdrop-blur-md space-y-2">
                       <div className="flex justify-between text-sm">
@@ -343,11 +378,23 @@ export default function AppointmentDashboard({ userId }: Props) {
                           </span>{" "}
                           {appt.doctorName || appt.test || "—"}
                       </div>
-                      <div>
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[appt.status]}`}>
-                          {statusLabel[appt.status]}
-                        </span>
-                      </div>
+                        <div>
+                          <div
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-1 ${statusStyles[appt.status]}`}
+                          >
+                            {statusLabel[appt.status]}
+                          </div>
+
+                          {/* Cancel Button - Only for Upcoming */}
+                          {statusLabel[appt.status] === statusLabel.pending && (
+                            <button
+                              className={`inline-block mt-1 px-4 py-1 rounded-full text-xs font-semibold ${cancelStyle.cancel}`}
+                              onClick={() => handleCancel(appt.$id)}
+                            >
+                              {statusCancel.cancel}
+                            </button>
+                          )}
+                        </div>
                     </div>
                   );
                 })
@@ -370,6 +417,13 @@ export default function AppointmentDashboard({ userId }: Props) {
               Book a new Appointment
             </span>
           </button>
+          {showCancelForm && selectedAppointmentId && (
+            <CancelAppointmentForm appointmentId={selectedAppointmentId} onClose={() => {
+                setShowCancelForm(false);
+                setSelectedAppointmentId(null);
+              }}
+            />
+          )}
         </div>
       </div>
     );
