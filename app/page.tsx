@@ -3,12 +3,17 @@ import PatientForm from "@/components/form/PatientForm";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import AdminPasskeyLogin from "@/components/adminPassKeyLogin";
+import { useState } from "react";
 
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function Home() {
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  //  const searchParams = useSearchParams();
+  // const isAdminMode = searchParams.get("admin") === "true";
 return (
-  <div className="flex flex-col md:flex-row h-screen w-full bg-background text-foreground overflow-hidden">
+  <div className="flex flex-col md:flex-row h-screen w-full bg-background text-foreground ">
     {/* Map Section - first on mobile */}
     <div className="w-full md:w-3/5 bg-muted px-3 pt-4 md:px-0 md:pt-0 flex items-center justify-center">
       <div className="w-full h-[350px] sm:h-[400px] md:h-[95%] rounded-2xl shadow-2xl overflow-hidden">
@@ -64,11 +69,19 @@ return (
       {/* Footer */}
       <div className="text-xs mt-3 px-2 flex justify-between text-dark-600">
         <p>&copy; 2025 ArogyaCompass</p>
-        <Link href="/?admin=true" className="text-green-600 hover:underline">
-          Admin
-        </Link>
+        <button
+            onClick={() => setShowAdminModal(true)}
+            className="text-green-600 hover:underline"
+          >
+            Admin
+          </button>
       </div>
     </section>
+      {showAdminModal && (
+          <AdminPasskeyLogin
+            onClose={() => setShowAdminModal(false)}
+          />
+        )}
   </div>
 );
 

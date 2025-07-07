@@ -5,6 +5,9 @@ import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID, E
 import { Query } from "node-appwrite";
 import { storage } from "@/lib/appwrite.config";
 import { InputFile } from "node-appwrite/file";
+import { generatePasskey } from "../utils/generatePasskey";
+import { generatePasskeyPDF } from "../utils/generatePasskeyPDF";
+import { sendEmailWithPDF } from "./sendEmailwithPDF";
 type Doctor = {
   Name: string;
   Email: string;
@@ -87,6 +90,7 @@ export const registerHospital = async (
   try {
     const hospitalId = ID.unique();
 
+
     let logoResult;
     if (logoFile) {
       const arrayBuffer = await logoFile.arrayBuffer();
@@ -101,7 +105,9 @@ export const registerHospital = async (
       doctorLogoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
     }
     
-
+    const hospitalPasskey = generatePasskey();
+    const hospitalPassword = 'HOSP' + hospitalData.name.slice(0, 2).toUpperCase();
+    
     const newHospital = await databases.createDocument(
       DATABASE_ID!,
       HOSPITAL_COLLECTION_ID!,
@@ -109,15 +115,31 @@ export const registerHospital = async (
       {
         ...hospitalData,
         logoUrl: logoResult
-          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${logoResult.$id}/view?project=${PROJECT_ID}`
-          : null,
+        ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${logoResult.$id}/view?project=${PROJECT_ID}`
+        : null,
         logoId: logoResult?.$id ?? null,
         logo: logoResult?.name ?? null, // optional: store file name
+        passkey: hospitalPasskey,
         doctors: [],
       }
     );
+    const hospitalPDF = await generatePasskeyPDF({
+        name: hospitalData.name,
+        email: hospitalData.email,
+        role: "Hospital",
+        passkey: hospitalPasskey,
+        password: hospitalPassword,
+      });
 
+      await sendEmailWithPDF({
+        to: hospitalData.email,
+        name: hospitalData.name,
+        role: "Hospital",
+        pdfBlob: hospitalPDF,
+      });
     for (const doctor of doctors) {
+      const doctorPasskey = generatePasskey();
+      const doctorPassword = 'DOCT' + doctor.Name.slice(-2).toUpperCase(); // e.g., "DOCTSH"
       await databases.createDocument(
         DATABASE_ID!,
         DOCTOR_COLLECTION_ID!,
@@ -130,8 +152,24 @@ export const registerHospital = async (
         logoId: doctorLogoResult?.$id ?? null,
         logo: doctorLogoResult?.name ?? null,
           hospitalId,
+        passkey: doctorPasskey,
         }
       );
+
+
+        const doctorPDF = await generatePasskeyPDF({
+          name: doctor.Name,
+          email: doctor.Email,
+          role: "Doctor",
+          passkey: doctorPasskey,
+          password: doctorPassword,
+        });
+        await sendEmailWithPDF({
+          to: doctor.Email,
+          name: doctor.Name,
+          role: "Doctor",
+          pdfBlob: doctorPDF,
+        });
     }
 
     return { hospital: newHospital, hospitalId };

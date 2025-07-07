@@ -12,6 +12,9 @@ import {
 } from "@/lib/appwrite.config";
 import type { LabTest } from "@/lib/constants/lab.constants";
 import { InputFile } from "node-appwrite/file";
+import { generatePasskey } from "../utils/generatePasskey";
+import { generatePasskeyPDF } from "../utils/generatePasskeyPDF";
+import { sendEmailWithPDF } from "./sendEmailwithPDF";
 
 type LabParams = {
   name: string;
@@ -39,6 +42,8 @@ export const registerLab = async (labData: LabParams, logoFile?:File) => {
       const inputFile = InputFile.fromBuffer(Buffer.from(arrayBuffer), logoFile.name);
       logoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
     }  
+    const passkey = generatePasskey();
+    const labPassword = 'HOSP' + labData.name.slice(0, 2).toUpperCase();
     const newLab = await databases.createDocument(
       DATABASE_ID!,
       LAB_COLLECTION_ID!,
@@ -49,9 +54,25 @@ export const registerLab = async (labData: LabParams, logoFile?:File) => {
           : null,
         logoId: logoResult?.$id ?? null,
         logo: logoResult?.name ?? null,
-
+        passkey : passkey,
       }
     );
+
+    const labPDF = await generatePasskeyPDF({
+        name: labData.name,
+        email: labData.email,
+        role: "Lab",
+        passkey: passkey,
+        password: labPassword,
+      });
+
+    await sendEmailWithPDF({
+      to: labData.email,
+      name: labData.name,
+      role: "Lab",
+      pdfBlob: labPDF,    
+    });
+    
     return { lab: newLab, labId };
   } catch (error) {
     console.error("❌ Error creating lab:", error);

@@ -126,14 +126,33 @@ const handleSuccessOk = async () => {
     const appointment = await getAppointmentByUserId(user.$id);
     if (!appointment) throw new Error("Appointment not found");
 
-    let institution = null;
+    let institutionDoc = null;
     if (appointment.hospitalId) {
-      institution = await getHospitalById(appointment.hospitalId);
+      institutionDoc = await getHospitalById(appointment.hospitalId);
     } else if (appointment.labId) {
-      institution = await getLabById(appointment.labId);
+      institutionDoc = await getLabById(appointment.labId);
     }
 
-    await generateReceiptPDF(user, "/assets/icons/logo-full.png", appointment, institution);
+    // Ensure appointment has the required properties for AppointmentData
+    const appointmentData = {
+      timestamp: appointment.timestamp ?? new Date().toISOString(),
+      hospitalId: appointment.hospitalId,
+      labId: appointment.labId,
+      doctorName: appointment.doctorName,
+      test: appointment.test,
+    };
+    if (!institutionDoc) {
+      throw new Error("Institution not found");
+    }
+
+    // Map Document to InstitutionData
+    const institution = {
+      name: institutionDoc.name,
+      address: institutionDoc.address,
+      // Add other properties if InstitutionData requires them
+    };
+
+    await generateReceiptPDF(user, "/assets/icons/logo-full.png", appointmentData, institution);
 
     router.push(`/patients/${user.$id}/directions`);
   };
