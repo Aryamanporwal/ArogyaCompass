@@ -43,12 +43,25 @@ export default function PatientExplore() {
   const [selectedTests, setSelectedtests] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-      setUserLocation(coords);
-    });
-  }, []);
+    useEffect(() => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          setUserLocation(coords);
+        },
+        (error) => {
+          console.error("Geolocation error:", error.message);
+          // 🌍 Fallback to New Delhi
+          setUserLocation([28.6139, 77.2090]);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    }, []);
+
 
     useEffect(() => {
         const fetchLabs = async () => {
