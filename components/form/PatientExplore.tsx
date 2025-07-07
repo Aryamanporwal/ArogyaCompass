@@ -43,8 +43,8 @@ export default function PatientExplore() {
   const [selectedTests, setSelectedtests] = useState("");
   const router = useRouter();
 
-    useEffect(() => {
-      navigator.geolocation.getCurrentPosition(
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
         (pos) => {
           const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
           setUserLocation(coords);
@@ -61,7 +61,6 @@ export default function PatientExplore() {
         }
       );
     }, []);
-
 
     useEffect(() => {
         const fetchLabs = async () => {
