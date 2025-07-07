@@ -17,15 +17,16 @@ name: string;
 }): Promise<Blob> {
   const doc = new jsPDF();
 
-  const imgResponse = await fetch("/assets/full-logo.png");
-  const imgBlob = await imgResponse.blob();
-  const imgDataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(imgBlob);
-  });
-  doc.addImage(imgDataUrl, "PNG", 80, 10, 50, 50);
+  // const imgUrl = `${window.location.origin}/assets/icons/logo-full.png`;
+  // const imgResponse = await fetch(imgUrl);
+  // const imgBlob = await imgResponse.blob();
+  // const imgDataUrl = await new Promise<string>((resolve, reject) => {
+  //   const reader = new FileReader();
+  //   reader.onloadend = () => resolve(reader.result as string);
+  //   reader.onerror = reject;
+  //   reader.readAsDataURL(imgBlob);
+  // });
+  // doc.addImage(imgDataUrl, "PNG", 80, 10, 50, 50);
 
 
   doc.setFontSize(18);

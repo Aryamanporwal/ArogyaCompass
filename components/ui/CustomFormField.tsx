@@ -31,7 +31,7 @@ export enum FormFieldType {
 }
 
 interface CustomProps{
-    control : Control<any>,
+    control : Control<FieldValues>,
     name : string,
     fieldType: FormFieldType,
     label?: string,
@@ -42,7 +42,7 @@ interface CustomProps{
     dateFormat?: string,
     showTimeSelect?: boolean,
     children ?: React.ReactNode,
-    renderSkeleton?: (field : any) => React.ReactNode,
+    renderSkeleton?: (field: ControllerRenderProps<FieldValues, string>) => React.ReactNode,
 
 }
 

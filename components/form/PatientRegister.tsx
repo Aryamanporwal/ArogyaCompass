@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, FieldValues } from "react-hook-form";
 import { Form, FormControl } from "@/components/ui/form";
 import CustomFormField, { FormFieldType } from "../ui/CustomFormField";
 import SubmitButton from "../ui/SubmitButton";
@@ -17,9 +17,7 @@ import { registerPatient } from "@/lib/actions/patient.action";
 import { generateReceiptPDF } from "@/lib/utils/generateReceipt";
 import { getHospitalById, getLabById } from "@/lib/actions/payment.action";
 import SuccessAppointment from "../ui/Success";
-import { Models } from "node-appwrite";
 
-type Document = Models.Document
 
 export const PatientRegisterForm = ({ user }: { user: User }) => {
   const router = useRouter();
@@ -29,7 +27,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
   const [test, setTest] = useState("")
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const form = useForm<Document>({
+  const form = useForm<FieldValues>({
     defaultValues: {
         ...PatientFormDefaultValues,
         name: "",
@@ -66,7 +64,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
 }, [form])
 
 
-const onSubmit = async (values: Document) => {
+const onSubmit = async (values: FieldValues) => {
   setIsLoading(true);
   console.log("Submitting form with values: ", values);
 
