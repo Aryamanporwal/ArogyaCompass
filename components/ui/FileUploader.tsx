@@ -16,7 +16,7 @@ const FileUpload = ({files, onChange}:FileUplaoderProps) => {
   const { getRootProps,  getInputProps} = useDropzone({ onDrop });
 
   return (
-    <div className='text-[12px] leading-[16px] font-normal flex cursor-pointer  flex-col items-center justify-center gap-3 rounded-md border border-dashed border-gray-800 bg-gray-900 p-5'
+    <div className='text-[12px] leading-[16px] font-normal flex cursor-pointer  flex-col items-center justify-center gap-3 rounded-md border border-dashed shadow-md dark:border-gray-800 bg-white dark:bg-[#2a2a2a] p-5'
       {...getRootProps()}
       style={{
         border: '2px dashed #cccccc',

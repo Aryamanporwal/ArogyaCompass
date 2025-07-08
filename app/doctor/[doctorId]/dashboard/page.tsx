@@ -1,9 +1,16 @@
+"use client";
+import DoctorDashboard from '@/components/doctorDashboard'
 import React from 'react'
+import { useParams } from "next/navigation";
 
-const doctor_dashBoard = () => {
+const DoctorDash = () => {
+  const params = useParams();
+  const doctorId = typeof params?.doctorId === "string" ? params.doctorId : "";
   return (
-    <div>Doctor DashBoard</div>
+    <div>
+      <DoctorDashboard params={{ doctorId }}/>
+    </div>
   )
 }
 
-export default doctor_dashBoard
+export default DoctorDash

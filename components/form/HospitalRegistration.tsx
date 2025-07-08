@@ -29,24 +29,6 @@ type Doctor = {
   experience: number;
 };
 
-// type HospitalData = {
-//   name: string;
-//   email: string;
-//   phone: string;
-//   address: string;
-//   city: string;
-//   licenseNumber: string;
-//   logoUrl: string;
-//   specialities: string[];
-//   isVerified: boolean;
-//   istrueLocation: boolean;
-//   coordinates: [number, number] | [];
-//   doctors:Doctor[];
-//   doctorName : string[];
-//   state : string;
-//   pincode : string;
-// };
-
 type HospitalData = {
   name: string;
   email: string;
@@ -147,75 +129,6 @@ const [hospital, setHospital] = useState<Omit<HospitalData, "logoUrl" | "special
       if (doctors.length === 1) return;
       setDoctors(doctors.filter((_, i) => i !== index));
     };
-
-
-  // // Logo upload handlers
-  // const handleDoctorLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-  //   try {
-  //     const result = await uploadDoctorLogo(file);
-  //     let previewUrl: string;
-  //     if (typeof result === "string") {
-  //       previewUrl = result;
-  //     } else if (result instanceof ArrayBuffer) {
-  //       const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
-  //       previewUrl = `data:image/png;base64,${base64String}`;
-  //     } else {
-  //       throw new Error("Unexpected logo upload result type");
-  //     }
-  //     updateDoctor(index, "logoUrl", previewUrl);
-  //   } catch (err) {
-  //     console.error("Logo upload failed:", err);
-  //     alert("Failed to upload logo.");
-  //   }
-  // };
-
-  // const handleHospitalLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-  //   try {
-  //     const result = await uploadHospitalLogo(file);
-  //     let previewUrl: string;
-  //     if (typeof result === "string") {
-  //       previewUrl = result;
-  //     } else if (result instanceof ArrayBuffer) {
-  //       const base64String = btoa(String.fromCharCode(...new Uint8Array(result)));
-  //       previewUrl = `data:image/png;base64,${base64String}`;
-  //     } else {
-  //       throw new Error("Unexpected hospital logo upload result type");
-  //     }
-  //     setHospitalLogoUrl(previewUrl);
-  //   } catch (err) {
-  //     console.error("Hospital logo upload failed:", err);
-  //     alert("Failed to upload hospital logo.");
-  //   }
-  // };
-
-  // Submit handler
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const hospitalData: HospitalData = {
-  //     ...hospital,
-  //     logoUrl: hospitalLogoUrl,
-  //     specialities,
-  //     coordinates: coordinates ?? [],
-  //     isVerified: false,
-  //     istrueLocation: false,
-  //     doctorName : doctors.map((doc) => doc.Name),
-  //   };
-  //   try {
-  //     const result = await registerHospital(hospitalData, doctors);
-  //     alert("Hospital Created proceed to payment");
-  //     if (result?.hospitalId) {
-  //       router.push(`hospital/${result.hospitalId}/payment`);
-  //     }
-      
-  //   } catch (error) {
-  //     console.error("Registration failed:", error);
-  //     alert("Failed to register. See console for details.");
-  //   }
-  // };
 
 
 const handleSubmit = async (e: React.FormEvent) => {
