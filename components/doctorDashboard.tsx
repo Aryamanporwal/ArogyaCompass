@@ -392,7 +392,7 @@ export default function DoctorDashboard({ params }: PageProps) {
             <StatCard
               icon={<PlusSquare size={24} className="text-indigo-600" />}
               title="Assistants on duty"
-              value={12}
+              value={assistants?.length || 0}
             />
           </div>
 
