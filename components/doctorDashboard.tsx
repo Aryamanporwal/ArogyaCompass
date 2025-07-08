@@ -20,6 +20,7 @@ import { getPatient } from "@/lib/actions/patient.action";
 import AssistantRegistration from "./form/AssistantRegistrationForm";
 import { getAssistantsByDoctorId } from "@/lib/actions/assistant.action";
 import DoctorReportForm from "./form/DoctorReportForm";
+import MedicalRecordList from "./medicalrecord";
 
 interface PageProps {
   params: {
@@ -592,6 +593,56 @@ export default function DoctorDashboard({ params }: PageProps) {
             )
             
             ) : null}
+
+        {selectedNav === "Patients" && (
+          // <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md w-full sm:w-1/2 mx-auto">
+          //   <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+          //     Patient List
+          //   </h3>
+
+          //   <div className="relative mb-4">
+          //     <Search className="absolute left-2.5 top-2.5 text-gray-400" size={16} />
+          //     <input
+          //       type="text"
+          //       placeholder="Search patients"
+          //       className="pl-8 pr-3 py-1.5 rounded-md border border-gray-300 text-sm dark:bg-[#121212] dark:border-gray-600 dark:text-white w-full"
+          //       // Optional: add onChange for search
+          //     />
+
+              <MedicalRecordList doctorId={params.doctorId} />
+
+            // </div>
+
+            // <ul className="space-y-2">
+            //   {(showAllPatients
+            //     ? appointmentPatientList
+            //     : appointmentPatientList.slice(0, 5)
+            //   ).map(({ patient }, index) => (
+            //     <li
+            //       key={index}
+            //       className="flex justify-between items-center px-3 py-2 bg-gray-100 dark:bg-[#2b2b2b] rounded-md hover:shadow transition-all"
+            //     >
+            //       <span className="text-sm font-medium text-gray-800 dark:text-white">
+            //         {patient?.name || "Unknown"}
+            //       </span>
+            //       <span className="text-sm text-blue-500">
+            //         {patient?.gender || "N/A"}
+            //       </span>
+            //     </li>
+            //   ))}
+            // </ul>
+
+            // {appointmentPatientList.length > 5 && (
+            //   <button
+            //     onClick={() => setShowAllPatients(!showAllPatients)}
+            //     className="mt-4 text-blue-600 text-sm hover:underline"
+            //   >
+            //     {showAllPatients ? "Show less" : "View all"}
+            //   </button>
+            // )}
+          // </div>
+        )}
+
 
             </main>
         </div>

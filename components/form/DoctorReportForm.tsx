@@ -40,7 +40,7 @@ export default function DoctorReportForm({
       diagnose: prescription,
       testRecommended,
       timestamp: new Date().toISOString(),
-      medicine: "", // Add appropriate value or another state if needed
+      medicine, // Add appropriate value or another state if needed
       bp,
       temperature,
       dosage,
