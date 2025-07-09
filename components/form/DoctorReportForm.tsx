@@ -37,41 +37,43 @@ export default function DoctorReportForm({
     const [frequency, setFrequency] = useState("");
     const [medicine, setMedicine] = useState("");
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    const newRecord = {
-      userId,
-      doctorName,
-      doctorContact : doctorPhone,
-      diagnose,
-      testRecommended,
-      timestamp: new Date().toISOString(),
-      medicine, // Add appropriate value or another state if needed
-      bp,
-      temperature,
-      dosage,
-      frequency,
-      patientEmail,
-      patientName,
-      patientPhone, 
-      doctorId,
+    const handleSubmit = async () => {
+      setLoading(true);
+      const newRecord = {
+        userId,
+        doctorName,
+        doctorContact: doctorPhone,
+        diagnose,
+        testRecommended,
+        timestamp: new Date().toISOString(),
+        medicine,
+        bp,
+        temperature,
+        dosage,
+        frequency,
+        patientEmail,
+        patientName,
+        patientPhone,
+        doctorId,
+      };
+
+      console.log("Submitting medical record:", newRecord); // Debug: check values
+
+      await createMedicalRecord(newRecord);
+      await updateAppointmentStatus(appointmentId, "done");
+
+      // Only reset after everything is done
+      setDiagnose("");
+      settestRecommended("");
+      setBp("");
+      setTemperature("");
+      setDosage("");
+      setFrequency("");
+      setMedicine("");
+      setLoading(false);
+      alert("Medical Report submitted successfully.");
     };
 
-    console.log("Submitting medical record:", newRecord);
-
-    await createMedicalRecord(newRecord);
-    await updateAppointmentStatus(appointmentId, "done");
-    setLoading(false);
-    alert("Medical Report submitted successfully.");
-    setDiagnose("");
-    // setPrescription("");
-    settestRecommended("");
-    setBp("");
-    setTemperature("");
-    setDosage("");
-    setFrequency("");
-    setMedicine("");
-  };
 
   return (
     <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md w-full sm:w-1/2 mx-auto sm:ml-6 mt-6 sm:mt-0">

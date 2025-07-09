@@ -399,7 +399,7 @@ export default function DoctorDashboard({ params }: PageProps) {
                 alt="Doctor"
                 width={18}
                 height={18}
-                className="rounded-full border "
+                className="border w-full h-full object-cover"
               />
               </div>
             </div>
