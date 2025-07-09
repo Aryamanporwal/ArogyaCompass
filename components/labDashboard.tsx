@@ -26,6 +26,7 @@ import { getAssistantsByLabId } from "@/lib/actions/assistant.action";
 import { handleResetPasskey } from "@/lib/actions/lab.action";
 import { useRouter } from "next/navigation";
 import LabPDFUpload from "./LabPDFUploader";
+import LabRecordList from "./reportRecord";
 
 interface PageProps {
   params: {
@@ -384,13 +385,18 @@ export default function LabDashboard({ params }: PageProps) {
                   className="pl-9 pr-3 py-2 rounded-md border border-gray-300 text-sm dark:bg-[#121212] dark:border-gray-600 dark:text-white"
                 />
               </div>
+
+
+            <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-500 shadow-lg">
+              {/* ------- */}
               <Image
                 src={lab?.logoUrl || "/assets/images/dr-cameron.png"}
                 alt="Lab"
-                width={36}
-                height={36}
-                className="rounded-full border "
+                className="border w-full h-full object-cover"
+                width={18}
+                height={18}
               />
+              </div>
             </div>
           </div>
 
@@ -513,7 +519,7 @@ export default function LabDashboard({ params }: PageProps) {
                 </div>
 
                 {/* Assistants on Duty */}
-                <div className="mb-8 p-6 rounded-xl shadow-md bg-white dark:bg-[#2a2a2a]">
+                <div className="mb-6 p-6 rounded-xl shadow-md bg-white dark:bg-[#2a2a2a]">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
                     Assistants on Duty
                 </h3>
@@ -628,10 +634,7 @@ export default function LabDashboard({ params }: PageProps) {
           //       // Optional: add onChange for search
           //     />
 
-            //   <MedicalRecordList labId={params.labId} />
-
-            // {make something which stores the patient report data }
-            
+              <LabRecordList labId={params.labId} />
 
             // </div>
 
@@ -663,8 +666,7 @@ export default function LabDashboard({ params }: PageProps) {
             //   </button>
             // )}
           // </div>
-          <>
-          </>
+
         )}
 
         {selectedNav === "Settings" && (
@@ -680,7 +682,7 @@ export default function LabDashboard({ params }: PageProps) {
 
             {/* Profile Section */}
             <div className="flex flex-col sm:flex-row gap-8 items-center">
-              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-500 shadow-lg">
+              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-gray-500 shadow-lg">
                 <Image
                   src={lab?.logoUrl || "/assets/icons/user.svg"}
                   alt="Lab Profile"

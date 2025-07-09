@@ -57,7 +57,7 @@ export default function AssistantRegistration({ doctorId, labId }: AssistantRegi
 
 
   return (
-    <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md">
+    <div className="bg-white dark:bg-[#1e1e1e] mb-6 p-6 rounded-xl shadow-md">
 
 
       {/* Add Assistant on Duty */}

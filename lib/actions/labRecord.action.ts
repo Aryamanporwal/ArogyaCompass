@@ -1,6 +1,6 @@
 "use server"
 import { InputFile } from "node-appwrite/file";
-import { ID } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { storage, databases, ENDPOINT, BUCKET_ID, PROJECT_ID, DATABASE_ID, LAB_RECORD_COLLECTION_ID } from "@/lib/appwrite.config";
 import { sendReportEmailWithPDF } from "./sendReportEmailwithPDF";
 
@@ -56,4 +56,21 @@ export async function saveLabTestReport(details: {
   await sendReportEmailWithPDF(patientEmail, base64PDF, patientName);
 
   return res;
+}
+
+
+export async function getLabTestReports(labId: string) {
+    try{
+
+        const response = await databases.listDocuments(
+          DATABASE_ID!,
+          LAB_RECORD_COLLECTION_ID!,
+          [Query.equal("labId", labId)]
+        );
+        return response.documents;
+    }
+    catch (error) {
+        console.error("Error fetching lab test reports:", error);
+        return [];
+    }
 }

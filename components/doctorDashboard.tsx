@@ -392,13 +392,16 @@ export default function DoctorDashboard({ params }: PageProps) {
                   className="pl-9 pr-3 py-2 rounded-md border border-gray-300 text-sm dark:bg-[#121212] dark:border-gray-600 dark:text-white"
                 />
               </div>
+              <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-500 shadow-lg">
+
               <Image
                 src={doctor?.logoUrl || "/assets/images/dr-cameron.png"}
                 alt="Doctor"
-                width={36}
-                height={36}
+                width={18}
+                height={18}
                 className="rounded-full border "
               />
+              </div>
             </div>
           </div>
 
