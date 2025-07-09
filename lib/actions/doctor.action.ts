@@ -4,6 +4,8 @@ import { Models, Query, ID } from "node-appwrite";
 import { generatePasskey } from "../utils/generatePasskey";
 import { generatePasskeyPDF } from "../utils/generatePasskeyPDF";
 import { sendEmailWithPDF } from "./sendEmailwithPDF";
+import { generateMedicalPDF } from "../utils/generateMedicalPDF";
+import { sendMedicalEmailWithPDF } from "./sendMedicalEmailwithPDF";
 
 export const getDoctorsByNames = async (names: string[]) => {
   const result = await databases.listDocuments(
@@ -64,6 +66,10 @@ export const createMedicalRecord = async (data: {
   temperature: string;
   dosage: string;
   frequency: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone:string;// Optional
+  doctorId: string; // Optional, if needed
 }) => {
   try {
     const res = await databases.createDocument(
@@ -72,6 +78,9 @@ export const createMedicalRecord = async (data: {
       ID.unique(),
       data
     );
+
+    const pdfBlob = await generateMedicalPDF(data)
+    await sendMedicalEmailWithPDF(data.patientEmail, pdfBlob, data.patientName);
     return res;
   } catch (error) {
     console.error("Failed to create medical record:", error);

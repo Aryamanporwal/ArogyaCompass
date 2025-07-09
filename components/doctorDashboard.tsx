@@ -601,11 +601,14 @@ export default function DoctorDashboard({ params }: PageProps) {
                 </div>
                 </div>
                 <DoctorReportForm
-                    doctorId={params.doctorId}
                     doctorName={doctor?.Name || ""}
                     doctorPhone={doctor?.phone || ""}
                     userId={currentPatient.userId}
                     appointmentId={selectedAppointmentId}
+                    doctorId={params.doctorId}
+                    patientName = {currentPatient.name}
+                    patientEmail = {currentPatient.email}
+                    patientPhone = {currentPatient.phone}
                 />
                 </div>
             ) : (

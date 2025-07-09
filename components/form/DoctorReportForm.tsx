@@ -12,6 +12,9 @@ interface DoctorReportFormProps {
   userId: string;
   appointmentId: string;
   doctorId: string;
+  patientName: string;
+  patientEmail: string;
+  patientPhone: string; // Optional, if needed
 }
 
 export default function DoctorReportForm({
@@ -19,10 +22,13 @@ export default function DoctorReportForm({
   doctorPhone,
   userId,
   appointmentId,
-  doctorId
+  doctorId,
+  patientName,
+  patientEmail,
+  patientPhone, // Added patient phone if needed
 }: DoctorReportFormProps) {
-  const [diagnosis, setDiagnosis] = useState("");
-  const [prescription, setPrescription] = useState("");
+  const [diagnose, setDiagnose] = useState("");
+  // const [prescription, setPrescription] = useState("");
   const [testRecommended, settestRecommended] = useState("");
   const [loading, setLoading] = useState(false);
   const [bp, setBp] = useState("");
@@ -36,8 +42,8 @@ export default function DoctorReportForm({
     const newRecord = {
       userId,
       doctorName,
-      doctorContact: doctorPhone,
-      diagnose: prescription,
+      doctorContact : doctorPhone,
+      diagnose,
       testRecommended,
       timestamp: new Date().toISOString(),
       medicine, // Add appropriate value or another state if needed
@@ -45,15 +51,20 @@ export default function DoctorReportForm({
       temperature,
       dosage,
       frequency,
+      patientEmail,
+      patientName,
+      patientPhone, 
       doctorId,
     };
+
+    console.log("Submitting medical record:", newRecord);
 
     await createMedicalRecord(newRecord);
     await updateAppointmentStatus(appointmentId, "done");
     setLoading(false);
     alert("Medical Report submitted successfully.");
-    setDiagnosis("");
-    setPrescription("");
+    setDiagnose("");
+    // setPrescription("");
     settestRecommended("");
     setBp("");
     setTemperature("");
@@ -73,8 +84,8 @@ export default function DoctorReportForm({
         <Input value={doctorPhone} disabled placeholder="Doctor Phone" className=" bg-gray-50 dark:bg-[#2b2b2b] dark:border-gray-700" />
         <Textarea
           placeholder="Diagnosis"
-          value={diagnosis}
-          onChange={(e) => setDiagnosis(e.target.value)}
+          value={diagnose}
+          onChange={(e) => setDiagnose(e.target.value)}
           className=" bg-gray-50 dark:bg-[#2b2b2b] dark:border-gray-700"
         />
         {/* <Textarea
