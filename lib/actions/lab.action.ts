@@ -1,6 +1,6 @@
 "use server";
 
-import { ID, Query } from "node-appwrite";
+import { ID, Models, Query } from "node-appwrite";
 import {
   databases,
   DATABASE_ID,
@@ -9,6 +9,7 @@ import {
   BUCKET_ID,
   ENDPOINT,
   PROJECT_ID,
+  APPOINTMENT_COLLECTION_ID,
 } from "@/lib/appwrite.config";
 import type { LabTest } from "@/lib/constants/lab.constants";
 import { InputFile } from "node-appwrite/file";
@@ -43,7 +44,7 @@ export const registerLab = async (labData: LabParams, logoFile?:File) => {
       logoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
     }  
     const passkey = generatePasskey();
-    const labPassword = 'HOSP' + labData.name.slice(0, 2).toUpperCase();
+    const labPassword = 'LAB' + labData.name.slice(0, 2).toUpperCase();
     const newLab = await databases.createDocument(
       DATABASE_ID!,
       LAB_COLLECTION_ID!,
@@ -112,3 +113,80 @@ export const getLabById = async (labId: string) => {
   const res = await databases.getDocument(DATABASE_ID!, LAB_COLLECTION_ID!, labId);
   return res;
 };
+
+export const updateLabPasskey = async (
+  labId: string,
+  updates: { passkey: string }
+) => {
+  try {
+    await databases.updateDocument(
+      DATABASE_ID!,
+      LAB_COLLECTION_ID!,
+      labId,
+      updates
+    );
+  } catch (error) {
+    console.error("Failed to update Lab passkey:", error);
+    throw error;
+  }
+};
+
+export const handleResetPasskey = async (labId : string) => {
+    try {
+        const lab = await getLabById(labId);
+        if (!lab || !lab.email || !lab.name) {
+        throw new Error("Lab info is incomplete");
+        }
+
+    // 1. Generate new passkey & password
+    const newPasskey = generatePasskey();
+    const newPassword = "LAB" + lab.name.slice(0,2).toUpperCase();
+
+    await updateLabPasskey(lab.$id, {
+      passkey: newPasskey,
+    });
+
+    // 3. Generate new PDF
+    const newPDF = await generatePasskeyPDF({
+      name: lab.name,
+      email: lab.email,
+      role: "Lab",
+      passkey: newPasskey,
+      password: newPassword,
+    });
+
+    // 4. Send email with new PDF
+    await sendEmailWithPDF({
+      to: lab.email,
+      name: lab.name,
+      role: "Lab",
+      pdfBlob: newPDF,
+    });
+
+    return { success: true, message: "New passkey generated and emailed successfully." };
+  } catch (err) {
+    console.error("Error resetting passkey:", err);
+      return { success: false, message: "Failed to reset passkey." };  }
+
+};
+
+
+export const getAppointmentsByLab = async (
+  labId: string
+): Promise<Models.DocumentList<Models.Document> | null> => {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+        Query.equal("labId", labId),
+      ]
+    );
+    return response;
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    return null;
+  }
+};
+
+

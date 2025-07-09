@@ -13,6 +13,7 @@ export const {
   ASSISTANT_COLLECTION_ID,
   MEDICINE_RECORD_COLLECTION_ID,
   NEXT_PUBLIC_BUCKET_ID: BUCKET_ID,
+  LAB_RECORD_COLLECTION_ID,
 } = process.env;
 
 const client = new sdk.Client();

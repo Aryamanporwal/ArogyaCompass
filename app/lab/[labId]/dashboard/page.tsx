@@ -1,9 +1,16 @@
+"use client";
+import LabDashboard from '@/components/labDashboard'
 import React from 'react'
+import { useParams } from "next/navigation";
 
-const lab_dashboard = () => {
+const LabDash = () => {
+  const params = useParams();
+  const labId = typeof params?.labId === "string" ? params.labId : "";
   return (
-    <div>lab_dashboard</div>
+    <div>
+      <LabDashboard params={{ labId }}/>
+    </div>
   )
 }
 
-export default lab_dashboard
+export default LabDash

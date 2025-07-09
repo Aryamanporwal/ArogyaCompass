@@ -87,3 +87,17 @@ export const getAssistantsByDoctorId = async (doctorId: string) => {
     return [];
   }
 };
+export const getAssistantsByLabId = async (labId: string) => {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      ASSISTANT_COLLECTION_ID!,
+      [Query.equal("labId", labId)]
+    );
+
+    return response.documents;
+  } catch (error) {
+    console.error("Error fetching assistants:", error);
+    return [];
+  }
+};

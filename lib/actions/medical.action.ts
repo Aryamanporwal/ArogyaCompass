@@ -1,7 +1,8 @@
 "use server"
-import { databases } from "@/lib/appwrite.config";
+import { databases, } from "@/lib/appwrite.config";
 import { Query } from "node-appwrite";
 import { DATABASE_ID, MEDICINE_RECORD_COLLECTION_ID } from "@/lib/appwrite.config";
+
 
 export async function getMedicalRecordsByDoctorId(doctorId: string) {
   try {
@@ -17,3 +18,7 @@ export async function getMedicalRecordsByDoctorId(doctorId: string) {
     return [];
   }
 }
+
+
+
+
