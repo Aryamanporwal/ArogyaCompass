@@ -10,7 +10,9 @@ import {
   ClipboardList,
   Sun,
   Moon,
-  UserPlus
+  UserPlus,
+  Phone,
+  Mail,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -21,6 +23,8 @@ import AssistantRegistration from "./form/AssistantRegistrationForm";
 import { getAssistantsByDoctorId } from "@/lib/actions/assistant.action";
 import DoctorReportForm from "./form/DoctorReportForm";
 import MedicalRecordList from "./medicalrecord";
+import { handleResetPasskey } from "@/lib/actions/doctor.action";
+import { useRouter } from "next/navigation";
 
 interface PageProps {
   params: {
@@ -110,6 +114,9 @@ export default function DoctorDashboard({ params }: PageProps) {
    const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
    const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
    const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+   const [passkey, setPasskey] = useState("");
+   const router = useRouter();
+
 
    interface Assistant {
      name: string;
@@ -249,6 +256,23 @@ export default function DoctorDashboard({ params }: PageProps) {
             };
             fetchSelectedPatient();
             }, [selectedPatientId]);
+
+              const handleSignOut = () => {
+                router.push("/"); // redirect to home
+              };
+
+           const handleResetdoctorPasskey = async () => {
+            const confirmed = confirm("Are you sure you want to reset your passkey?");
+            if (!confirmed) return;
+
+            // Call Appwrite function or backend logic here
+            const res = await handleResetPasskey(params.doctorId);
+            if (res) {
+              alert(res.message || "Passkey reset successfully. Please check your email for the new passkey.");
+            } else {
+              alert("Failed to reset passkey. Please try again later.");
+            }
+          };
   return (
     <div
       className={`relative font-sans transition-colors duration-300 min-h-screen ${
@@ -339,7 +363,8 @@ export default function DoctorDashboard({ params }: PageProps) {
               {darkMode ? <Sun size={16} /> : <Moon size={16} />}
               {sidebarOpen && <span>{darkMode ? "Light Mode" : "Dark Mode"}</span>}
             </button>
-            <button className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white">
+            <button className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
+             onClick = {handleSignOut}>
               <LogOut size={16} />
               {sidebarOpen && <span>Sign out</span>}
             </button>
@@ -368,7 +393,7 @@ export default function DoctorDashboard({ params }: PageProps) {
                 />
               </div>
               <Image
-                src={doctor?.logoUrl || "/assets/icons/dr-cameron.png"}
+                src={doctor?.logoUrl || "/assets/images/dr-cameron.png"}
                 alt="Doctor"
                 width={36}
                 height={36}
@@ -423,7 +448,7 @@ export default function DoctorDashboard({ params }: PageProps) {
                                 onClick={() => {
                                     setSelectedNav("Appointments");
                                     setSelectedPatientId(appointment.userId); 
-                                     setSelectedAppointmentId(appointment.$id);// This maps to patient.userId
+                                    setSelectedAppointmentId(appointment.$id);// This maps to patient.userId
                                 }}
                             className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
                         >
@@ -537,7 +562,7 @@ export default function DoctorDashboard({ params }: PageProps) {
             )}
         {selectedNav === "Appointments" ? (
             currentPatient  && selectedAppointmentId ? (
-             <div className="flex flex-col sm:flex-row gap-6">
+             <div className="flex flex-col mb-6 sm:flex-row gap-6">
                 <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md w-full sm:w-1/2 mx-auto">
                 <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                     Patient Details
@@ -641,6 +666,123 @@ export default function DoctorDashboard({ params }: PageProps) {
             //   </button>
             // )}
           // </div>
+        )}
+
+        {selectedNav === "Settings" && (
+          <div className="flex flex-col mb-6 sm:flex-row gap-6">
+            {/* <div className="hidden lg:block lg:min-w-[250px]" /> */}
+          <div className="bg-white dark:bg-[#1e1e1e] mb-6 p-6 sm:p-10 rounded-2xl shadow-xl w-full sm:max-w-4xl mx-auto space-y-10">
+            
+            {/* Header */}
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Account Settings</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your personal and security details.</p>
+            </div>
+
+            {/* Profile Section */}
+            <div className="flex flex-col sm:flex-row gap-8 items-center">
+              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-500 shadow-lg">
+                <Image
+                  src={doctor?.logoUrl || "/assets/icons/user.svg"}
+                  alt="Doctor Profile"
+                  width={112}
+                  height={112}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Full Name</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{doctor?.Name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white break-all">{doctor?.Email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Phone Number</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{doctor?.phone}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Address</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{doctor?.Address || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">City</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{doctor?.City || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Speciality</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{doctor?.speciality || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">License Number</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{doctor?.licenseNumber || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Availability</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{doctor?.availability || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Section */}
+            <div className="pt-6 border-t border-gray-300 dark:border-gray-700">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">Security</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Enter your passkey to reset your secure access credentials.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+                <input
+                  type="password"
+                  value={passkey}
+                  onChange={(e) => setPasskey(e.target.value)}
+                  placeholder="Enter passkey"
+                  className="w-full sm:w-auto px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-[#121212] dark:text-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  onClick={() => {
+                    const doctorName = doctor?.Name || "";
+                    const lastTwo = doctorName.slice(-2).toUpperCase();
+                    const expectedKey = `DOCT${lastTwo}`;
+
+                    if (passkey === expectedKey) {
+                      handleResetdoctorPasskey();
+                    } else {
+                      alert("Invalid passkey. Please try again.");
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium shadow"
+                >
+                  Reset Passkey
+                </button>
+              </div>
+            </div>
+
+            {/* Contact Support Section */}
+            <div className="pt-6 border-t border-gray-300 dark:border-gray-700 space-y-4">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white">Contact ArogyaCompass</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Reach out to our support team for help or inquiries.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a
+                  href={`mailto:aryamanporwal@gmail.com?subject=Doctor Support Request&body=Hello ArogyaCompass Team,%0D%0A%0D%0AI need assistance regarding...%0D%0A%0D%0ARegards,%0D%0Aaryamanporwal@gmail.com`}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow text-sm"
+                >
+                  <Mail size={18} /> Email Support
+                </a>
+                <a
+                  href="tel:+916392994628"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow text-sm"
+                >
+                  <Phone size={18} /> Call Support
+                </a>
+              </div>
+            </div>
+          </div>
+           </div>
         )}
 
 
