@@ -72,7 +72,7 @@ export default function MedicalRecordList({ doctorId }: { doctorId: string }) {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md w-full">
+    <div className="bg-white dark:bg-[#1e1e1e] p-6 mb-6 rounded-xl shadow-md w-full">
       <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
         Medical Records
       </h3>

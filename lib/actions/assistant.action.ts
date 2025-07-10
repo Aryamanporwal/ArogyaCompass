@@ -1,6 +1,6 @@
 "use server";
 
-import { ID, Query } from "node-appwrite";
+import { ID, Models, Query } from "node-appwrite";
 import {
   databases,
   DATABASE_ID,
@@ -9,11 +9,13 @@ import {
   BUCKET_ID,
   ENDPOINT,
   PROJECT_ID,
+  APPOINTMENT_COLLECTION_ID,
 } from "@/lib/appwrite.config";
 import { InputFile } from "node-appwrite/file";
 import { generatePasskey } from "../utils/generatePasskey";
 import { generatePasskeyPDF } from "../utils/generatePasskeyPDF";
 import { sendEmailWithPDF } from "./sendEmailwithPDF";
+import { getDoctorById } from "./doctor.action";
 
 type AssistantParams = {
   name: string;
@@ -101,3 +103,80 @@ export const getAssistantsByLabId = async (labId: string) => {
     return [];
   }
 };
+export const getAssistantById = async (assistantId: string) => {
+  const res = await databases.getDocument(DATABASE_ID!, ASSISTANT_COLLECTION_ID!, assistantId);
+    return res;
+};
+
+
+
+export const getAppointmentsByAssistant = async(assistantId: string) : Promise<Models.DocumentList<Models.Document> | null> => {
+  try {
+    // Step 1: Fetch assistant document
+    const assistantRes = await databases.getDocument(
+      DATABASE_ID!,
+      ASSISTANT_COLLECTION_ID!,
+      assistantId,
+    );
+
+    // Step 2: If assistant has doctorId, fetch the doctor document
+    if (assistantRes.doctorId) {
+      const doctorRes = await getDoctorById(assistantRes.doctorId);
+
+      const doctorName = doctorRes?.Name;
+      const hospitalId = doctorRes?.hospitalId;
+
+      if (doctorName && hospitalId) {
+        const appointmentsRes = await databases.listDocuments(
+          DATABASE_ID!,
+          APPOINTMENT_COLLECTION_ID!,
+          [
+            Query.equal("status", "pending"),
+            Query.equal("doctorName", doctorName),
+            Query.equal("hospitalId", hospitalId)
+          ]
+        );
+
+        return appointmentsRes;
+      }
+      
+    }
+
+    // Step 3: If assistant has labId, fetch appointments by labId
+    if (assistantRes.labId) {
+      const appointmentsRes = await databases.listDocuments(
+        DATABASE_ID!,
+        APPOINTMENT_COLLECTION_ID!,
+        [Query.equal("labId", assistantRes.labId)]
+      );
+
+      return appointmentsRes;
+    }
+    return null
+
+  } catch (error) {
+    console.error("❌ Error fetching appointments for assistant:", error);
+    return null;
+  }
+}
+
+
+export async function sendSMSToPatients(patients: { phone: string }[], message: string) {
+  try {
+    const uniquePhones = [...new Set(patients.map(p => p.phone))];
+
+    const sendRequests = uniquePhones.map(phone =>
+      fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/send-sms`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: `+91${phone}`, message }),
+      })
+    );
+
+    await Promise.all(sendRequests);
+    return true;
+  } catch (error) {
+    console.error("Failed to send SMS to patients:", error);
+    return false;
+  }
+}

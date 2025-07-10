@@ -207,3 +207,51 @@ export const getUser = async(userId : string) =>{
     console.error("error occured during retrieving the user details " , error);
   }
 };
+
+
+export const getPatientWithDetail = async (userId: string, doctorName?: string) => {
+  try {
+    // 1. If doctorName is present, try fetching patient with primaryPhysician match
+    if (doctorName) {
+      const matchDoctor = await databases.listDocuments(
+        DATABASE_ID!,
+        PATIENT_COLLECTION_ID!,
+        [
+          Query.equal("userId", [userId]),
+          Query.equal("primaryPhysician", [doctorName])
+        ]
+      );
+
+      if (matchDoctor.documents.length > 0) {
+        return {
+          ...parseStringify(matchDoctor.documents[0]),
+          matchedBy: "doctorName"
+        };
+      }
+    }
+
+    // 2. Else fallback: fetch by userId only
+    const fallback = await databases.listDocuments(
+      DATABASE_ID!,
+      PATIENT_COLLECTION_ID!,
+      [Query.equal("userId", [userId])]
+    );
+
+    if (fallback.documents.length > 0) {
+      const patient = parseStringify(fallback.documents[0]);
+      return {
+        ...patient,
+        matchedBy: doctorName ? "userIdOnly" : "testOnly",
+        test: patient.test || null,
+      };
+    }
+
+    // 3. No matching patient found
+    return null;
+  } catch (error) {
+    console.error("Error in getPatientWithDetail:", error);
+    return null;
+  }
+};
+
+

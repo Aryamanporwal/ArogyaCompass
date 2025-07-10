@@ -16,7 +16,9 @@ type AppointmentParams = {
 export const createAppointment = async (data : AppointmentParams) => {
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
-    const now = new Date().toISOString();
+    const now = new Date(
+        new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+      );
     const status = "pending"; 
 
   if (!userId) {
@@ -51,6 +53,29 @@ export const getAppointmentByUserId = async (userId: string) => {
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
       [
+        Query.equal("userId", userId),
+        Query.orderDesc("timestamp"),
+        Query.limit(1)
+      ]
+    );
+
+    return response.documents[0] || null;
+  } catch (error) {
+    console.error("❌ Error fetching appointment by userId:", error);
+    return null;
+  }
+};
+export const getPendingAppointmentByUserId = async (userId: string) => {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+         Query.equal("status", "pending"),
         Query.equal("userId", userId),
         Query.orderDesc("timestamp"),
         Query.limit(1)
@@ -106,3 +131,21 @@ export const cancelAppointment = async (appointmentId: string, reason: string) =
     return { success: false, error: error };
   }
 };
+
+
+export async function markAppointmentDone(appointmentId: string) {
+  try {
+    await databases.updateDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!, // your collectionId
+      appointmentId,
+      {
+        status: "done",
+      }
+    );
+    return true;
+  } catch (error) {
+    console.error("Failed to mark appointment as done:", error);
+    return false;
+  }
+}

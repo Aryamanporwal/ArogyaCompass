@@ -162,7 +162,7 @@ export default function LabDashboard({ params }: PageProps) {
 
 
 
-    useEffect(() => {
+  useEffect(() => {
     const fetchAppointments = async () => {
         if (!lab) return;
         const res = await getAppointmentsByLab(
