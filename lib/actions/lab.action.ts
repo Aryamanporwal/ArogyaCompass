@@ -188,5 +188,23 @@ export const getAppointmentsByLab = async (
     return null;
   }
 };
+export const getPendingAppointmentsByLab = async (
+  labId: string
+): Promise<Models.DocumentList<Models.Document> | null> => {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+        Query.equal("labId", labId),
+        Query.equal("status","pending"),
+      ]
+    );
+    return response;
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    return null;
+  }
+};
 
 

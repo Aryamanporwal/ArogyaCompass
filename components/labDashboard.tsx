@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { getAppointmentsByLab, getLabById } from "@/lib/actions/lab.action";
+import { getAppointmentsByLab, getLabById, getPendingAppointmentsByLab } from "@/lib/actions/lab.action";
 import { Models } from "node-appwrite";
 import { getPatient } from "@/lib/actions/patient.action";
 import AssistantRegistration from "./form/AssistantRegistrationForm";
@@ -27,6 +27,8 @@ import { handleResetPasskey } from "@/lib/actions/lab.action";
 import { useRouter } from "next/navigation";
 import LabPDFUpload from "./LabPDFUploader";
 import LabRecordList from "./reportRecord";
+import { Button } from "./ui/button";
+import { updateAppointmentStatus } from "@/lib/actions/doctor.action";
 
 interface PageProps {
   params: {
@@ -110,6 +112,7 @@ export default function LabDashboard({ params }: PageProps) {
    const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
    const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
    const [passkey, setPasskey] = useState("");
+     const [loading, setLoading] = useState(false);
    const router = useRouter();
 
 
@@ -162,6 +165,26 @@ export default function LabDashboard({ params }: PageProps) {
 
 
 
+  useEffect(() => {
+    const fetchAppointments = async () => {
+        if (!lab) return;
+        const res = await getPendingAppointmentsByLab(
+            params.labId // Assuming lab.labId is the correct identifier
+        );
+
+        const allAppointments = res?.documents || [];
+        setAppointments(allAppointments);
+        // setTotalCount(allAppointments.length); 
+
+        // // Filter pending
+        // const pending = allAppointments.filter(
+        //     (a) => a.status?.toLowerCase() === "pending"
+        // );
+        // setPendingCount(pending.length);
+    };
+
+    fetchAppointments();
+    }, [lab, params.labId]);
   useEffect(() => {
     const fetchAppointments = async () => {
         if (!lab) return;
@@ -253,6 +276,11 @@ export default function LabDashboard({ params }: PageProps) {
               const handleSignOut = () => {
                 router.push("/"); // redirect to home
               };
+
+                const handleSubmit = async () => {
+                  setLoading(true);
+                  await updateAppointmentStatus(appointments[0].$id, "done");
+                }
 
            const handleResetLabPasskey = async () => {
             const confirmed = confirm("Are you sure you want to reset your passkey?");
@@ -607,7 +635,15 @@ export default function LabDashboard({ params }: PageProps) {
                         patientEmail={currentPatient.email}
                         patientPhone={currentPatient.phone}
                         />
+                        <Button
+                          className="bg-blue-600 text-white hover:bg-blue-700 mt-2"
+                          onClick={handleSubmit}
+                          disabled={loading}
+                        >
+                          {loading ? "Submitting..." : "Submit"}
+                        </Button>
                 </div>
+
             ) : (
                 <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md w-full justify-center sm:w-1/2 mx-auto text-center">
                 <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">Oops!! Laboratory</h3>
