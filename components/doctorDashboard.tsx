@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { getAppointmentsByDoctorAndHospital, getDoctorById } from "@/lib/actions/doctor.action";
+import { getAppointmentsByDoctorAndHospital, getDoctorById, getPendingAppointmentsByDoctorAndHospital } from "@/lib/actions/doctor.action";
 import { Models } from "node-appwrite";
 import { getPatient } from "@/lib/actions/patient.action";
 import AssistantRegistration from "./form/AssistantRegistrationForm";
@@ -166,13 +166,35 @@ export default function DoctorDashboard({ params }: PageProps) {
     useEffect(() => {
     const fetchAppointments = async () => {
         if (doctor?.Name && doctor?.hospitalId) {
-        const res = await getAppointmentsByDoctorAndHospital(
+        const res = await getPendingAppointmentsByDoctorAndHospital(
             doctor.Name,
             doctor.hospitalId
         );
 
         const allAppointments = res?.documents || [];
         setAppointments(allAppointments);
+        // setTotalCount(allAppointments.length); 
+
+        // Filter pending
+        // const pending = allAppointments.filter(
+        //     (a) => a.status?.toLowerCase() === "pending"
+        // );
+        // setPendingCount(pending.length);
+        }
+    };
+
+    fetchAppointments();
+    }, [doctor]);
+    useEffect(() => {
+    const fetchAppointments = async () => {
+        if (doctor?.Name && doctor?.hospitalId) {
+        const res = await getAppointmentsByDoctorAndHospital(
+            doctor.Name,
+            doctor.hospitalId
+        );
+
+        const allAppointments = res?.documents || [];
+        // setAppointments(allAppointments);
         setTotalCount(allAppointments.length); 
 
         // Filter pending

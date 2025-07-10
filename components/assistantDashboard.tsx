@@ -386,7 +386,6 @@ export default function AssistantDashboard({params}: PageProps) {
             <DoctorLabInfoCard doctorId={assistant?.doctorId} labId={assistant?.labId} />
           </div>  
 
-
           <BroadcastMessageBox  patients={validPatients} />
 
 
@@ -535,6 +534,8 @@ export default function AssistantDashboard({params}: PageProps) {
           {selectedNav === "Management" && (
             <div>
               {/* Management content goes here */}
+              
+
             </div>
           )}
           {selectedNav === "Emergency" && (

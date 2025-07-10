@@ -51,6 +51,27 @@ export const getAppointmentsByDoctorAndHospital = async (
     return null;
   }
 };
+export const getPendingAppointmentsByDoctorAndHospital = async (
+  doctorName: string,
+  hospitalId: string
+): Promise<Models.DocumentList<Models.Document> | null> => {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+        Query.equal("doctorName", doctorName),
+        Query.equal("hospitalId", hospitalId),
+        Query.equal("status", "pending")
+      ]
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    return null;
+  }
+};
 
 
 // CREATE a new record in medicalRecord collection
