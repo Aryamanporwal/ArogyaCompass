@@ -13,6 +13,7 @@ import {
   UserPlus,
   Phone,
   Mail,
+  Clock,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -403,7 +404,27 @@ export default function LabDashboard({ params }: PageProps) {
         {selectedNav === "Dashboard" && (
             <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div className="flex flex-col gap-1 mb-4">
             <h1 className="text-2xl font-semibold">Welcome, {lab?.name}</h1>
+            <h2 className="text-lg font-medium flex items-center gap-3 mt-1 text-black dark:text-gray-300">
+            <span className="flex items-center gap-1">
+                <CalendarDays size={18} className="text-blue-600 dark:text-blue-400" />
+                {new Date().toLocaleDateString("en-IN", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                })}
+            </span>
+
+            <span className="flex items-center gap-1">
+                <Clock size={18} className="text-blue-600 dark:text-blue-400" />
+                {new Date().toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                })}
+            </span>
+            </h2>
+            </div>
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
