@@ -180,3 +180,61 @@ export async function sendSMSToPatients(patients: { phone: string }[], message: 
     return false;
   }
 }
+
+export const updateAssistantPasskey = async (
+  assistantId: string,
+  updates: { passkey: string }
+) => {
+  try {
+    await databases.updateDocument(
+      DATABASE_ID!,
+      ASSISTANT_COLLECTION_ID!,
+      assistantId,
+      updates
+    );
+  } catch (error) {
+    console.error("Failed to update doctor passkey:", error);
+    throw error;
+  }
+};
+
+
+export const handleResetPasskey = async (assistantId : string) => {
+    try {
+        const assistant = await getAssistantById(assistantId);
+        if (!assistant || !assistant.email || !assistant.name) {
+        throw new Error("Assistant info is incomplete");
+        }
+
+    // 1. Generate new passkey & password
+    const newPasskey = generatePasskey();
+    const newPassword = "ASSI" + assistant.name.slice(-2).toUpperCase();
+
+    // 2. Update doctor record in Appwrite
+    await updateAssistantPasskey(assistant.$id, {
+      passkey: newPasskey,
+    });
+
+    // 3. Generate new PDF
+    const newPDF = await generatePasskeyPDF({
+      name: assistant.name,
+      email: assistant.email,
+      role: "Assistant",
+      passkey: newPasskey,
+      password: newPassword,
+    });
+
+    // 4. Send email with new PDF
+    await sendEmailWithPDF({
+      to: assistant.email,
+      name: assistant.name,
+      role: "Assistant",
+      pdfBlob: newPDF,
+    });
+
+    return { success: true, message: "New passkey generated and emailed successfully." };
+  } catch (err) {
+    console.error("Error resetting passkey:", err);
+      return { success: false, message: "Failed to reset passkey." };  }
+
+};

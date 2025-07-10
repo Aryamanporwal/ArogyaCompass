@@ -10,12 +10,15 @@ import {
   Search,
   CalendarDays,
   Clock,
+  Settings,
+  Mail,
+  Phone,
 //   PlusSquare,
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getAppointmentsByAssistant, getAssistantById } from "@/lib/actions/assistant.action";
+import { getAppointmentsByAssistant, getAssistantById, handleResetPasskey } from "@/lib/actions/assistant.action";
 import DoctorLabInfoCard from "./ui/doctorLabInfoCard";
 import { Models } from "node-appwrite";
 import { getPatient, getPatientWithDetail } from "@/lib/actions/patient.action";
@@ -87,6 +90,7 @@ const navItems = [
   { label: "Appointments", icon: <ClipboardList size={20} /> },
   { label: "Management", icon: <Users size={20} /> },
   { label: "Emergency", icon: <AlertTriangle size={20} /> },
+  { label: "Settings", icon: <Settings size={20} /> },
 ];
 
 export default function AssistantDashboard({params}: PageProps) {
@@ -103,6 +107,7 @@ export default function AssistantDashboard({params}: PageProps) {
   const [showAllPatients, setShowAllPatients] = useState(false);
   const [showAllAppointments, setShowAllAppointments] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const [passkey, setPasskey] = useState("");
 
   const router = useRouter();
 
@@ -223,6 +228,19 @@ export default function AssistantDashboard({params}: PageProps) {
   const handleSignOut = () => {
     router.push("/");
   };
+
+   const handleResetLabPasskey = async () => {
+              const confirmed = confirm("Are you sure you want to reset your passkey?");
+              if (!confirmed) return;
+  
+              // Call Appwrite function or backend logic here
+              const res = await handleResetPasskey(params.assistantId);
+              if (res) {
+                alert(res.message || "Passkey reset successfully. Please check your email for the new passkey.");
+              } else {
+                alert("Failed to reset passkey. Please try again later.");
+              }
+            };
 
   return (
     <div
@@ -524,6 +542,110 @@ export default function AssistantDashboard({params}: PageProps) {
               {/* Emergency content goes here */}
             </div>
           )}
+
+        {selectedNav === "Settings" && (
+            <>
+            
+          <div className="flex flex-col mb-6 sm:flex-row gap-6">
+            {/* <div className="hidden lg:block lg:min-w-[250px]" /> */}
+          <div className="bg-white dark:bg-[#1e1e1e] mb-6 p-6 sm:p-10 rounded-2xl shadow-xl w-full sm:max-w-4xl mx-auto space-y-10">
+            
+            {/* Header */}
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Account Settings</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your personal and security details.</p>
+            </div>
+
+            {/* Profile Section */}
+            <div className="flex flex-col sm:flex-row gap-8 items-center">
+              <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-gray-500 shadow-lg">
+                <Image
+                  src={assistant?.logoUrl || "/assets/icons/user.svg"}
+                  alt="Lab Profile"
+                  width={112}
+                  height={112}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Full Name</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{assistant?.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white break-all">{assistant?.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Phone Number</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{assistant?.phone}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Address</p>
+                  <p className="text-base font-semibold text-gray-900 dark:text-white">{assistant?.address || "N/A"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Security Section */}
+            <div className="pt-6 border-t border-gray-300 dark:border-gray-700">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">Security</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Enter your passkey to reset your secure access credentials.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+                <input
+                  type="password"
+                  value={passkey}
+                  onChange={(e) => setPasskey(e.target.value)}
+                  placeholder="Enter passkey"
+                  className="w-full sm:w-auto px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-[#121212] dark:text-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  onClick={() => {
+                    const AssistantName = assistant?.name || "";
+                    const lastTwo = AssistantName.slice(-2).toUpperCase();
+                    const expectedKey = `ASSI${lastTwo}`;
+
+                    if (passkey === expectedKey) {
+                      handleResetLabPasskey();
+                    } else {
+                      alert("Invalid passkey. Please try again.");
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium shadow"
+                >
+                  Reset Passkey
+                </button>
+              </div>
+            </div>
+
+            {/* Contact Support Section */}
+            <div className="pt-6 border-t border-gray-300 dark:border-gray-700 space-y-4">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white">Contact ArogyaCompass</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Reach out to our support team for help or inquiries.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a
+                  href={`mailto:aryamanporwal@gmail.com?subject=Doctor Support Request&body=Hello ArogyaCompass Team,%0D%0A%0D%0AI need assistance regarding...%0D%0A%0D%0ARegards,%0D%0Aaryamanporwal@gmail.com`}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow text-sm"
+                >
+                  <Mail size={18} /> Email Support
+                </a>
+                <a
+                  href="tel:+916392994628"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow text-sm"
+                >
+                  <Phone size={18} /> Call Support
+                </a>
+              </div>
+            </div>
+          </div>
+           </div>
+           </>
+        )}
         </main>
       </div>
     </div>
