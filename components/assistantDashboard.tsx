@@ -24,6 +24,7 @@ import { Models } from "node-appwrite";
 import { getPatient, getPatientWithDetail } from "@/lib/actions/patient.action";
 import BroadcastMessageBox from "./ui/broadcastMessageBox";
 import MessageCurrentOrAllPatients from "./ui/messageCurrentorAll";
+import AttendanceManagement from "./ui/attendanceManagement";
 
 interface PageProps {
   params: {
@@ -533,7 +534,7 @@ export default function AssistantDashboard({params}: PageProps) {
             ) : null}
           {selectedNav === "Management" && (
             <div>
-              {/* Management content goes here */}
+              <AttendanceManagement assistantId={params.assistantId}/>
               
 
             </div>
