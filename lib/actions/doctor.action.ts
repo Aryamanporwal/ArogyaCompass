@@ -7,6 +7,50 @@ import { sendEmailWithPDF } from "./sendEmailwithPDF";
 import { generateMedicalPDF } from "../utils/generateMedicalPDF";
 import { sendMedicalEmailWithPDF } from "./sendMedicalEmailwithPDF";
 
+export interface Doctor {
+  $id: string;
+  Name: string;
+  Email: string;
+  phone: string;
+  address: string;
+  City: string;
+  licenseNumber: string;
+  logoUrl: string;
+  speciality: string[];
+  isVerified: boolean;
+  availability: string[];
+  experience: number;
+  hospitalId: string;
+  logo: string;
+  logoId: string;
+}
+
+export const getDoctorsByAssistantDoctorId = async (
+  doctorId: string
+): Promise<Doctor[]> => {
+  try {
+    const doctor = await databases.getDocument(
+      DATABASE_ID!,
+      DOCTOR_COLLECTION_ID!,
+      doctorId
+    );
+
+    const hospitalId = doctor?.hospitalId;
+    if (!hospitalId) return [];
+
+    const doctorsList = await databases.listDocuments(
+      DATABASE_ID!,
+      DOCTOR_COLLECTION_ID!,
+      [Query.equal("hospitalId", hospitalId)]
+    );
+
+    return doctorsList.documents as unknown as Doctor[];
+  } catch (error) {
+    console.error("Error fetching doctors:", error);
+    return [];
+  }
+};
+
 export const getDoctorsByNames = async (names: string[]) => {
   const result = await databases.listDocuments(
     DATABASE_ID!,

@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 import { CalendarDays } from "lucide-react";
-import { getAttendanceByAssistantId, markAttendance } from "@/lib/actions/attendance.action";
+import { getAttendanceByDoctorId, markAttendance } from "@/lib/actions/docattendance.action"
 
 interface AttendanceDocument {
   date: string;
@@ -20,7 +20,7 @@ interface AttendanceDocument {
 }
 
 interface Props {
-  assistantId: string;
+  doctorId: string;
 }
 
 const monthOrder = [
@@ -28,7 +28,7 @@ const monthOrder = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
-const AttendanceManagement = ({ assistantId }: Props) => {
+const DoctorAttendance = ({ doctorId }: Props) => {
   const [attendanceData, setAttendanceData] = useState<AttendanceDocument[]>([]);
   const [filter, setFilter] = useState<"monthly" | "yearly">("yearly");
   const [status, setStatus] = useState<"present" | "absent" | "leave">("present");
@@ -36,9 +36,9 @@ const AttendanceManagement = ({ assistantId }: Props) => {
   const [todayMarked, setTodayMarked] = useState(false);
 
   useEffect(() => {
-    if (!assistantId) return;
+    if (!doctorId) return;
     const fetchAttendance = async () => {
-      const data = await getAttendanceByAssistantId(assistantId, filter);
+      const data = await getAttendanceByDoctorId(doctorId, filter);
       if (data) {
         setAttendanceData(
           data.documents.map((doc) => ({
@@ -56,11 +56,11 @@ const AttendanceManagement = ({ assistantId }: Props) => {
       }
     };
     fetchAttendance();
-  }, [assistantId, filter]);
+  }, [doctorId, filter]);
 
   const handleMarkAttendance = async () => {
     const today = new Date().toISOString();
-    await markAttendance({ assistantId, date: today, status: status, remark });
+    await markAttendance({ doctorId, date: today, status: status, remark });
     setTodayMarked(true);
     setTimeout(() => setTodayMarked(false), 3000);
   };
@@ -123,7 +123,7 @@ const AttendanceManagement = ({ assistantId }: Props) => {
     <div className="flex flex-col mb-6 sm:flex-row gap-6">
       <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md w-full mx-auto">
         <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-          <CalendarDays size={22} /> Assistant Attendance
+          <CalendarDays size={22} /> doctor Attendance
         </h3>
 
         {/* Filter */}
@@ -219,4 +219,4 @@ const AttendanceManagement = ({ assistantId }: Props) => {
   );
 };
 
-export default AttendanceManagement;
+export default DoctorAttendance;

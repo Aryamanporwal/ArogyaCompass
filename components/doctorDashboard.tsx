@@ -14,6 +14,7 @@ import {
   Phone,
   Mail,
   Clock,
+  Presentation
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -26,6 +27,7 @@ import DoctorReportForm from "./form/DoctorReportForm";
 import MedicalRecordList from "./medicalrecord";
 import { handleResetPasskey } from "@/lib/actions/doctor.action";
 import { useRouter } from "next/navigation";
+import DoctorAttendance from "./ui/doctorAttendance";
 
 interface PageProps {
   params: {
@@ -369,6 +371,13 @@ export default function DoctorDashboard({ params }: PageProps) {
                 onClick={() => setSelectedNav("Add Patient")}
               />
               <NavItem
+                icon={<Presentation  size={20} />}
+                label="Attendance"
+                active={selectedNav === "Attendance"}
+                open={sidebarOpen}
+                onClick={() => setSelectedNav("Attendance")}
+              />
+              <NavItem
                 icon={<Settings size={20} />}
                 label="Settings"
                 active={selectedNav === "Settings"}
@@ -668,6 +677,12 @@ export default function DoctorDashboard({ params }: PageProps) {
             )
             
             ) : null}
+
+        {selectedNav === "Attendance" &&(
+          <div>
+            <DoctorAttendance doctorId="params.doctorId"/>
+          </div>
+        )}
 
         {selectedNav === "Patients" && (
           // <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md w-full sm:w-1/2 mx-auto">

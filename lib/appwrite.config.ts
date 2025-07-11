@@ -15,6 +15,7 @@ export const {
   NEXT_PUBLIC_BUCKET_ID: BUCKET_ID,
   LAB_RECORD_COLLECTION_ID,
   ATTENDANCE_COLLECTION_ID,
+  DOCTOR_ATTENDANCE_COLLECTION_ID,
 } = process.env;
 
 const client = new sdk.Client();

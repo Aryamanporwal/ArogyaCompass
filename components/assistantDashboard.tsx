@@ -13,6 +13,7 @@ import {
   Settings,
   Mail,
   Phone,
+  Presentation,
 //   PlusSquare,
 } from "lucide-react";
 import Image from "next/image";
@@ -25,6 +26,7 @@ import { getPatient, getPatientWithDetail } from "@/lib/actions/patient.action";
 import BroadcastMessageBox from "./ui/broadcastMessageBox";
 import MessageCurrentOrAllPatients from "./ui/messageCurrentorAll";
 import AttendanceManagement from "./ui/attendanceManagement";
+import EmergencyDoctors from "./EmergencyDoctor";
 
 interface PageProps {
   params: {
@@ -89,7 +91,7 @@ export type Patient = {
 const navItems = [
   { label: "Dashboard", icon: <Home size={20} /> },
   { label: "Appointments", icon: <ClipboardList size={20} /> },
-  { label: "Management", icon: <Users size={20} /> },
+  { label: "Management", icon: <Presentation size={20} /> },
   { label: "Emergency", icon: <AlertTriangle size={20} /> },
   { label: "Settings", icon: <Settings size={20} /> },
 ];
@@ -535,13 +537,12 @@ export default function AssistantDashboard({params}: PageProps) {
           {selectedNav === "Management" && (
             <div>
               <AttendanceManagement assistantId={params.assistantId}/>
-              
-
             </div>
           )}
           {selectedNav === "Emergency" && (
-            <div>
-              {/* Emergency content goes here */}
+            <div >
+              <h1 className="text-2xl mb-4 font-semibold">Contact Doctors</h1>
+                <EmergencyDoctors doctorId={assistant?.doctorId || ""} />
             </div>
           )}
 
