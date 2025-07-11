@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarClock, Hospital, FlaskConical } from "lucide-react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
@@ -112,55 +113,55 @@ export default function Payments() {
 
 
 
+
 return (
-  <div className="h-screen bg-[#0B0E1C] text-white flex justify-center flex-col md:flex-row items-center px-4 py-6 gap-6 overflow-hidden">
-    <Script src = "https://checkout.razorpay.com/v1/checkout.js"/>
-    {/* Left: Payment Card */}
-    <div className="bg-white text-black rounded-2xl shadow-lg w-[600px] p-6 flex flex-col overflow-y-auto max-h-[95vh] scrollbar-thin scrollbar-thumb-gray-300 justify center">
+  <div className="min-h-screen bg-[#0B0E1C] text-white flex flex-col md:flex-row items-center justify-center px-4 py-6 gap-6 overflow-hidden">
+    <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+
+    {/* Payment Card */}
+    <div className="bg-white text-black rounded-2xl shadow-lg w-full max-w-xl p-6 overflow-y-auto max-h-[95vh]">
       {/* Logo */}
-    <div className="flex flex-col items-center justify-center -mt-2 mb-3">
-      <Image
-        alt="logo"
-        src="/assets/icons/logo.png"
-        height={200}
-        width={200}
-        className="h-20 sm:h-24 md:h-28 w-auto object-contain"
-      />
-      <div className="-mt-1 text-center leading-tight">
-        <h1 className="text-[1.3rem] font-extrabold bg-gradient-to-r from-blue-600 via-blue-600 to-blue-400 bg-clip-text text-transparent ">
+      <div className="flex flex-col items-center justify-center -mt-2 mb-4">
+        <Image
+          alt="logo"
+          src="/assets/icons/logo.png"
+          height={80}
+          width={80}
+          className="h-20 w-auto object-contain"
+        />
+        <h1 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-blue-600 to-blue-400 bg-clip-text text-transparent">
           ArogyaCompass
         </h1>
-        <h2 className="text-sm text-blue-400 mt-0.5 font-bold">Your Smart Path to Faster Care</h2>
+        <p className="text-sm text-blue-400 font-semibold -mt-1">
+          Your Smart Path to Faster Care
+        </p>
       </div>
-    </div>
 
       {/* Countdown */}
-      <div className="flex items-center justify-center text-blue-600  font-bold text-lg mb-4">
-        ⏳ <span id="countdown" className="ml-2">05:00</span>
+      <div className="flex items-center justify-center text-blue-600 font-bold text-base mb-4">
+        <CalendarClock className="mr-2" size={18} />
+        <span id="countdown">05:00</span>
       </div>
 
-      {/* Title */}
-      <h2 className="text-2xl font-bold mb-1">
-        {type === "hospital" ? "🏥 Hospital Subscription" : "🔬 Lab Subscription"}
+      {/* Title & Description */}
+      <h2 className="text-xl font-bold mb-1 flex items-center gap-2">
+        {type === "hospital" ? <Hospital size={20} /> : <FlaskConical size={20} />}
+        {type === "hospital" ? "Hospital Subscription" : "Lab Subscription"}
       </h2>
-
-      {/* Description */}
-      <p className="text-gray-600 mb-1">
+      <p className="text-sm text-gray-600 mb-1">
         {type === "hospital"
           ? "Dashboard tools, doctor visibility & location verification"
           : "Get featured on maps, manage tests, and patient records"}
       </p>
 
       {/* Price */}
-      <p className="text-green-600 font-semibold text-xl mb-1">
+      <p className="text-green-600 font-semibold text-lg mb-2">
         ₹{type === "hospital" ? "2000" : "1500"} / month
       </p>
+      <p className="text-xs text-gray-500 mb-4">Trusted by Government</p>
 
-      {/* Trust */}
-      <p className="text-sm text-gray-500 mb-4">Trusted by Government</p>
-
-      {/* Coupon Section */}
-      <label className="text-sm font-semibold mb-1">Do you have a coupon code?</label>
+      {/* Coupon */}
+      <label className="text-sm font-semibold mb-1 block">Do you have a coupon code?</label>
       <input
         type="text"
         placeholder="Enter Coupon Code"
@@ -171,65 +172,34 @@ return (
       <button
         onClick={handlePayment}
         disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer py-2 px-4 rounded w-full mb-4 disabled:opacity-50"
+        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded w-full mb-5 disabled:opacity-50"
       >
         {loading ? "Processing..." : "Grab the Subscription Now →"}
       </button>
 
-      {/* Features */}
-      <div className="bg-gray-100 rounded-xl p-4 overflow-y-auto max-h-[300px]">
+      {/* Features List */}
+      <div className="bg-gray-100 rounded-xl p-4 max-h-[300px] overflow-y-auto">
         <h3 className="text-md font-semibold mb-3">Everything you’ll get:</h3>
-        <ul className="space-y-3 text-sm text-gray-800 list-none">
-          <li>
-            <span className="font-semibold">📅 Everyday Patient Registered</span><br />
-            <span className="text-gray-600">Track daily patient registrations with real-time insights.</span>
-          </li>
-          <li>
-            <span className="font-semibold">📲 Real-Time Update Sending to Patient</span><br />
-            <span className="text-gray-600">Notify patients instantly via SMS or app updates.</span>
-          </li>
-          <li>
-            <span className="font-semibold">🤖 AI Based Data Handling</span><br />
-            <span className="text-gray-600">Automated data processing using intelligent algorithms.</span>
-          </li>
-          <li>
-            <span className="font-semibold">✨ Smart File Analysis</span><br />
-            <span className="text-gray-600">Upload and analyze medical files, prescriptions, or reports instantly.</span>
-          </li>
-          <li>
-            <span className="font-semibold">📊 Interactive Dashboard</span><br />
-            <span className="text-gray-600">Visualize performance metrics, reports, and activities with ease.</span>
-          </li>
-          <li>
-            <span className="font-semibold">🌐 Patient Medical History</span><br />
-            <span className="text-gray-600">Access complete patient records in one click.</span>
-          </li>
-          <li>
-            <span className="font-semibold">🔐 Data Privacy</span><br />
-            <span className="text-gray-600">Your data stays secure and confidential — always.</span>
-          </li>
-          <li>
-            <span className="font-semibold">💼 Commercial Rights</span><br />
-            <span className="text-gray-600">Full ownership of your data and outputs — no restrictions.</span>
-          </li>
-          <li>
-            <span className="font-semibold">🗺️ Featured on Arogya Maps</span><br />
-            <span className="text-gray-600">Boost visibility by appearing on verified health maps.</span>
-          </li>
+        <ul className="space-y-3 text-sm text-gray-800 list-disc list-inside">
+          {[
+            ["📅", "Everyday Patient Registered", "Track daily patient registrations with real-time insights."],
+            ["📲", "Real-Time Update Sending", "Notify patients instantly via SMS or app updates."],
+            ["🤖", "AI Based Data Handling", "Automated data processing using intelligent algorithms."],
+            ["✨", "Smart File Analysis", "Upload and analyze prescriptions or reports instantly."],
+            ["📊", "Interactive Dashboard", "Visualize performance and activity metrics easily."],
+            ["🌐", "Patient Medical History", "Access complete patient records instantly."],
+            ["🔐", "Data Privacy", "Your data stays secure and confidential."],
+            ["💼", "Commercial Rights", "Full ownership of your data — no restrictions."],
+            ["🗺️", "Featured on Arogya Maps", "Boost your visibility across verified maps."]
+          ].map(([icon, title, desc], i) => (
+            <li key={i}>
+              <span className="font-semibold">{icon} {title}</span><br />
+              <span className="text-gray-600">{desc}</span>
+            </li>
+          ))}
         </ul>
       </div>
     </div>
-
-    {/* Right: Illustration Image */}
-    {/* <div className="w-full md:w-1/2 flex items-center justify-center p-4 max-h-[100vh]">
-      <Image
-        src="/assets/images/pay_image.png"
-        alt="Pay Illustration"
-        width={500}
-        height={500}
-        className="object-contain rounded-2xl"
-      />
-    </div> */}
 
     {/* Countdown Script */}
     <script dangerouslySetInnerHTML={{
@@ -246,6 +216,7 @@ return (
     }} />
   </div>
 );
+
 
 
 }

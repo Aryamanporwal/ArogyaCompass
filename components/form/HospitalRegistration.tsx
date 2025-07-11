@@ -1,7 +1,10 @@
 "use client";
 
+
+import Image from "next/image";
+import { Building2 } from "lucide-react";
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, UserPlus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { registerHospital } from "@/lib/actions/hospital.action";
 import { Input } from "@/components/ui/input";
@@ -153,7 +156,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     alert("Hospital Created. Proceed to payment");
 
     if (result?.hospitalId) {
-      router.push(`hospital/${result.hospitalId}/payment`);
+      router.push(`/payment`);
     }
   } catch (error) {
     console.error("Registration failed:", error);
@@ -162,45 +165,57 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
 
-
 return (
-  <div className="flex flex-col md:flex-row h-screen w-full bg-background text-foreground overflow-hidden">
+  <div className="flex flex-col md:flex-row h-screen w-full bg-black mb-6 text-white overflow-hidden font-sans">
     {/* Map Section - first on mobile */}
-    <div className="w-full md:w-[45%] bg-muted px-3 pt-4 md:px-0 md:pt-0 flex items-center justify-center">
-      <div className="w-full h-[350px] sm:h-[420px] md:h-[95%] rounded-2xl shadow-2xl overflow-hidden">
+    <div className="w-full md:w-[45%] bg-black px-3 pt-4 md:px-0 md:pt-0 flex items-center justify-center">
+      <div className="w-full h-[350px] sm:h-[420px] md:h-[95%] rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
         <HospitalMap onLocationFetched={setCoordinates} />
       </div>
     </div>
 
     {/* Form Section */}
-    <div className="w-full md:w-[55%] overflow-y-auto p-6 sm:p-8 bg-gray-900 text-white">
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <h2 className="text-3xl font-bold text-center md:text-left">Register Hospital</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input required placeholder="Hospital Name" value={hospital.name} onChange={e => handleHospitalChange("name", e.target.value)} />
-          <Input required placeholder="Email Address" type="email" value={hospital.email} onChange={e => handleHospitalChange("email", e.target.value)} />
-          <Input required placeholder="Phone Number" value={hospital.phone} onChange={e => handleHospitalChange("phone", e.target.value)} />
-          <Input required placeholder="Address" value={hospital.address} onChange={e => handleHospitalChange("address", e.target.value)} />
-          <Input required placeholder="City" value={hospital.city} onChange={e => handleHospitalChange("city", e.target.value)} />
-          <Input required placeholder="State" value={hospital.state} onChange={e => handleHospitalChange("state", e.target.value)} />
-          <Input required placeholder="Pincode" value={hospital.pincode} onChange={e => handleHospitalChange("pincode", e.target.value)} />
-          <Input required placeholder="License Number" value={hospital.licenseNumber} onChange={e => handleHospitalChange("licenseNumber", e.target.value)} />
-          <Input placeholder="Specialities (comma-separated)" value={specialities.join(",")} onChange={e => setSpecialities(e.target.value.split(","))} />
-          <div>
-            <label className="block mb-1 text-sm font-medium">Hospital Image</label>
-            <FileUpload files={logoFile} onChange={setLogoFile} />
+    <div className="w-full md:w-[55%] overflow-y-auto p-6 sm:p-8 bg-black">
+      {/* Logo Header */}
+      <div className="flex items-center justify-center md:justify-start mb-8 gap-3 backdrop-blur-md bg-[#2a2a2a]/30 px-6 py-3 rounded-2xl shadow border border-gray-700">
+        <Image src="/assets/icons/logo.png" alt="Logo" width={42} height={42} />
+        <h1 className="text-2xl font-semibold text-white">ArogyaCompass</h1>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-10">
+        <h2 className="text-3xl font-bold text-center md:text-left text-green-400 flex items-center gap-2">
+          <Building2 className="text-green-400" size={24} /> Register Hospital
+        </h2>
+
+        <div className="border border-gray-700 p-6 rounded-xl bg-[#080808] shadow-md space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Input required placeholder="Hospital Name" value={hospital.name} onChange={e => handleHospitalChange("name", e.target.value)} />
+            <Input required placeholder="Email Address" type="email" value={hospital.email} onChange={e => handleHospitalChange("email", e.target.value)} />
+            <Input required placeholder="Phone Number" value={hospital.phone} onChange={e => handleHospitalChange("phone", e.target.value)} />
+            <Input required placeholder="Address" value={hospital.address} onChange={e => handleHospitalChange("address", e.target.value)} />
+            <Input required placeholder="City" value={hospital.city} onChange={e => handleHospitalChange("city", e.target.value)} />
+            <Input required placeholder="State" value={hospital.state} onChange={e => handleHospitalChange("state", e.target.value)} />
+            <Input required placeholder="Pincode" value={hospital.pincode} onChange={e => handleHospitalChange("pincode", e.target.value)} />
+            <Input required placeholder="License Number" value={hospital.licenseNumber} onChange={e => handleHospitalChange("licenseNumber", e.target.value)} />
+            <Input placeholder="Specialities (comma-separated)" value={specialities.join(",")} onChange={e => setSpecialities(e.target.value.split(","))} />
+            <div >
+              <label className="block mb-1 text-sm font-medium text-gray-300">Hospital Image</label>
+              <FileUpload files={logoFile} onChange={setLogoFile} />
+            </div>
           </div>
         </div>
 
         <div>
-          <h3 className="text-xl font-semibold mt-4 mb-2">Doctors</h3>
+          <h3 className="text-2xl font-semibold mb-4 text-indigo-400 flex items-center gap-2">
+            <UserPlus className="text-indigo-400" size={20} /> Doctors
+          </h3>
           {doctors.map((doctor, index) => (
-            <div key={index} className="border border-gray-700 p-4 rounded-lg mb-4 space-y-4">
+            <div key={index} className="border border-gray-700 p-5 rounded-xl mb-6 bg-[#080808] shadow-md space-y-4">
               <div className="flex justify-between items-center">
-                <h4 className="text-lg font-medium">Doctor #{index + 1}</h4>
+                <h4 className="text-lg font-semibold">Doctor #{index + 1}</h4>
                 {index > 0 && (
-                  <button type="button" onClick={() => removeDoctor(index)} className="text-red-500 cursor-pointer hover:text-red-700">
-                    <Trash2 />
+                  <button type="button" onClick={() => removeDoctor(index)} className="text-red-500 hover:text-red-600">
+                    <Trash2 size={18} />
                   </button>
                 )}
               </div>
@@ -211,8 +226,8 @@ return (
                 <Input required placeholder="Address" value={doctor.Address} onChange={e => updateDoctor(index, "Address", e.target.value)} />
                 <Input required placeholder="City" value={doctor.City} onChange={e => updateDoctor(index, "City", e.target.value)} />
                 <Input required placeholder="License Number" value={doctor.licenseNumber} onChange={e => updateDoctor(index, "licenseNumber", e.target.value)} />
-                <div>
-                  <label className="block mb-1 text-sm font-medium">Doctor Image</label>
+                <div  >
+                  <label className="block mb-1 text-sm font-medium text-gray-300">Doctor Image</label>
                   <FileUpload files={doctorLogoFile} onChange={setDoctorLogoFile} />
                 </div>
                 <Input placeholder="Speciality (comma-separated)" value={doctor.speciality.join(",")} onChange={e => updateDoctor(index, "speciality", e.target.value.split(","))} />
@@ -222,23 +237,23 @@ return (
             </div>
           ))}
 
-          <button type="button" onClick={addDoctor} className="mt-2 flex items-center space-x-2 cursor-pointer text-blue-400 hover:text-blue-600">
-            <Plus />
-            <span>Add another doctor</span>
+          <button type="button" onClick={addDoctor} className="mt-2 flex items-center space-x-2 text-blue-400 hover:text-blue-500">
+            <Plus size={18} />
+            <span className="font-medium">Add another doctor</span>
           </button>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row mb-6 items-center justify-between gap-4">
           <button
             type="submit"
-            className="bg-green-500 hover:bg-green-600 text-white cursor-pointer font-semibold py-2 px-6 rounded-lg"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-all"
           >
             Submit and Continue
           </button>
 
           <button
             type="button"
-            className="text-blue-500 font-bold ml-auto cursor-pointer hover:underline"
+            className="text-blue-500 hover:underline text-sm font-medium"
             onClick={() => router.push("/labRegistration")}
           >
             Go to Lab Registration
@@ -248,5 +263,6 @@ return (
     </div>
   </div>
 );
+
 
 }
