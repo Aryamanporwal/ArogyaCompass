@@ -24,31 +24,31 @@
 //     {/* Form Section */}
 //     <section className="w-full md:w-2/5 flex flex-col justify-start px-6 pt-6 pb-4 sm:px-10 md:px-12 lg:px-16 bg-background overflow-y-auto">
 //       {/* Logo + Tagline */}
-//       <div className="flex flex-col items-center justify-center -mt-2 mb-3">
-//         <Image
-//           alt="logo"
-//           src="/assets/icons/logo.png"
-//           height={200}
-//           width={200}
-//           className="h-20 sm:h-24 md:h-28 w-auto object-contain"
-//         />
-//         <div className="-mt-1 text-center leading-tight">
-//           <h1 className="text-[1.3rem] font-bold bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-clip-text text-transparent">
-//             ArogyaCompass
-//           </h1>
-//           <h2 className="text-sm text-blue-500 mt-0.5">
-//             Your Smart Path to Faster Care
-//           </h2>
-//         </div>
-//       </div>
+      // <div className="flex flex-col items-center justify-center -mt-2 mb-3">
+      //   <Image
+      //     alt="logo"
+      //     src="/assets/icons/logo.png"
+      //     height={200}
+      //     width={200}
+      //     className="h-20 sm:h-24 md:h-28 w-auto object-contain"
+      //   />
+      //   <div className="-mt-1 text-center leading-tight">
+      //     <h1 className="text-[1.3rem] font-bold bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-clip-text text-transparent">
+      //       ArogyaCompass
+      //     </h1>
+      //     <h2 className="text-sm text-blue-500 mt-0.5">
+      //       Your Smart Path to Faster Care
+      //     </h2>
+      //   </div>
+      // </div>
 
 //       {/* Headings */}
-//       <div className="mb-5">
-//         <h1 className="text-2xl font-bold mb-1 text-left">Hi there...</h1>
-//         <p className="text-base text-dark-600 text-left">
-//           Get started with your appointment journey
-//         </p>
-//       </div>
+      // <div className="mb-5">
+      //   <h1 className="text-2xl font-bold mb-1 text-left">Hi there...</h1>
+      //   <p className="text-base text-dark-600 text-left">
+      //     Get started with your appointment journey
+      //   </p>
+      // </div>
 
 //       {/* Form Card */}
 //       <div className="w-full rounded-xl bg-transparent p-5 shadow-md border border-dark-500">
@@ -102,7 +102,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-
+import {  useRef } from "react";
+import {PatientForm} from "@/components/form/PatientForm";
 // Dynamically import MapView to avoid SSR issues with leaflet
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
@@ -117,7 +118,42 @@ const NAV_ITEMS = [
 export default function Page() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [selectedNav, setSelectedNav] = useState("About Us");
+  const [selectedNav, setSelectedNav] = useState<string | null>(null);
+  const navContentRef = useRef<HTMLDivElement>(null);
+  const [isPatientFormOpen, setIsPatientFormOpen] = useState(false);
+
+
+  useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      navContentRef.current &&
+      !navContentRef.current.contains(event.target as Node)
+    ) {
+      setSelectedNav(null); // Clear selection if click is outside
+    }
+  };
+
+  if (selectedNav) {
+    document.addEventListener("mousedown", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [selectedNav]);
+
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsPatientFormOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -139,7 +175,7 @@ export default function Page() {
 
       <div className="flex h-screen w-full overflow-hidden relative">
         {/* Sidebar */}
-        <aside
+        {/* <aside
           className={`
               fixed top-0 left-0 h-full z-50
               ${sidebarOpen ? "w-56" : "w-0"}
@@ -152,6 +188,23 @@ export default function Page() {
             minWidth: sidebarOpen ? "14rem" : "4rem",
             width: sidebarOpen ? "14rem" : "4rem",
           }}
+        > */}
+        <aside
+          className={`
+            z-50 h-screen 
+            ${sidebarOpen ? "w-56" : "w-0"} 
+            sm:w-16 
+            ${darkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"} 
+            border-r p-2.5 
+            flex flex-col justify-between 
+            overflow-hidden 
+            transition-all duration-300 ease-in-out
+            fixed top-0 left-0 sm:relative
+          `}
+          style={{
+            minWidth: sidebarOpen ? "15rem" : "4rem",
+            width: sidebarOpen ? "15rem" : "4rem",
+          }}
         >
           <div>
             <div
@@ -161,8 +214,8 @@ export default function Page() {
               <Image
                 src="/assets/icons/logo.png"
                 alt="Logo"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
               />
               <span
                 className={`text-lg font-semibold transition-all duration-300 ${
@@ -183,7 +236,12 @@ export default function Page() {
                   label={item.label}
                   active={selectedNav === item.label}
                   open={sidebarOpen}
-                  onClick={() => setSelectedNav(item.label)}
+                  onClick={() => {
+                      setSelectedNav(item.label);
+                      if (window.innerWidth < 640) {
+                        setSidebarOpen(false); // Close sidebar on mobile
+                      }
+                    }}
                 />
               ))}
             </nav>
@@ -207,14 +265,17 @@ export default function Page() {
           <button
             className="absolute z-[1000] top-4 right-4  px-5 py-2 rounded-md bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition"
             style={{ pointerEvents: "auto" }}
+            onClick={() => setIsPatientFormOpen(true)}
           >
             Login
           </button>
           {/* Selected Nav Content */}
           <div className="absolute top-20 left-0 right-0 z-10 px-4 sm:px-10 pointer-events-none">
+            <div ref={navContentRef}>
             {selectedNav === "About Us" && (
               <div className="max-w-lg mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 mb-4 pointer-events-auto">
                 {/* About Us content goes here */}
+                <h1> HI </h1>
               </div>
             )}
             {selectedNav === "Contact" && (
@@ -237,6 +298,7 @@ export default function Page() {
                 {/* Super Admin content goes here */}
               </div>
             )}
+            </div>
           </div>
           {/* Map Section */}
           <div className="flex-1 inset-0 z-0 h-full w-full relative">
@@ -257,6 +319,22 @@ export default function Page() {
 
         </main>
       </div>
+      {isPatientFormOpen && (
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center backdrop-blur-sm ">
+      <div className="bg-white  rounded-xl p-6 w-full max-w-md mx-4 shadow-lg relative">
+        {/* Close Button */}
+        <button
+          onClick={() => setIsPatientFormOpen(false)}
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:hover:text-white"
+        >
+          ✕
+        </button>
+  
+        {/* Your PatientForm */}
+        <PatientForm />
+      </div>
+    </div>
+  )}
     </div>
   );
 }

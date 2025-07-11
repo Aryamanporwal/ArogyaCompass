@@ -1,6 +1,6 @@
 "use client"
 import Image from 'next/image'
-import React from 'react'
+// import React, { useEffect, useState } from 'react'
 import {
   FormControl,
   FormField,
@@ -55,7 +55,21 @@ const RenderField = ({
   props: CustomProps;
 }) => {
   const { fieldType, iconSrc, iconAlt, placeholder, disabled, showTimeSelect, dateFormat, renderSkeleton } = props;
+  // const [isDark, setIsDark] = useState(false);
 
+  //   useEffect(() => {
+  //     const checkTheme = () => {
+  //       setIsDark(document.documentElement.classList.contains("dark"));
+  //     };
+
+  //     checkTheme();
+
+      // Optional: Re-check on theme change (if your theme toggler triggers events)
+    //   const observer = new MutationObserver(checkTheme);
+    //   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+    //   return () => observer.disconnect();
+    // }, []);
   switch (fieldType) {
     case FormFieldType.INPUT:
 
@@ -69,7 +83,7 @@ const RenderField = ({
                   alt={iconAlt || "icon"}
                   height={20}
                   width={20}
-                  className="opacity-70"
+                  className=" opacity-70"
                 />
               </span>
             )}
@@ -77,8 +91,13 @@ const RenderField = ({
               placeholder={placeholder}
               disabled={disabled}
               {...field}
-              className="bg-dark-400 placeholder:text-dark-600 border border-dark-500 h-11 
-                         focus-visible:ring-0 focus-visible:ring-offset-0 pl-10 rounded-md"
+              className="
+                h-11 pl-10 rounded-md transition-all
+                bg-white text-gray-900 placeholder:text-gray-500 border border-gray-300
+                focus:outline-none focus:ring-2 focus:ring-blue-500
+
+                dark:bg-[#101828] dark:text-white dark:placeholder:text-gray-500 dark:border-gray-700
+              "
             />
           </div>
         </FormControl>
@@ -87,41 +106,13 @@ const RenderField = ({
     case FormFieldType.PHONE_INPUT:
         return (
             <FormControl>
-            <div className="relative w-full bg-gray-900 rounded-md border focus-visible:ring-0 focus-visible:ring-offset-0">
-                <PhoneInput
-                country={"in"}
-                placeholder={placeholder}
-                value={field.value as string | undefined}
-                onChange={field.onChange}
-                inputStyle={{
-                    width: "100%",
-                    height: "44px",
-                    backgroundColor: "#101828",        // Tailwind: bg-dark-400
-                    color: "#ffffff",
-                    paddingLeft: "3rem",
-                    borderRadius: "0.25rem",            // Tailwind: rounded-md
-                    border: "1px solid #101828",       // Tailwind: border-dark-500
-                    outline: "none",
-                    boxShadow: "none",
-                    fontSize: "16px"
-                }}
-                containerStyle={{
-                    width: "100%",
-                    backgroundColor: "#101828",        // bg-dark-400
-                    border: "none",
-                    borderRadius: "0.25rem"
-                }}
-                buttonStyle={{
-                    backgroundColor: "#101828",        // bg-dark-400
-                    border: "none",
-                    borderTopLeftRadius: "0.25rem",
-                    borderBottomLeftRadius: "0.25rem"
-                }}
-                dropdownStyle={{
-                    backgroundColor: "101828",        // bg-dark-400
-                    color: "#101828"
-                }}
-                />
+            <div className="relative w-full dark:bg-[#0f0f0f] rounded-md border focus-visible:ring-0 focus-visible:ring-offset-0">
+            <PhoneInput
+              country={"in"}
+              placeholder={placeholder}
+              value={field.value as string | undefined}
+              onChange={field.onChange}
+            />
             </div>
             </FormControl>
         );
@@ -140,18 +131,30 @@ const RenderField = ({
 
                 {/* Date Picker Input */}
                 <FormControl className="flex-1">
-                  <DatePicker
-                    selected={field.value}
-                    onChange={(date) => field.onChange(date)}
-                    dateFormat={dateFormat ?? 'dd/MM/yyyy'}
-                    placeholderText="Choose a date"
-                    showTimeSelect= {showTimeSelect ?? false}
-                    timeInputLabel = "Time:"
-                    wrapperClassName='date-picker'
-                    className="bg-gray-900 text-white placeholder-gray-400 focus:outline-none w-full"
-                    calendarClassName="!bg-gray-900 !text-white !border-gray-800"
-                    dayClassName={() => "!text-white hover:!bg-gray-700"}
-                  />
+                    <DatePicker
+                      selected={field.value}
+                      onChange={(date) => field.onChange(date)}
+                      dateFormat={dateFormat ?? "dd/MM/yyyy"}
+                      placeholderText="Choose a date"
+                      showTimeSelect={showTimeSelect ?? false}
+                      timeInputLabel="Time:"
+                      wrapperClassName="date-picker"
+                      className="
+                        w-full h-11 px-3 rounded-md text-sm transition-all
+                        bg-white text-gray-900 placeholder:text-gray-500 border border-gray-300
+                        dark:bg-[#101828] dark:text-white dark:placeholder:text-gray-400 dark:border-gray-700
+                        focus:outline-none focus:ring-2 focus:ring-blue-500
+                      "
+                      calendarClassName="
+                        !rounded-md !text-sm !shadow-lg
+                        !bg-white !text-gray-900 !border !border-gray-300
+                        dark:!bg-[#1f2937] dark:!text-white dark:!border-gray-700
+                      "
+                      dayClassName={() =>
+                        "rounded-md transition-colors " +
+                        "hover:!bg-gray-200 dark:hover:!bg-gray-700 !text-gray-900 dark:!text-white"
+                      }
+                    />
                 </FormControl>
               </div>
           )
@@ -165,7 +168,12 @@ const RenderField = ({
                 <Input
                   value={field.value}
                   readOnly
-                  className="bg-gray-900 text-white placeholder:text-gray-500 border border-gray-800 h-11 rounded-md px-4"
+                  className="
+                    h-11 px-4 rounded-md transition-all
+                    bg-white text-gray-900 placeholder:text-gray-500 border border-gray-300
+                    dark:bg-[#101828] dark:text-white dark:placeholder:text-gray-400 dark:border-gray-700
+                    focus:outline-none focus:ring-2 focus:ring-blue-500
+                  "
                 />
               </FormControl>
             )
@@ -176,7 +184,13 @@ const RenderField = ({
               <Textarea
                placeholder={placeholder}
                {...field}
-               className = "bg-gray-900 placeholder:text-gray-700 border-gray-800 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="
+                  h-11 px-4 rounded-md transition-all
+                  bg-white text-gray-900 placeholder:text-gray-500 border border-gray-300
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+
+                  dark:bg-[#101828] dark:text-white dark:placeholder:text-gray-400 dark:border-gray-700
+                "
                disabled = {props.disabled}
                ></Textarea>
             </FormControl>
@@ -186,7 +200,13 @@ const RenderField = ({
         <FormControl>
           <Select onValueChange={field.onChange} defaultValue={field.value}>
            
-              <SelectTrigger className="bg-gray-900  placeholder:text-gray-700 border-gray-800 h-11 focus:ring-0 focus:ring-offset-0">
+              <SelectTrigger className="
+                h-11 px-4 rounded-md transition-all
+                bg-white text-gray-900 placeholder:text-gray-500 border border-gray-300
+                focus:ring-0 focus:ring-offset-0 focus:outline-none
+
+                dark:bg-[#101828] dark:text-white dark:placeholder:text-gray-400 dark:border-gray-700
+              ">
                 <SelectValue placeholder={props.placeholder} />
               </SelectTrigger>
             
@@ -205,7 +225,12 @@ const RenderField = ({
               checked={field.value}
               onCheckedChange={field.onChange}
             />
-            <label htmlFor={props.name} className="cursor-pointer text-sm font-medium text-amber-100 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 md:leading-none">
+            <label htmlFor={props.name} className="
+                cursor-pointer text-sm font-medium
+                text-gray-700 dark:text-amber-100
+                peer-disabled:cursor-not-allowed peer-disabled:opacity-70
+                md:leading-none transition-colors
+              ">
               {props.label}
             </label>
           </div>
