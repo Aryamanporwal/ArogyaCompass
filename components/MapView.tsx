@@ -39,11 +39,11 @@ export default function MapView() {
   const tileURL = `https://api.maptiler.com/maps/streets-v2/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;
 
   return (
-    <div ref={mapRef} className="relative h-full w-full">
+    <div ref={mapRef} className="absolute inset-0 h-full w-full">
       {/* Expand Button */}
       <button
         onClick={handleFullscreen}
-        className="absolute top-4 right-4 z-[1000] rounded-full cursor-pointer bg-gray-500 p-2 shadow-lg hover:bg-amber-500"
+        className="absolute right-4 bottom-4  z-[1000] rounded-full cursor-pointer bg-gray-500 p-2 shadow-lg hover:bg-amber-500"
         title="Toggle Fullscreen"
       >
         ⛶
