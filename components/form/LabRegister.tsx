@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { registerLab} from "@/lib/actions/lab.action";
 import { LAB_TEST_OPTIONS, LabTest } from "@/lib/constants/lab.constants";
 import FileUpload from "../ui/FileUploader";
+import { LogOut } from "lucide-react"
 
 // Load map dynamically to avoid SSR issues
 const LabMap = dynamic(() => import("@/components/LabMap"), { ssr: false });
@@ -169,13 +170,23 @@ return (
             Submit and Continue
           </button>
 
-          <button
-            type="button"
-            className="text-blue-500 hover:underline text-sm font-medium"
-            onClick={() => router.push("/hospitalregistration")}
-          >
-            Go to Hospital Registration
-          </button>
+          <div className="flex flex-col gap-3 mt-3">
+            <button
+              type="button"
+              className="text-blue-500 hover:underline text-sm font-medium"
+              onClick={() => router.push("/hospitalregistration")}
+            >
+              Go to Hospital Registration
+            </button>
+
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center gap-2 text-red-600 hover:text-red-800 font-medium"
+            >
+              <LogOut className="w-5 h-5" />
+              Home
+            </button>
+          </div>
         </div>
       </form>
     </div>

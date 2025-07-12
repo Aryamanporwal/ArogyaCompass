@@ -2,7 +2,7 @@
 
 
 import Image from "next/image";
-import { Building2 } from "lucide-react";
+import { Building2, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Plus, Trash2, UserPlus } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -251,13 +251,23 @@ return (
             Submit and Continue
           </button>
 
-          <button
-            type="button"
-            className="text-blue-500 hover:underline text-sm font-medium"
-            onClick={() => router.push("/labRegistration")}
-          >
-            Go to Lab Registration
-          </button>
+          <div className="flex flex-col gap-3 mt-3">
+            <button
+              type="button"
+              className="text-blue-500 hover:underline text-sm font-medium"
+              onClick={() => router.push("/labRegistration")}
+            >
+              Go to Lab Registration
+            </button>
+
+            <button
+              onClick={() => router.push("/")}
+              className="flex items-center gap-2 text-red-600 hover:text-red-800 font-medium"
+            >
+              <LogOut className="w-5 h-5" />
+              Home
+            </button>
+          </div>
         </div>
       </form>
     </div>
