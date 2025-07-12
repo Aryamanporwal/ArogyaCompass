@@ -1,175 +1,34 @@
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 // import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { getAllHospitals } from "@/lib/actions/hospital.action";
-import { createAppointment } from "@/lib/actions/appointment.action"
-import { useRouter } from "next/navigation";
-import { getAllLabs } from "@/lib/actions/lab.action";
-import { getUserIdFromCookie } from "@/lib/actions/user.action";
-import { Models } from "node-appwrite";
-type Document = Models.Document;
+// import { Input } from "@/components/ui/input";
+// import { getAllHospitals } from "@/lib/actions/hospital.action";
+// import { createAppointment } from "@/lib/actions/appointment.action"
+// import { useRouter } from "next/navigation";
+// import { getAllLabs } from "@/lib/actions/lab.action";
+// import { getUserIdFromCookie } from "@/lib/actions/user.action";
+// import { Models } from "node-appwrite";
+// type Document = Models.Document;
 
 const ExploreMap = dynamic(() => import("@/components/ExploreMapView"), { ssr: false });
 
 export default function PatientExplore() {
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"all" | "hospital" | "lab">("all");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  interface Hospital {
-    $id: string;
-    name: string;
-    city?: string;
-    doctorName?: string[];
-    // Add other fields as needed
-  }
-
-  interface Lab{
-    $id : string;
-    name : string;
-    city?:string;
-    test?:string[];
-  }
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
-  const [selectedHospital, setSelectedHospital] = useState<string>("");
-  const [doctors, setDoctors] = useState<string[]>([]);
-  const [selectedDoctor, setSelectedDoctor] = useState("");
-  const [labs, setLabs] = useState<Lab[]>([]); 
-  const [selectedLab , setSelectedLab] = useState<string>("");
-  const [tests, setTests] = useState<string[]>([]);
-  const [selectedTests, setSelectedtests] = useState("");
-  const router = useRouter();
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          setUserLocation(coords);
-        },
-        (error) => {
-          console.error("Geolocation error:", error.message);
-          // 🌍 Fallback to New Delhi
-          setUserLocation([28.6139, 77.2090]);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        }
-      );
-    }, []);
-
-    useEffect(() => {
-        const fetchLabs = async () => {
-            const rest = await getAllLabs();
-            const labs : Lab[] = rest.map((doc: Document) => ({
-            $id: doc.$id ,
-            name: doc.name,
-            city: doc.city,
-            test: doc.test, // optional
-            }));
-            setLabs(labs);
-        };
-        fetchLabs();
-    }, []);
-
-  useEffect(() => {
-    const fetch = async () => {
-      const res = await getAllHospitals();
-      // Map Document[] to Hospital[]
-      const hospitals: Hospital[] = res.map((doc: Document) => ({
-        $id: doc.$id,
-        name: doc.name,
-        city: doc.city,
-        doctorName: doc.doctorName,
-      }));
-      setHospitals(hospitals);
-    };
-    fetch();
-  }, []);
-
-  const filteredHospitals = hospitals.filter((h) =>
-    h.name.toLowerCase().includes(search.toLowerCase()) &&
-    (city ? h.city?.toLowerCase() === city.toLowerCase() : true)
-  );
-  const filteredLabs = labs.filter((l) =>
-    l.name.toLowerCase().includes(search.toLowerCase()) &&
-    (city ? l.city?.toLowerCase() === city.toLowerCase() : true)
-  );
-
-  const handleHospitalSelect = (id: string) => {
-    setSelectedHospital(id);
-    const hosp = hospitals.find((h) => h.$id === id);
-    if (hosp) setDoctors(hosp.doctorName || []);
-  };
-  const handleLabsSelect = (id: string) => {
-    setSelectedLab(id);
-    const losp = labs.find((l) => l.$id === id);
-    if(losp) setTests(losp.test || []);
-  };
-
-  const autofillState = async () => {
-    try {
-      const res = await fetch(
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${userLocation?.[0]}&longitude=${userLocation?.[1]}&localityLanguage=en`
-      );
-      const data = await res.json();
-       setState(data.principalSubdivision); // State
-       setCity(data.city || data.locality); // City or fallback to locality
-
-    return { state: data.principalSubdivision, city: data.city || data.locality };
-    } catch {
-      alert("Failed to fetch state");
-    }
-  };
-
-const handleContinue = async () => {
-    try {
-        if (view === "hospital") {
-        await createAppointment({
-            hospitalId: selectedHospital,
-            doctorName: selectedDoctor,
-            city,
-            state,
-        });
-        } else if (view === "lab") {
-        await createAppointment({
-            labId: selectedLab,
-            test: selectedTests, // selectedTests must be a string[]
-            city,
-            state,
-        });
-        }
-
-       const userId = await getUserIdFromCookie(); // ✅ secure
-        if (!userId) {
-            alert("Not logged in.");
-            return;
-        }
-
-        router.push(`/patients/${userId}/pdetails`);
-        } catch {
-            alert("❌ Failed to create appointment");
-        }
-    };
+  
 
 
   return (
   <div className="w-full h-screen overflow-hidden">
     {/* Map Section */}
-    <div className="w-screen h-screen bg-[#0B0E1C] flex items-center justify-center">
-      <div className="w-full h-full rounded-2xl shadow-2xl overflow-hidden bg-[#0B0E1C]">
-        <ExploreMap 
-          view={view} 
-          selectedHospitalId={selectedHospital} 
-          userLocation={userLocation} 
-          selectedLabId={selectedLab} 
+     <div className="w-screen h-screen bg-[#0B0E1C] flex items-center justify-center">
+       <div className="w-full h-full rounded-2xl shadow-2xl overflow-hidden bg-[#0B0E1C]">
+         <ExploreMap 
+  //         view={view} 
+  //         selectedHospitalId={selectedHospital} 
+  //         userLocation={userLocation} 
+  //         selectedLabId={selectedLab} 
         />
       </div>
-    </div>
+       </div>
       {/* Right Panel */}
       {/* <div className="w-full lg:w-[40%] bg-[#0B0E1C] text-white p-6 space-y-4 overflow-y-auto">
         <div className="flex flex-col items-center space-y-1">
@@ -192,14 +51,14 @@ const handleContinue = async () => {
         <h2 className="text-2xl font-bold mb-2">Explore Healthcare Services</h2>
 
         {/* Search Hospital */}
-        <Input
+        {/* <Input
           type="text"
           placeholder="Search hospital or Lab by name"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-        />
+        /> */}
 
-        <Input
+        {/* <Input
           placeholder={state || "State"}
           className="bg-gray-800 px-4 py-2 rounded-md w-full"
           value={state}
@@ -209,9 +68,9 @@ const handleContinue = async () => {
             }
           }}
           onChange={(e) => setState(e.target.value)}
-        />
+        /> */}
 
-        <Input
+        {/* <Input
           placeholder={city || "City"}
           className="bg-gray-800 px-4 py-2 rounded-md w-full"
           value={city}
@@ -221,10 +80,10 @@ const handleContinue = async () => {
             }
           }}
           onChange={(e) => setState(e.target.value)}
-        />
+        /> */}
 
         {/* View Filter Dropdown */}
-        <select
+        {/* <select
           value={view}
           onChange={(e) => setView(e.target.value as "all" | "hospital" | "lab")}
           className="bg-gray-800 px-4 py-2 rounded-md w-full"
@@ -236,7 +95,7 @@ const handleContinue = async () => {
 
         {/* State, City, Hospital, Doctor */}
 
-
+{/* 
         {view === "hospital" ? (
         <select
             value={selectedHospital}
@@ -286,12 +145,12 @@ const handleContinue = async () => {
           {tests.map((doc, i) => (
             <option key={i}>{doc}</option>
           ))}
-        </select>
+        </select> */} 
 
 
 
         {/* Continue Button */}
-        <button
+        {/* <button
           disabled={
                 (view === "hospital" && (!selectedHospital || !selectedDoctor)) ||
                 (view === "lab" && (!selectedLab || selectedTests.length === 0))
@@ -300,7 +159,7 @@ const handleContinue = async () => {
           className="bg-blue-600 hover:bg-blue-700 cursor-pointer px-4 py-2 rounded-md w-full disabled:opacity-40"
         >
           Continue
-        </button>
-    </div>
+        </button> */}
+      </div>
   );
 }

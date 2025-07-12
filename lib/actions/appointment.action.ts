@@ -3,6 +3,7 @@
 import { ID , Query} from "appwrite";
 import { databases, DATABASE_ID, APPOINTMENT_COLLECTION_ID } from "@/lib/appwrite.config";
 import { cookies } from "next/headers"
+import { DateTime } from "luxon";
 // Define a type that allows either hospital or lab
 type AppointmentParams = {
   city: string;
@@ -16,8 +17,7 @@ type AppointmentParams = {
 export const createAppointment = async (data : AppointmentParams) => {
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
-    const now = new Date(new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
-      
+    const now =  DateTime.now().setZone("Asia/Kolkata").toISO(); 
     const status = "pending"; 
 
   if (!userId) {

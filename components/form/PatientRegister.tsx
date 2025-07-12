@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@radix-ui/react-radio-group";
 import { GenderOptions, IdentificationTypes, PatientFormDefaultValues } from "@/lib/constants";
 import { Label } from "@radix-ui/react-label";
 import { getUserIdFromCookie } from "@/lib/actions/user.action";
-import { getAppointmentByUserId } from "@/lib/actions/appointment.action";
+import { getAppointmentByUserId, getPendingAppointmentByUserId } from "@/lib/actions/appointment.action";
 import { SelectItem } from "../ui/select";
 import FileUpload from "../ui/FileUploader";
 import { registerPatient } from "@/lib/actions/patient.action";
@@ -47,7 +47,7 @@ export const PatientRegisterForm = ({ user }: { user: User }) => {
   const fetchDoctorName = async () => {
     const userId = await getUserIdFromCookie()
     if (userId) {
-      const appointment = await getAppointmentByUserId(userId)
+      const appointment = await getPendingAppointmentByUserId(userId)
 
       if (appointment?.doctorName) {
         setDoctorName(appointment.doctorName)

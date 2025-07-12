@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { getAppointmentByUserId } from "@/lib/actions/appointment.action";
 import { Button } from "./button";
+import { DateTime } from "luxon";
 
 interface Appointment {
   doctorName?: string;
@@ -23,24 +24,21 @@ const SuccessAppointment: React.FC<SuccessAppointmentProps> = ({ userId, open, o
   useEffect(() => {
     if (!open) return;
     getAppointmentByUserId(userId)
-      .then((doc) => {
-        if (doc) {
-          let timestamp: Date;
-          if (doc.timestamp && typeof doc.timestamp.toDate === "function") {
-            timestamp = doc.timestamp.toDate();
-          } else {
-            timestamp = new Date(doc.timestamp)
-          }
+    .then((doc) => {
+      if (doc) {
+        const timestamp = DateTime.fromISO(doc.timestamp, { zone: "utc" })
+          .setZone("Asia/Kolkata")
+          .toJSDate();
 
-          setAppointment({
-            doctorName: doc.doctorName,
-            test: doc.test,
-            timestamp,
-          });
-        } else {
-          setAppointment(null);
-        }
-      })
+        setAppointment({
+          doctorName: doc.doctorName,
+          test: doc.test,
+          timestamp,
+        });
+      } else {
+        setAppointment(null);
+      }
+    })
       .finally(() => setLoading(false));
   }, [userId, open]);
 
@@ -66,15 +64,17 @@ const SuccessAppointment: React.FC<SuccessAppointmentProps> = ({ userId, open, o
     );
   }
 
-  const dateString = appointment.timestamp.toLocaleDateString(undefined, {
+  const dateString = appointment.timestamp.toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "long",
     year: "numeric",
+    timeZone: "Asia/Kolkata"
   });
-  const timeString = appointment.timestamp.toLocaleTimeString(undefined, {
+  const timeString = appointment.timestamp.toLocaleTimeString("en-IN", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "Asia/Kolkata"
   });
 
   const detailLabel = appointment.doctorName
