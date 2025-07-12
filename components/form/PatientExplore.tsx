@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
+// import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { getAllHospitals } from "@/lib/actions/hospital.action";
 import { createAppointment } from "@/lib/actions/appointment.action"
@@ -158,16 +158,20 @@ const handleContinue = async () => {
 
 
   return (
-    <div className="flex flex-col lg:flex-row w-full h-screen overflow-hidden">
-      {/* Map Section */}
-      <div className="w-full lg:w-[60%] bg-[#0B0E1C] flex items-center justify-center px-3 pt-4 lg:px-0 lg:pt-0">
-        <div className="w-full h-[65vh] lg:h-[95%] rounded-2xl shadow-2xl overflow-hidden bg-[#0B0E1C]">
-          <ExploreMap view={view} selectedHospitalId={selectedHospital} userLocation={userLocation} selectedLabId={selectedLab}/>
-        </div>
+  <div className="w-full h-screen overflow-hidden">
+    {/* Map Section */}
+    <div className="w-screen h-screen bg-[#0B0E1C] flex items-center justify-center">
+      <div className="w-full h-full rounded-2xl shadow-2xl overflow-hidden bg-[#0B0E1C]">
+        <ExploreMap 
+          view={view} 
+          selectedHospitalId={selectedHospital} 
+          userLocation={userLocation} 
+          selectedLabId={selectedLab} 
+        />
       </div>
-
+    </div>
       {/* Right Panel */}
-      <div className="w-full lg:w-[40%] bg-[#0B0E1C] text-white p-6 space-y-4 overflow-y-auto">
+      {/* <div className="w-full lg:w-[40%] bg-[#0B0E1C] text-white p-6 space-y-4 overflow-y-auto">
         <div className="flex flex-col items-center space-y-1">
         <Image
             alt="logo"
@@ -297,7 +301,6 @@ const handleContinue = async () => {
         >
           Continue
         </button>
-      </div>
     </div>
   );
 }

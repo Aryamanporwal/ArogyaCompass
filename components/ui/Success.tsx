@@ -29,7 +29,7 @@ const SuccessAppointment: React.FC<SuccessAppointmentProps> = ({ userId, open, o
           if (doc.timestamp && typeof doc.timestamp.toDate === "function") {
             timestamp = doc.timestamp.toDate();
           } else {
-            timestamp = new Date(doc.timestamp);
+            timestamp = new Date(doc.timestamp)
           }
 
           setAppointment({

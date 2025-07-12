@@ -16,9 +16,8 @@ type AppointmentParams = {
 export const createAppointment = async (data : AppointmentParams) => {
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
-    const now = new Date(
-        new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-      );
+    const now = new Date(new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }));
+      
     const status = "pending"; 
 
   if (!userId) {
