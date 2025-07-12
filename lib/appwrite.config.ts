@@ -16,6 +16,7 @@ export const {
   LAB_RECORD_COLLECTION_ID,
   ATTENDANCE_COLLECTION_ID,
   DOCTOR_ATTENDANCE_COLLECTION_ID,
+  REVIEW_COLLECTION_ID,
 } = process.env;
 
 const client = new sdk.Client();
