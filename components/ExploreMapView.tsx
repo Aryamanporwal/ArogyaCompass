@@ -485,7 +485,7 @@ const mobileSheetStyle: React.CSSProperties = {
     borderBottomRightRadius: "1.5rem",
     boxShadow: "0 8px 32px 0 rgba(31,38,135,0.18)",
     zIndex: 1002,
-    display: sidebarVisible ? "flex" : "none",
+    display: (selected || sidebarVisible )? "flex" : "none",
     flexDirection: "column",
     transform: showListSidebar ? "translateX(0%)" : "translateX(-100%)",
     transition: "transform 0.35s cubic-bezier(.4,0,.2,1)",
@@ -603,7 +603,11 @@ const mobileSheetStyle: React.CSSProperties = {
   // Show details sidebar when marker or card is clicked
   const handleMarkerClick = (item: Hospital | Lab) => {
     setSelected(item);
-    setShowListSidebar(false);
+    if (isMobile) {
+    setShowListSidebar(false); 
+  } else {
+    setShowListSidebar(true); 
+  }
     setSelectedDoctor("");
     setSelectedTest("");
   };
