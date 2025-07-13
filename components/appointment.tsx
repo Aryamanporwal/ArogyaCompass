@@ -14,31 +14,162 @@ import {
   AlertCircle,
   HeartPulse,
   CalendarPlus,
+  PlusSquare,
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-// import { Models } from "node-appwrite";
 // import { handleResetPasskey } from "@/lib/actions/lab.action";
 import { useRouter } from "next/navigation";
 // import { Button } from "./ui/button";
+import { getHospitalById } from "@/lib/actions/hospital.action";
+import { getLabById } from "@/lib/actions/lab.action";
+import { getAllAppointmentsByUserId } from "@/lib/actions/appointment.action";
+import { getUserNameById } from "@/lib/actions/user.action";
+import { Models } from "node-appwrite";
+import  CancelAppointmentForm  from "@/components/ui/cancelAppointment";
 
-// interface PageProps {
-//   params: {
-//     patientId: string;
-//   };
-// }
-// { params }: PageProps
+type Document = Models.Document;
 
-export default function PatientDashboard() {
+
+enum AppointmentStatus {
+  Done = "done",
+  Cancelled = "cancelled",
+  Pending = "pending",
+}
+
+interface Appointment {
+  $id: string;
+//   appointmentNumber: string; // assuming you have this field; else generate/display $id
+  hospitalId?: string;
+  doctorName?: string;
+  city: string;
+  state: string;
+  timestamp: string; // ISO string from DB
+  status: AppointmentStatus;
+  labId?: string;
+  test?: string;
+  userId: string;
+}
+
+interface Hospital {
+  $id: string;
+  name?: string;
+}
+
+interface Lab {
+  $id: string;
+  name?: string;
+}
+
+interface Props {
+  userId: string;
+}
+
+
+export default function PatientDashboard({ userId }: Props) {
    const [sidebarOpen, setSidebarOpen] = useState(false);
    const [darkMode, setDarkMode] = useState(false);
    const [selectedNav, setSelectedNav] = useState("Dashboard");
-//    const [loading, setLoading] = useState(false);
    const router = useRouter();
-
-    const handleSignOut = () => {
+   const [name, setName] = useState<string | null>(null);
+   const [appointments, setAppointments] = useState<Appointment[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus>(AppointmentStatus.Pending);
+   const [hospitalNames, setHospitalNames] = useState<Record<string, string>>({});
+   const [labNames, setLabNames] = useState<Record<string, string>>({});
+   const [showCancelForm, setShowCancelForm] = useState(false);
+   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+   const handleSignOut = () => {
         router.push("/"); 
     };
+
+
+        useEffect(() => {
+            async function fetchAppointments() {
+                setLoading(true);
+                try {
+                const rawDocs = await getAllAppointmentsByUserId(userId);
+    
+                const docs: Appointment[] = rawDocs.map((doc: Document) => ({
+                    $id: doc.$id,
+                    hospitalId: doc.hospitalId,
+                    doctorName: doc.doctorName,
+                    city: doc.city,
+                    state: doc.state,
+                    timestamp: doc.timestamp,
+                    status: doc.status,
+                    labId: doc.labId,
+                    test: doc.test,
+                    userId: doc.userId,
+                }));
+    
+                setAppointments(docs);
+                } catch (error) {
+                console.error("Error fetching appointments:", error);
+                setAppointments([]);
+                }
+                setLoading(false);
+            }
+    
+            fetchAppointments();
+            }, [userId]);
+    
+            useEffect(() => {
+                async function fetchName() {
+                const result = await getUserNameById(userId);
+                setName(result);
+                }
+                fetchName();
+            }, [userId]);
+    
+          const handleCancel = (appointmentId: string) => {
+            console.log("Open cancel form for appointment:", appointmentId);
+            setSelectedAppointmentId(appointmentId); 
+            setShowCancelForm(true); 
+          };
+    
+      // Fetch hospital and lab names for appointments
+      useEffect(() => {
+        async function fetchInstitutions() {
+          const hNames: Record<string, string> = {};
+          const lNames: Record<string, string> = {};
+          await Promise.all(
+            appointments.map(async (appt) => {
+              if (appt.hospitalId && !hospitalNames[appt.hospitalId]) {
+                try {
+                  const hospital: Hospital = await getHospitalById(appt.hospitalId);
+                  hNames[appt.hospitalId] = hospital.name || "—";
+                } catch {
+                  hNames[appt.hospitalId] = "—";
+                }
+              }
+              if (appt.labId && !labNames[appt.labId]) {
+                try {
+                  const lab: Lab = await getLabById(appt.labId);
+                  lNames[appt.labId] = lab.name || "—";
+                } catch {
+                  lNames[appt.labId] = "—";
+                }
+              }
+            })
+          );
+          setHospitalNames((prev) => ({ ...prev, ...hNames }));
+          setLabNames((prev) => ({ ...prev, ...lNames }));
+        }
+        if (appointments.length) fetchInstitutions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [appointments]);
+    
+      // Filter appointments by selected status
+      const filteredAppointments = appointments.filter((appt) => appt.status === selectedStatus);
+    
+      // Counts for cards
+      const counts = {
+        [AppointmentStatus.Done]: appointments.filter((a) => a.status === AppointmentStatus.Done).length,
+        [AppointmentStatus.Pending]: appointments.filter((a) => a.status === AppointmentStatus.Pending).length,
+        [AppointmentStatus.Cancelled]: appointments.filter((a) => a.status === AppointmentStatus.Cancelled).length,
+      };
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -180,7 +311,7 @@ export default function PatientDashboard() {
             <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div className="flex flex-col gap-1 mb-4">
-            <h1 className="text-2xl font-semibold">Welcome, Aryaman</h1>
+            <h1 className="text-2xl font-semibold">Welcome, {name}</h1>
             <h2 className="text-lg font-medium flex items-center gap-3 mt-1 text-black dark:text-gray-300">
             <span className="flex items-center gap-1">
                 <CalendarDays size={18} className="text-blue-600 dark:text-blue-400" />
@@ -226,22 +357,22 @@ export default function PatientDashboard() {
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            {/* <StatCard
+            <StatCard
               icon={<CalendarDays size={24} className="text-blue-600" />}
               title="Upcoming Appointments"
-              value={pendingCount}
+              value={counts[AppointmentStatus.Pending]}
             />
             <StatCard
-              icon={<Users size={24} className="text-green-600" />}
-              title="Total Patients"
-              value={totalCount}
+              icon={<User size={24} className="text-green-600" />}
+              title="Previous Appointments"
+              value={counts[AppointmentStatus.Done]}
             />
             <StatCard
               icon={<PlusSquare size={24} className="text-indigo-600" />}
-              title="Assistants on duty"
-              value={assistants?.length || 0}
+              title="Cancelled Appointments"
+              value={counts[AppointmentStatus.Cancelled]}
             />
-          </div> */}
+          </div>
 
           {/* Appointments & Patients */}
           {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
@@ -323,7 +454,7 @@ export default function PatientDashboard() {
                     {showAllPatients ? "Show less" : "View all"}
                 </button>
             </div> */}
-          </div> 
+          {/* </div>  */}
           </>
           )}
 
@@ -336,16 +467,24 @@ export default function PatientDashboard() {
             )}
         {selectedNav === "Medical_Records" && (
             <></>
-        )}
+            )}
         {selectedNav === "Report_Problem" && (
             <></>
-        )}
+            )}
         {selectedNav === "First_Aid" && (
             <></>
-        )}
+            )}
+        {selectedNav === "Book_Appointment" && (
+            
+            (() => {
+                router.push(`/patients/${userId}/explore`);
+                return null; // avoid rendering anything
+              })()
+            
+            )}
         {selectedNav === "Settings" && (
          <></>
-        )}
+            )}
             </main>
         </div>
     </div>
@@ -385,16 +524,34 @@ const NavItem = ({
   </div>
 );
 
-
-// const StatCard = ({ icon, title, value }: { icon: React.ReactNode; title: string; value: number }) => (
-//   <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-md p-5 flex items-center gap-4">
-//     <div className="p-2 bg-gray-100 dark:bg-[#2a2a2a] rounded-lg">{icon}</div>
-//     <div>
-//       <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
-//       <p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>
-//     </div>
-//   </div>
-// );
+const STATUS_CARDS = [
+  {
+    key: AppointmentStatus.Done,
+    label: "previous",
+    icon: "/assets/icons/appointments.svg",
+  },
+  {
+    key: AppointmentStatus.Pending,
+    label: "upcoming",
+    icon: "/assets/icons/pending.svg",
+    iconColor: "text-blue-400",
+  },
+  {
+    key: AppointmentStatus.Cancelled,
+    label: "Cancelled",
+    icon: "/assets/icons/cancelled.svg",
+    iconColor: "text-red-400",
+  },
+];
+const StatCard = ({ icon, title, value }: { icon: React.ReactNode; title: string; value: number }) => (
+  <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-md p-5 flex items-center gap-4">
+    <div className="p-2 bg-gray-100 dark:bg-[#2a2a2a] rounded-lg">{icon}</div>
+    <div>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
+      <p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>
+    </div>
+  </div>
+);
 
 
 

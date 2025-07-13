@@ -12,7 +12,7 @@ const MyAppointments = () => {
   
   return (
     <div>
-        <PatientDashboard />
+        <PatientDashboard userId={userId}/>
     </div>
   )
 }
