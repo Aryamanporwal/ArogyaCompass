@@ -1,5 +1,6 @@
 "use client"
-import AppointmentDashboard from '@/components/MyAppointments'
+import PatientDashboard from '@/components/appointment';
+// import AppointmentDashboard from '@/components/MyAppointments'
 import { useParams } from 'next/navigation';
 import React from 'react'
 
@@ -11,7 +12,7 @@ const MyAppointments = () => {
   
   return (
     <div>
-        <AppointmentDashboard userId={userId}/>
+        <PatientDashboard />
     </div>
   )
 }
