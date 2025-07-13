@@ -81,81 +81,84 @@ const SuccessAppointment: React.FC<SuccessAppointmentProps> = ({ userId, open, o
     ? `Dr. ${appointment.doctorName}`
     : appointment.test || "";
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent  backdrop-blur-sm ">
-      <div className="min-w-[340px] flex flex-col items-center justify-center bg-gray-900 rounded-xl px-8 py-10">
-        {/* Logo */}
-        <div className="flex flex-col items-center justify-center -mt-2 mb-3">
-          <Image
-            alt="logo"
-            src="/assets/icons/logo.png"
-            height={150}
-            width={150}
-            className="h-20 sm:h-24 md:h-28 w-auto object-contain"
-          />
-          <div className="-mt-1 text-center leading-tight">
-            <h1 className="text-[1.3rem] font-bold bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-clip-text text-transparent">
-              ArogyaCompass
-            </h1>
-            <h2 className="text-sm text-blue-500 mt-0.5">
-              Your Smart Path to Faster Care
-            </h2>
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+        <div className="min-w-[340px] max-w-sm w-full flex flex-col items-center justify-center bg-white rounded-2xl px-6 py-8 shadow-xl border border-gray-200">
+          {/* Logo */}
+          <div className="flex flex-col items-center justify-center mb-4">
+            <Image
+              alt="logo"
+              src="/assets/icons/logo.png"
+              height={120}
+              width={120}
+              className="h-20 w-auto object-contain"
+            />
+            <div className="text-center leading-tight mt-1">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 via-blue-700 to-blue-500 bg-clip-text text-transparent">
+                ArogyaCompass
+              </h1>
+              <h2 className="text-sm text-blue-500">Your Smart Path to Faster Care</h2>
+            </div>
           </div>
-        </div>
-        {/* Success Checkmark */}
-        <div className="mb-6">
-          <Image
-            src="/assets/gifs/success.gif"
-            alt="Success"
-            width={120}
-            height={120}
-            style={{ display: "block" }}
-          />
-        </div>
-        {/* Success Message */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-semibold text-white mb-2">
-            Your <span className="text-[#22C55E]">appointment request</span> has been successfully submitted!
-          </h2>
-          <p className="text-[#A3A3A3] mt-2">We will be in touch shortly to confirm.</p>
-        </div>
-        {/* Appointment Details */}
-        <div className="bg-[#232627] rounded-lg px-8 py-4 flex flex-col items-center">
-          <span className="text-[#A3A3A3] mb-2">Requested appointment details:</span>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-3 py-1 bg-[#181A1B] rounded text-white">
-              {/* Doctor/Test Icon */}
-              <svg className="w-5 h-5 mr-1 text-[#22C55E]" fill="currentColor" viewBox="0 0 20 20">
-                <circle cx="10" cy="10" r="10" />
-              </svg>
-              {detailLabel}
-            </span>
-            <span className="inline-flex items-center px-3 py-1 bg-[#181A1B] rounded text-white">
-              {/* Calendar Icon */}
-              <Image
-                src="/assets/icons/calendar.svg"
-                alt="Calendar"
-                className="w-5 h-5 mr-1 inline"
-                style={{ display: "inline" }}
-                width = {24}
-                height  = {24}
-              />
-              {dateString} – {timeString}
-            </span>
-          </div>
-        </div>
-        <div className="w-full mt-5 py-3 rounded-lg bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white font-semibold text-lg shadow transition hover:from-green-600 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300">
-        <Button
-            onClick={onOk}
-            className="w-full bg-transparent cursor-pointer hover:bg-transparent text-white shadow-none text-lg font-semibold"
-        >
-            OK
-        </Button>
-        </div>
 
+          {/* Success Animation */}
+          <div className="mb-5">
+            <Image
+              src="/assets/gifs/success.gif"
+              alt="Success"
+              width={100}
+              height={100}
+            />
+          </div>
+
+          {/* Success Message */}
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Your <span className="text-green-600">appointment request</span> was submitted!
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              We’ll be in touch soon to confirm.
+            </p>
+          </div>
+
+          {/* Appointment Details */}
+          <div className="w-full bg-gray-50 border border-gray-200 rounded-lg px-6 py-4 flex flex-col items-center">
+            <span className="text-gray-500 text-sm mb-2">Appointment Details</span>
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-gray-800 border border-gray-300 shadow-sm">
+                {/* Doctor/Test Icon */}
+                <svg className="w-4 h-4 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <circle cx="10" cy="10" r="10" />
+                </svg>
+                {detailLabel}
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-gray-800 border border-gray-300 shadow-sm">
+                {/* Calendar Icon */}
+                <Image
+                  src="/assets/icons/calendar.svg"
+                  alt="Calendar"
+                  width={20}
+                  height={20}
+                  className="w-4 h-4 mr-1"
+                />
+                {dateString} – {timeString}
+              </span>
+            </div>
+          </div>
+
+          {/* OK Button */}
+          <div className="w-full mt-6">
+            <Button
+              onClick={onOk}
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-lg font-semibold py-2.5 rounded-lg shadow-md transition-all"
+            >
+              OK
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+
 };
 
 export default SuccessAppointment;

@@ -111,6 +111,33 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* Custom phone input style to match your inputClass */
+.custom-phone-input .form-control {
+  width: 100% !important;
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important; /* border-gray-300 */
+  color: #1e2023 !important;             /* text-gray-900 */
+  border-radius: 0.375rem !important;     /* rounded-md */
+  height: 44px !important;                /* h-11 */
+  padding-left: 3rem !important;          /* enough for flag */
+  padding-right: 0.75rem !important;      /* px-3 */
+  font-size: 1rem !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s;
+}
+
+.custom-phone-input .form-control:focus {
+  border-color: gray-400 !important;       /* blue-600 */
+  outline: none !important;
+  box-shadow: 0 0 0 2px gray-400 !important; /* ring-2 ring-blue-500 */
+}
+
+.custom-phone-input .flag-dropdown {
+  border: none !important;
+  background: transparent !important;
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
