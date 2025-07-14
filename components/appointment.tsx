@@ -28,6 +28,11 @@ import { getAllAppointmentsByUserId } from "@/lib/actions/appointment.action";
 import { getUserNameById } from "@/lib/actions/user.action";
 import { Models } from "node-appwrite";
 import  CancelAppointmentForm  from "@/components/ui/cancelAppointment";
+import FinePaymentModal from "./ui/finepayment";
+import MedicalRecords from "./ui/Medical_Record";
+import { getLabRecordsByUserId, getMedicineRecordsByUserId } from "@/lib/actions/medicalr.action";
+import { generateMedicalHistoryPDF } from "@/lib/utils/generateMedicalHistoryPDF";
+
 
 type Document = Models.Document;
 
@@ -67,6 +72,21 @@ interface Props {
 }
 
 
+async function handleDownloadFullHistory(userId: string) {
+  const [labRecords, medicineRecords] = await Promise.all([
+    getLabRecordsByUserId(userId),
+    getMedicineRecordsByUserId(userId),
+  ]);
+
+  await generateMedicalHistoryPDF({
+    userId,
+    labRecords,
+    medicineRecords,
+    logoUrl: "/assets/icons/logo-full.png", // optional
+  });
+}
+
+
 export default function PatientDashboard({ userId }: Props) {
    const [sidebarOpen, setSidebarOpen] = useState(false);
    const [darkMode, setDarkMode] = useState(false);
@@ -75,11 +95,13 @@ export default function PatientDashboard({ userId }: Props) {
    const [name, setName] = useState<string | null>(null);
    const [appointments, setAppointments] = useState<Appointment[]>([]);
    const [loading, setLoading] = useState(true);
-   const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus>(AppointmentStatus.Pending);
+  //  const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus>(AppointmentStatus.Pending);
    const [hospitalNames, setHospitalNames] = useState<Record<string, string>>({});
    const [labNames, setLabNames] = useState<Record<string, string>>({});
    const [showCancelForm, setShowCancelForm] = useState(false);
    const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+   const [showFineModal, setShowFineModal] = useState(false);
+   const [cancelledSinceLastFine, setCancelledSinceLastFine] = useState(0);
    const handleSignOut = () => {
         router.push("/"); 
     };
@@ -123,12 +145,6 @@ export default function PatientDashboard({ userId }: Props) {
                 fetchName();
             }, [userId]);
     
-          const handleCancel = (appointmentId: string) => {
-            console.log("Open cancel form for appointment:", appointmentId);
-            setSelectedAppointmentId(appointmentId); 
-            setShowCancelForm(true); 
-          };
-    
       // Fetch hospital and lab names for appointments
       useEffect(() => {
         async function fetchInstitutions() {
@@ -162,7 +178,7 @@ export default function PatientDashboard({ userId }: Props) {
       }, [appointments]);
     
       // Filter appointments by selected status
-      const filteredAppointments = appointments.filter((appt) => appt.status === selectedStatus);
+      // const filteredAppointments = appointments.filter((appt) => appt.status === selectedStatus);
     
       // Counts for cards
       const counts = {
@@ -171,9 +187,30 @@ export default function PatientDashboard({ userId }: Props) {
         [AppointmentStatus.Cancelled]: appointments.filter((a) => a.status === AppointmentStatus.Cancelled).length,
       };
 
+      const upcomingAppointments = appointments.filter(a => a.status === AppointmentStatus.Pending);
+      const cancelledAppointments = appointments.filter(a => a.status === AppointmentStatus.Cancelled);
+
+      const fineDue = cancelledSinceLastFine >= 5;
+
+      const handleFinePaymentSuccess = () => {
+        setShowFineModal(false);
+        setCancelledSinceLastFine(0);
+      }
+
+      const handleCancel = (appointmentId : string) => {
+        setSelectedAppointmentId(appointmentId);
+        setShowCancelForm(true);
+      }
+
+      const handleCancelConfirmed = () => {
+        setCancelledSinceLastFine(prev => prev+1);
+      }
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
+   
+   
 
   return (
     <div
@@ -188,6 +225,13 @@ export default function PatientDashboard({ userId }: Props) {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      <FinePaymentModal
+        open={showFineModal}
+        onClose={() => setShowFineModal(false)}
+        onSuccess={handleFinePaymentSuccess}
+        darkMode={darkMode}
+      />
 
       {/* Layout Container */}
       <div className="flex h-screen w-full overflow-hidden">
@@ -225,6 +269,7 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "Dashboard"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("Dashboard")}
+                disabled = {false}
               />
               <NavItem
                 icon={<ClipboardList size={20} />}
@@ -232,13 +277,22 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "Appointments"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("Appointments")}
+                disabled = {false}
               />
                 <NavItem
                 icon={<CalendarX size={20} />}
                 label="Cancel Appointment"
                 active={selectedNav === "Cancel_Appointment"}
                 open={sidebarOpen}
-                onClick={() => setSelectedNav("Cancel_Appointment")}
+                disabled = {fineDue}
+                onClick={() =>{
+                  if(fineDue) {
+                    setShowFineModal(true);
+                    setSelectedNav("Cancel_Appointment")
+                  }else{
+                    setSelectedNav("Cancel_Appointment")
+                  }
+                }}
                 />
 
                 <NavItem
@@ -247,7 +301,9 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "Medical_Records"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("Medical_Records")}
+                disabled={false}
                 />
+                
 
                 <NavItem
                 icon={<AlertCircle size={20} />}
@@ -255,6 +311,7 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "Report_Problem"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("Report_Problem")}
+                disabled = {false}
                 />
 
                 <NavItem
@@ -263,6 +320,7 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "First_Aid"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("First_Aid")}
+                disabled = {false}
                 />
 
                 <NavItem
@@ -271,6 +329,7 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "Book_Appointment"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("Book_Appointment")}
+                disabled = {false}
                 />
 
               <NavItem
@@ -279,6 +338,7 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "Settings"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("Settings")}
+                disabled = {false}
               />
 
             </nav>
@@ -374,99 +434,523 @@ export default function PatientDashboard({ userId }: Props) {
             />
           </div>
 
-          {/* Appointments & Patients */}
-          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
-            {/* Appointments Section */}
-            {/* <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Appointments</h3>
-              </div>
-             <ul className="space-y-4">
-                {(showAllAppointments ? appointmentPatientList : appointmentPatientList.slice(0, 5)).map(
-                    ({ appointment, patient }, index) => (
-                    <li
-                        key={index}
-                        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 px-4 py-3 rounded-lg border dark:border-gray-700 bg-gray-100 dark:bg-[#2b2b2b] hover:shadow transition-all"
+          {/* Upcoming Appointments Table (Desktop) */}
+          <div className={`
+            hidden sm:block overflow-x-auto rounded-2xl shadow-2xl 
+            ${darkMode ? "bg-[#111418]/60 ring-1 ring-white/10" : "bg-white border border-gray-200"}
+            backdrop-blur-md mb-8
+          `}>
+            <table className={`min-w-full border-collapse text-sm 
+              ${darkMode ? "text-white" : "text-gray-900"}
+            `}>
+              <thead>
+                <tr className={`
+                  ${darkMode 
+                    ? "text-gray-400 border-b border-white/10 bg-transparent"
+                    : "text-gray-500 border-b border-gray-200 bg-[#f3f6fa]"
+                  }
+                `}>
+                  <th className="py-4 px-6 text-left font-medium">Date</th>
+                  <th className="py-4 px-6 text-left font-medium">Time</th>
+                  <th className="py-4 px-6 text-left font-medium">Hospital / Lab</th>
+                  <th className="py-4 px-6 text-left font-medium">Doctor Name / Test Name</th>
+                  <th className="py-4 px-6 text-left font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8 text-gray-500">Loading...</td>
+                  </tr>
+                ) : appointments.filter(a => a.status === AppointmentStatus.Pending).length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8 text-gray-500">No upcoming appointments found.</td>
+                  </tr>
+                ) : (
+                  appointments
+                    .filter(appt => appt.status === AppointmentStatus.Pending)
+                    .map(appt => {
+                      const dateObj = new Date(appt.timestamp);
+                      const date = dateObj.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+                      const time = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true });
+                      const isHospital = !!appt.hospitalId;
+                      const institutionName = isHospital
+                        ? hospitalNames[appt.hospitalId!] || "—"
+                        : appt.labId
+                        ? labNames[appt.labId] || "—"
+                        : "—";
+                      return (
+                        <tr key={appt.$id} className={`
+                          border-b 
+                          ${darkMode ? "border-white/10 hover:bg-white/5" : "border-gray-100 hover:bg-gray-50"}
+                          transition-all
+                        `}>
+                          <td className="py-4 px-6">{date}</td>
+                          <td className="py-4 px-6">{time}</td>
+                          <td className="py-4 px-6">{institutionName}</td>
+                          <td className="py-4 px-6">{appt.doctorName || appt.test || "—"}</td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-3">
+                              <span
+                                className={`
+                                  inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                  ${darkMode 
+                                    ? "bg-blue-900 text-blue-400" 
+                                    : "bg-blue-100 text-blue-700"
+                                  }
+                                `}
+                              >
+                                ⏳ Upcoming
+                              </span>
+                              <button
+                                className={`
+                                  px-4 py-1 rounded-full text-xs font-semibold
+                                  ${darkMode 
+                                    ? "bg-red-900 text-red-400" 
+                                    : "bg-red-100 text-red-700"
+                                  }
+                                `}
+                                disabled = {cancelledSinceLastFine>=5}
+                                onClick={
+                                  () => handleCancel(appt.$id)}
+                              >
+                                ✖ Cancel
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+            {/* Upcoming Appointments Card View (Mobile) */}
+          <div className="sm:hidden space-y-4 mb-8">
+            {loading ? (
+              <p className="text-center py-4 text-gray-400">Loading...</p>
+            ) : appointments.filter(a => a.status === AppointmentStatus.Pending).length === 0 ? (
+              <p className="text-center py-4 text-gray-400">No upcoming appointments found.</p>
+            ) : (
+              appointments
+                .filter(appt => appt.status === AppointmentStatus.Pending)
+                .map(appt => {
+                  const dateObj = new Date(appt.timestamp);
+                  const date = dateObj.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+                  const time = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true });
+                  const isHospital = !!appt.hospitalId;
+                  const institutionName = isHospital
+                    ? hospitalNames[appt.hospitalId!] || "—"
+                    : appt.labId
+                    ? labNames[appt.labId] || "—"
+                    : "—";
+                  return (
+                    <div key={appt.$id}
+                      className={`
+                        ring-1 rounded-xl p-4 shadow-xl backdrop-blur-md space-y-2
+                        ${darkMode 
+                          ? "bg-[#111418]/70 ring-white/10"
+                          : "bg-white ring-gray-200"
+                        }
+                      `}
+                    >
+                      <div className="flex justify-between text-sm">
+                        <span className={darkMode ? "text-white font-medium" : "text-gray-900 font-medium"}>{date}</span>
+                        <span className={darkMode ? "text-gray-400" : "text-gray-500"}>{time}</span>
+                      </div>
+                      <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                        <span className="font-semibold">
+                          {appt.doctorName ? "Hospital" : appt.test ? "Lab" : "Hospital/Lab"}:
+                        </span>{" "}
+                        {institutionName}
+                      </div>
+                      <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                        <span className="font-semibold">
+                          {appt.doctorName ? "Doctor Name" : appt.test ? "Test" : "—"}:
+                        </span>{" "}
+                        {appt.doctorName || appt.test || "—"}
+                      </div>
+                      <div>
+                        <div
+                          className={`
+                            inline-block px-3 py-1 rounded-full text-xs font-semibold mb-1
+                            ${darkMode 
+                              ? "bg-blue-900 text-blue-400" 
+                              : "bg-blue-100 text-blue-700"
+                            }
+                          `}
                         >
-                        <div>
-                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                            <span className="text-gray-500 mr-2 dark:text-gray-400">
-                                {new Date(appointment.timestamp).toLocaleString()}
-                            </span>
-                            {patient?.name || "Unknown Patient"}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{appointment.city}</p>
+                          ⏳ Upcoming
                         </div>
                         <button
-                                onClick={() => {
-                                    setSelectedNav("Appointments");
-                                    setSelectedPatientId(appointment.userId); 
-                                    setSelectedAppointmentId(appointment.$id);// This maps to patient.userId
-                                }}
-                            className="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                          className={`
+                            inline-block mt-1 px-4 py-1 rounded-full text-xs font-semibold
+                            ${darkMode 
+                              ? "bg-red-900 text-red-400" 
+                              : "bg-red-100 text-red-700"
+                            }
+                          `}
+                          onClick={() => handleCancel(appt.$id)}
+                          disabled = {cancelledSinceLastFine>=5}
                         >
-                            Review
+                          ✖ Cancel
                         </button>
-                    </li>
+                      </div>
+                    </div>
+                  );
+                })
+            )}
+          </div>
 
-                    )
-                )}
-                </ul>
-                <button
-                className="mt-4 text-blue-600 text-sm hover:underline"
-                onClick={() => setShowAllAppointments(!showAllAppointments)}
-                >
-                {showAllAppointments ? "Show less" : "View all"}
-                </button>
-            </div> */}
-
-            {/* Patients Section */}
-            {/* <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Patient List</h3>
-              </div>
-              <div className="relative mb-4">
-                <Search className="absolute left-2.5 top-2.5 text-gray-400" size={16} />
-                <input
-                  type="text"
-                  placeholder="Search patients"
-                  className="pl-8 pr-3 py-1.5 rounded-md border border-gray-300 text-sm dark:bg-[#121212] dark:border-gray-600 dark:text-white"
-                />
-              </div>
-                <ul className="space-y-2">
-                {(showAllPatients
-                    ? appointmentPatientList
-                    : appointmentPatientList.slice(0, 5)
-                ).map(({ patient }, index) => (
-                    <li
-                    key={index}
-                    className="flex justify-between text-sm text-gray-800 dark:text-gray-200"
-                    >
-                    <span>{patient?.name || "Unknown"}</span>
-                    <span className="text-blue-500">{patient?.gender || "N/A"}</span>
-                    </li>
-                ))}
-                </ul>
-                <button
-                    className="mt-4 text-blue-600 text-sm hover:underline"
-                    onClick={() => setShowAllPatients(!showAllPatients)}
-                    >
-                    {showAllPatients ? "Show less" : "View all"}
-                </button>
-            </div> */}
-          {/* </div>  */}
           </>
           )}
 
 
         {selectedNav === "Appointments" && (
-            <></>
-            )}
+          <>
+            <h2 className="text-xl font-semibold mb-4">Completed Appointments</h2>
+            <div className={`
+              hidden sm:block overflow-x-auto rounded-2xl shadow-2xl mb-8
+              ${darkMode ? "bg-[#111418]/60 ring-1 ring-white/10" : "bg-white border border-gray-200"}
+              backdrop-blur-md
+            `}>
+              <table className={`min-w-full border-collapse text-sm ${darkMode ? "text-white" : "text-gray-900"}`}>
+                <thead>
+                  <tr className={`
+                    ${darkMode
+                      ? "text-gray-400 border-b border-white/10 bg-transparent"
+                      : "text-gray-500 border-b border-gray-200 bg-[#f3f6fa]"
+                    }
+                  `}>
+                    <th className="py-4 px-6 text-left font-medium">Date</th>
+                    <th className="py-4 px-6 text-left font-medium">Time</th>
+                    <th className="py-4 px-6 text-left font-medium">Hospital / Lab</th>
+                    <th className="py-4 px-6 text-left font-medium">Doctor Name / Test Name</th>
+                    <th className="py-4 px-6 text-left font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-8 text-gray-500">Loading...</td>
+                    </tr>
+                  ) : appointments.filter(a => a.status === AppointmentStatus.Done).length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-8 text-gray-500">No completed appointments found.</td>
+                    </tr>
+                  ) : (
+                    appointments
+                      .filter(appt => appt.status === AppointmentStatus.Done)
+                      .map(appt => {
+                        const dateObj = new Date(appt.timestamp);
+                        const date = dateObj.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+                        const time = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true });
+                        const isHospital = !!appt.hospitalId;
+                        const institutionName = isHospital
+                          ? hospitalNames[appt.hospitalId!] || "—"
+                          : appt.labId
+                          ? labNames[appt.labId] || "—"
+                          : "—";
+                        return (
+                          <tr key={appt.$id} className={`
+                            border-b
+                            ${darkMode ? "border-white/10 hover:bg-white/5" : "border-gray-100 hover:bg-gray-50"}
+                            transition-all
+                          `}>
+                            <td className="py-4 px-6">{date}</td>
+                            <td className="py-4 px-6">{time}</td>
+                            <td className="py-4 px-6">{institutionName}</td>
+                            <td className="py-4 px-6">{appt.doctorName || appt.test || "—"}</td>
+                            <td className="py-4 px-6">
+                              <span className={`
+                                inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                ${darkMode ? "bg-green-900 text-green-400" : "bg-green-100 text-green-700"}
+                              `}>
+                                ✔ Done
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile Card View */}
+            <div className="sm:hidden space-y-4 mb-8">
+              {loading ? (
+                <p className="text-center py-4 text-gray-400">Loading...</p>
+              ) : appointments.filter(a => a.status === AppointmentStatus.Done).length === 0 ? (
+                <p className="text-center py-4 text-gray-400">No completed appointments found.</p>
+              ) : (
+                appointments
+                  .filter(appt => appt.status === AppointmentStatus.Done)
+                  .map(appt => {
+                    const dateObj = new Date(appt.timestamp);
+                    const date = dateObj.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+                    const time = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true });
+                    const isHospital = !!appt.hospitalId;
+                    const institutionName = isHospital
+                      ? hospitalNames[appt.hospitalId!] || "—"
+                      : appt.labId
+                      ? labNames[appt.labId] || "—"
+                      : "—";
+                    return (
+                      <div key={appt.$id}
+                        className={`
+                          ring-1 rounded-xl p-4 shadow-xl backdrop-blur-md space-y-2
+                          ${darkMode ? "bg-[#111418]/70 ring-white/10" : "bg-white ring-gray-200"}
+                        `}
+                      >
+                        <div className="flex justify-between text-sm">
+                          <span className={darkMode ? "text-white font-medium" : "text-gray-900 font-medium"}>{date}</span>
+                          <span className={darkMode ? "text-gray-400" : "text-gray-500"}>{time}</span>
+                        </div>
+                        <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                          <span className="font-semibold">
+                            {appt.doctorName ? "Hospital" : appt.test ? "Lab" : "Hospital/Lab"}:
+                          </span>{" "}
+                          {institutionName}
+                        </div>
+                        <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                          <span className="font-semibold">
+                            {appt.doctorName ? "Doctor Name" : appt.test ? "Test" : "—"}:
+                          </span>{" "}
+                          {appt.doctorName || appt.test || "—"}
+                        </div>
+                        <div>
+                          <span
+                            className={`
+                              inline-block px-3 py-1 rounded-full text-xs font-semibold
+                              ${darkMode ? "bg-green-900 text-green-400" : "bg-green-100 text-green-700"}
+                            `}
+                          >
+                            ✔ Done
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+              )}
+            </div>
+          </>
+        )}
+
         {selectedNav === "Cancel_Appointment" && (
-            <></> 
-            )}
+          fineDue ? (
+            <FinePaymentModal
+            open = {true}
+            onClose = {() => setShowFineModal(false)}
+            onSuccess = {handleFinePaymentSuccess}
+            darkMode = {darkMode}
+            />
+          ):(
+          <>
+            {/* --- UPCOMING APPOINTMENTS (Cards, Responsive) --- */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Upcoming Appointments</h2>
+
+              {/* Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {upcomingAppointments.length === 0 ? (
+                  <div className="text-gray-500 col-span-full text-center py-8">No upcoming appointments.</div>
+                ) : (
+                  upcomingAppointments.map(appt => {
+                    const dateObj = new Date(appt.timestamp);
+                    const date = dateObj.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+                    const time = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true });
+                    const isHospital = !!appt.hospitalId;
+                    const institutionName = isHospital
+                      ? hospitalNames[appt.hospitalId!] || "—"
+                      : appt.labId
+                      ? labNames[appt.labId] || "—"
+                      : "—";
+                    return (
+                      <div
+                        key={appt.$id}
+                        className={`
+                          ring-1 rounded-xl p-4 shadow-xl backdrop-blur-md space-y-2
+                          ${darkMode ? "bg-[#111418]/70 ring-white/10" : "bg-white ring-gray-200"}
+                        `}
+                      >
+                        <div className="flex justify-between text-sm">
+                          <span className={darkMode ? "text-white font-medium" : "text-gray-900 font-medium"}>{date}</span>
+                          <span className={darkMode ? "text-gray-400" : "text-gray-500"}>{time}</span>
+                        </div>
+                        <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                          <span className="font-semibold">
+                            {appt.doctorName ? "Hospital" : appt.test ? "Lab" : "Hospital/Lab"}:
+                          </span>{" "}
+                          {institutionName}
+                        </div>
+                        <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                          <span className="font-semibold">
+                            {appt.doctorName ? "Doctor Name" : appt.test ? "Test" : "—"}:
+                          </span>{" "}
+                          {appt.doctorName || appt.test || "—"}
+                        </div>
+                        <div>
+                          <div
+                            className={`
+                              inline-block px-3 py-1 rounded-full text-xs font-semibold mb-1
+                              ${darkMode ? "bg-blue-900 text-blue-400" : "bg-blue-100 text-blue-700"}
+                            `}
+                          >
+                            ⏳ Upcoming
+                          </div>
+                          <button
+                            className={`
+                              inline-block mt-1 px-4 py-1 rounded-full text-xs font-semibold
+                              ${darkMode ? "bg-red-900 text-red-400" : "bg-red-100 text-red-700"}
+                            `}
+                            onClick={() =>  handleCancel(appt.$id)}
+                           
+                          >
+                            ✖ Cancel
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* --- CANCELLED APPOINTMENTS (Table, Responsive) --- */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Cancelled Appointments</h2>
+              <div className={`
+                hidden sm:block overflow-x-auto rounded-2xl shadow-2xl mb-8
+                ${darkMode ? "bg-[#111418]/60 ring-1 ring-white/10" : "bg-white border border-gray-200"}
+                backdrop-blur-md
+              `}>
+                <table className={`min-w-full border-collapse text-sm ${darkMode ? "text-white" : "text-gray-900"}`}>
+                  <thead>
+                    <tr className={`
+                      ${darkMode
+                        ? "text-gray-400 border-b border-white/10 bg-transparent"
+                        : "text-gray-500 border-b border-gray-200 bg-[#f3f6fa]"
+                      }
+                    `}>
+                      <th className="py-4 px-6 text-left font-medium">Date</th>
+                      <th className="py-4 px-6 text-left font-medium">Time</th>
+                      <th className="py-4 px-6 text-left font-medium">Hospital / Lab</th>
+                      <th className="py-4 px-6 text-left font-medium">Doctor Name / Test Name</th>
+                      <th className="py-4 px-6 text-left font-medium">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cancelledAppointments.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center py-8 text-gray-500">No cancelled appointments.</td>
+                      </tr>
+                    ) : (
+                      cancelledAppointments.map(appt => {
+                        const dateObj = new Date(appt.timestamp);
+                        const date = dateObj.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+                        const time = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true });
+                        const isHospital = !!appt.hospitalId;
+                        const institutionName = isHospital
+                          ? hospitalNames[appt.hospitalId!] || "—"
+                          : appt.labId
+                          ? labNames[appt.labId] || "—"
+                          : "—";
+                        return (
+                          <tr key={appt.$id} className={`
+                            border-b
+                            ${darkMode ? "border-white/10 hover:bg-white/5" : "border-gray-100 hover:bg-gray-50"}
+                            transition-all
+                          `}>
+                            <td className="py-4 px-6">{date}</td>
+                            <td className="py-4 px-6">{time}</td>
+                            <td className="py-4 px-6">{institutionName}</td>
+                            <td className="py-4 px-6">{appt.doctorName || appt.test || "—"}</td>
+                            <td className="py-4 px-6">
+                              <span className={`
+                                inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                ${darkMode ? "bg-red-900 text-red-400" : "bg-red-100 text-red-700"}
+                              `}>
+                                ✖ Cancelled
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              {/* Mobile Card View for Cancelled */}
+              <div className="sm:hidden space-y-4 mb-8">
+                {cancelledAppointments.length === 0 ? (
+                  <p className="text-center py-4 text-gray-400">No cancelled appointments.</p>
+                ) : (
+                  cancelledAppointments.map(appt => {
+                    const dateObj = new Date(appt.timestamp);
+                    const date = dateObj.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+                    const time = dateObj.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: true });
+                    const isHospital = !!appt.hospitalId;
+                    const institutionName = isHospital
+                      ? hospitalNames[appt.hospitalId!] || "—"
+                      : appt.labId
+                      ? labNames[appt.labId] || "—"
+                      : "—";
+                    return (
+                      <div
+                        key={appt.$id}
+                        className={`
+                          ring-1 rounded-xl p-4 shadow-xl backdrop-blur-md space-y-2
+                          ${darkMode ? "bg-[#111418]/70 ring-white/10" : "bg-white ring-gray-200"}
+                        `}
+                      >
+                        <div className="flex justify-between text-sm">
+                          <span className={darkMode ? "text-white font-medium" : "text-gray-900 font-medium"}>{date}</span>
+                          <span className={darkMode ? "text-gray-400" : "text-gray-500"}>{time}</span>
+                        </div>
+                        <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                          <span className="font-semibold">
+                            {appt.doctorName ? "Hospital" : appt.test ? "Lab" : "Hospital/Lab"}:
+                          </span>{" "}
+                          {institutionName}
+                        </div>
+                        <div className={darkMode ? "text-sm text-white/90" : "text-sm text-gray-800"}>
+                          <span className="font-semibold">
+                            {appt.doctorName ? "Doctor Name" : appt.test ? "Test" : "—"}:
+                          </span>{" "}
+                          {appt.doctorName || appt.test || "—"}
+                        </div>
+                        <div>
+                          <span
+                            className={`
+                              inline-block px-3 py-1 rounded-full text-xs font-semibold
+                              ${darkMode ? "bg-red-900 text-red-400" : "bg-red-100 text-red-700"}
+                            `}
+                          >
+                            ✖ Cancelled
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </>
+          )
+        )}
+
+
         {selectedNav === "Medical_Records" && (
-            <></>
+            <>
+            <button
+              className="mt-4 px-6 py-2 mb-4 rounded-lg bg-blue-700 text-white font-semibold hover:bg-blue-800"
+              onClick={() => handleDownloadFullHistory(userId)}
+            >
+              Download Full Medical History (PDF)
+            </button>
+            <MedicalRecords userId={userId} darkMode={darkMode}/>
+            </>
             )}
         {selectedNav === "Report_Problem" && (
             <></>
@@ -487,6 +971,18 @@ export default function PatientDashboard({ userId }: Props) {
             )}
             </main>
         </div>
+
+        {/* Cancel Appointment Form Modal */}
+        {showCancelForm && selectedAppointmentId && (
+          <CancelAppointmentForm
+            appointmentId={selectedAppointmentId}
+            onClose={() => {
+              setShowCancelForm(false);
+              setSelectedAppointmentId(null);
+            }}
+            onCancelConfirmed = {handleCancelConfirmed}
+          />
+        )}
     </div>
 
   );
@@ -498,20 +994,23 @@ const NavItem = ({
   active = false,
   open = true,
   onClick,
+  disabled = false,
 }: {
   icon: React.ReactNode;
   label: string;
   active?: boolean;
   open?: boolean;
   onClick: () => void;
+  disabled : boolean;
 }) => (
   <div
-    onClick={onClick}
+    onClick={!disabled ? onClick : undefined}
     className={`flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer transition-all duration-300 whitespace-nowrap overflow-hidden ${
       active
         ? "bg-gray-200 dark:bg-[#222] text-black dark:text-white"
         : "hover:bg-gray-100 dark:hover:bg-[#222] text-gray-600 dark:text-gray-300"
     }`}
+    aria-disabled={disabled}
   >
     {icon}
     <span
@@ -524,25 +1023,7 @@ const NavItem = ({
   </div>
 );
 
-const STATUS_CARDS = [
-  {
-    key: AppointmentStatus.Done,
-    label: "previous",
-    icon: "/assets/icons/appointments.svg",
-  },
-  {
-    key: AppointmentStatus.Pending,
-    label: "upcoming",
-    icon: "/assets/icons/pending.svg",
-    iconColor: "text-blue-400",
-  },
-  {
-    key: AppointmentStatus.Cancelled,
-    label: "Cancelled",
-    icon: "/assets/icons/cancelled.svg",
-    iconColor: "text-red-400",
-  },
-];
+
 const StatCard = ({ icon, title, value }: { icon: React.ReactNode; title: string; value: number }) => (
   <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-md p-5 flex items-center gap-4">
     <div className="p-2 bg-gray-100 dark:bg-[#2a2a2a] rounded-lg">{icon}</div>

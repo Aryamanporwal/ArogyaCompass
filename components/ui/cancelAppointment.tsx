@@ -6,10 +6,11 @@ import Image from "next/image";
 
 interface CancelAppointmentFormProps {
   appointmentId: string;
-  onClose?: () => void; // Optional callback to close the form
+  onClose?: () => void;
+   onCancelConfirmed?: () => void; // Optional callback to close the form
 }
 
-export default function CancelAppointmentForm({ appointmentId , onClose}: CancelAppointmentFormProps) {
+export default function CancelAppointmentForm({ appointmentId , onClose, onCancelConfirmed}: CancelAppointmentFormProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [reason, setReason] = useState("");
@@ -37,6 +38,7 @@ export default function CancelAppointmentForm({ appointmentId , onClose}: Cancel
       const result = await cancelAppointment(appointmentId, reason);
       if (result.success) {
         setSuccessMsg("✅ Appointment successfully cancelled.");
+        if (onCancelConfirmed) onCancelConfirmed(); 
       } else {
         throw new Error("Failed to cancel");
       }

@@ -636,7 +636,7 @@ export default function Page() {
                                 Welcome Super Admin...
                               </h1>
                               <p className="mt-2 text-base sm:text-m text-left text-gray-800 dark:text-gray-300">
-                                ArogyaCompass Welcomes you to drive into the statics and technicalities!✨
+                                ArogyaCompass Welcomes you to drive into the statistics and technicalities!✨
                               </p>
                             </div>
                             <div className="text-xs mt-3 px-2 flex justify-between text-dark-600">
