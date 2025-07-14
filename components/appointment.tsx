@@ -16,6 +16,7 @@ import {
   CalendarPlus,
   PlusSquare,
   User,
+  Video,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -32,6 +33,8 @@ import FinePaymentModal from "./ui/finepayment";
 import MedicalRecords from "./ui/Medical_Record";
 import { getLabRecordsByUserId, getMedicineRecordsByUserId } from "@/lib/actions/medicalr.action";
 import { generateMedicalHistoryPDF } from "@/lib/utils/generateMedicalHistoryPDF";
+import FirstAidShortsFeed from "./ui/firsAidFeed";
+import FirstAidShortsSection from "./ui/firstAidShortsSection";
 
 
 type Document = Models.Document;
@@ -320,6 +323,14 @@ export default function PatientDashboard({ userId }: Props) {
                 active={selectedNav === "First_Aid"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("First_Aid")}
+                disabled = {false}
+                />
+                <NavItem
+                icon={<Video size={20} />}
+                label="Upload Video"
+                active={selectedNav === "Upload"}
+                open={sidebarOpen}
+                onClick={() => setSelectedNav("Upload")}
                 disabled = {false}
                 />
 
@@ -944,7 +955,7 @@ export default function PatientDashboard({ userId }: Props) {
         {selectedNav === "Medical_Records" && (
             <>
             <button
-              className="mt-4 px-6 py-2 mb-4 rounded-lg bg-blue-700 text-white font-semibold hover:bg-blue-800"
+              className="px-6 py-2 mb-4 rounded-lg bg-blue-700 text-white font-semibold hover:bg-blue-800"
               onClick={() => handleDownloadFullHistory(userId)}
             >
               Download Full Medical History (PDF)
@@ -956,7 +967,14 @@ export default function PatientDashboard({ userId }: Props) {
             <></>
             )}
         {selectedNav === "First_Aid" && (
-            <></>
+            <>
+              <FirstAidShortsFeed/>
+            </>
+            )}
+        {selectedNav === "Upload" && (
+            <>
+            <FirstAidShortsSection userId={userId} darkMode={darkMode} />
+            </>
             )}
         {selectedNav === "Book_Appointment" && (
             
