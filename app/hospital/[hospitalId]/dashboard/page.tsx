@@ -1,9 +1,14 @@
+"use client"
+import HospitalDashboard from '@/components/hospitalDashboard'
 import React from 'react'
+import { useParams } from "next/navigation";
 
-const hospital_dashboard = () => {
+const Hospital_dashboard = () => {
+   const params = useParams();
+    const hospitalId = typeof params?.hospitalId === "string" ? params.hospitalId : "";
   return (
-    <div>hospital_dashboard</div>
+    <div><HospitalDashboard params = {{hospitalId}}/></div>
   )
 }
 
-export default hospital_dashboard
+export default Hospital_dashboard
