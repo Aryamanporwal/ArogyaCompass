@@ -1,8 +1,8 @@
+// firstAidUpload.action.ts
 "use server";
-import { storage, databases, DATABASE_ID, FIRST_AID_VIDEO_UPLOAD_COLLECTION_ID } from "@/lib/appwrite.config"; // adjust import as per your setup
-import { ID } from "appwrite";
+import { storage, databases, DATABASE_ID, FIRST_AID_VIDEO_UPLOAD_COLLECTION_ID, BUCKET_ID } from "@/lib/appwrite.config";
+import { ID, Permission, Role } from "appwrite";
 
-// This function receives FormData from the client
 export async function uploadFirstAidVideo(formData: FormData) {
   const type = formData.get("type") as string;
   const title = formData.get("title") as string;
@@ -17,12 +17,16 @@ export async function uploadFirstAidVideo(formData: FormData) {
   } else if (type === "upload") {
     const file = formData.get("video") as File;
     if (!file) throw new Error("No video file provided");
-    // Upload to Appwrite Storage
-    const uploaded = await storage.createFile("firstaid-videos", ID.unique(), file);
+
+    // 🔐 Upload and make public (if needed)
+    const uploaded = await storage.createFile(BUCKET_ID!, ID.unique(), file, [
+      Permission.read(Role.any()) // 👈 or Role.user(userId) if private
+    ]);
+
     videoId = uploaded.$id;
   }
 
-  // Save metadata to Appwrite Database
+  // Save to Appwrite Database (NO videoUrl)
   await databases.createDocument(
     DATABASE_ID!,
     FIRST_AID_VIDEO_UPLOAD_COLLECTION_ID!,
@@ -41,6 +45,7 @@ export async function uploadFirstAidVideo(formData: FormData) {
 }
 
 
+
 export async function deleteFirstAidVideo({
   docId,
   type,
@@ -53,7 +58,7 @@ export async function deleteFirstAidVideo({
   // Delete from Storage if uploaded file
   if (type === "upload" && videoId) {
     try {
-      await storage.deleteFile("firstaid-videos", videoId);
+      await storage.deleteFile(BUCKET_ID!, videoId);
     } catch (err) {
       // File might already be deleted, ignore error
       console.log(err);

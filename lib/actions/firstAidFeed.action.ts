@@ -1,5 +1,13 @@
+// firstAidFeed.action.ts
 "use server";
-import { BUCKET_ID, DATABASE_ID, databases, ENDPOINT, FIRST_AID_VIDEO_UPLOAD_COLLECTION_ID, PROJECT_ID } from "@/lib/appwrite.config";
+import {
+  DATABASE_ID,
+  databases,
+  FIRST_AID_VIDEO_UPLOAD_COLLECTION_ID,
+  BUCKET_ID,
+  ENDPOINT,
+  PROJECT_ID
+} from "@/lib/appwrite.config";
 
 export interface FirstAidVideo {
   $id: string;
@@ -12,22 +20,30 @@ export interface FirstAidVideo {
   [key: string]: unknown;
 }
 
+// Utility to generate preview URL
+function generateVideoUrl(videoId: string): string {
+  return `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${videoId}/preview?project=${PROJECT_ID}`;
+}
+
 export async function getFirstAidVideos(): Promise<FirstAidVideo[]> {
   const res = await databases.listDocuments(DATABASE_ID!, FIRST_AID_VIDEO_UPLOAD_COLLECTION_ID!);
 
-  const withUrls: FirstAidVideo[] = await Promise.all(
-    res.documents.map(async (doc) => {
-      // Defensive: check for required fields
-      if (!doc.title || !doc.description || !doc.type) {
-        throw new Error("Document missing required fields");
-      }
-      let videoUrl: string | null = null;
-      if (doc.type === "upload" && doc.videoId) {
-        // Use .href for browser SDK (returns URL object)
-        videoUrl = `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${doc.videoFileId}/preview?project=${PROJECT_ID}`;
-      }
-      return { ...doc, videoUrl } as unknown as FirstAidVideo;
-    })
-  );
-  return withUrls;
+  const videos: FirstAidVideo[] = res.documents.map((doc) => {
+    if (!doc.title || !doc.description || !doc.type) {
+      throw new Error("Invalid document");
+    }
+
+    let videoUrl: string | null = null;
+
+    if (doc.type === "upload" && doc.videoId) {
+      videoUrl = generateVideoUrl(doc.videoId);
+    }
+
+    return {
+      ...doc,
+      videoUrl,
+    } as unknown as FirstAidVideo;
+  });
+
+  return videos;
 }

@@ -44,6 +44,7 @@
     "recharts": "^3.1.0",
     "resend": "^4.6.0",
     "sib-api-v3-sdk": "^8.5.0",
+    "swiper": "^11.2.10",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "twilio": "^5.7.2",
