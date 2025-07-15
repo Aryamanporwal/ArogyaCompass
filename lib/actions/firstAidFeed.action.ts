@@ -22,7 +22,7 @@ export interface FirstAidVideo {
 
 // Utility to generate preview URL
 function generateVideoUrl(videoId: string): string {
-  return `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${videoId}/preview?project=${PROJECT_ID}`;
+  return `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${videoId}/view?project=${PROJECT_ID}`;
 }
 
 export async function getFirstAidVideos(): Promise<FirstAidVideo[]> {

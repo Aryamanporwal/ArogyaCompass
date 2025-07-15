@@ -62,97 +62,100 @@ export default function FirstAidUpload({ userId, darkMode , onUploadSuccess}: Fi
 
 
   return (
-    <form
-      onSubmit={handleSubmit}
+<form
+  onSubmit={handleSubmit}
+  className={`
+    max-w-md mx-auto p-6 rounded-xl shadow-lg flex flex-col gap-4 border
+    ${darkMode
+      ? "bg-[#13151c] border-[#273864] text-white"
+      : "bg-slate-50 border-slate-200 text-slate-900"}
+  `}
+>
+  <h2
+    className={`text-xl font-semibold tracking-tight mb-1 ${darkMode ? "text-blue-400" : "text-blue-700"}`}
+  >
+    Upload First Aid Video
+  </h2>
+  <input
+    className={`
+      border rounded-md p-2 outline-none transition
+      text-base
+      ${darkMode
+        ? "bg-[#151929] border-[#273864] text-white placeholder:text-blue-100 focus:ring-2 focus:ring-blue-700"
+        : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-400"}
+    `}
+    type="text"
+    placeholder="Title"
+    value={title}
+    onChange={e => setTitle(e.target.value)}
+    required
+  />
+  <textarea
+    className={`
+      border rounded-md p-2 outline-none resize-none min-h-[60px]
+      ${darkMode
+        ? "bg-[#151929] border-[#273864] text-white placeholder:text-blue-100 focus:ring-2 focus:ring-blue-700"
+        : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-400"}
+    `}
+    placeholder="Description"
+    value={description}
+    onChange={e => setDescription(e.target.value)}
+  />
+  <select
+    value={type}
+    onChange={e => setType(e.target.value as "youtube"|"upload")}
+    className={`
+      border rounded-md p-2 outline-none text-base
+      ${darkMode
+        ? "bg-[#151929] border-[#273864] text-white focus:ring-2 focus:ring-blue-700"
+        : "bg-white border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-400"}
+    `}
+  >
+    <option value="youtube">YouTube Link</option>
+    <option value="upload">Upload File</option>
+  </select>
+  {type === "youtube" ? (
+    <input
       className={`
-        max-w-md mx-auto p-8 rounded-2xl shadow-2xl flex flex-col gap-5 border
+        border rounded-md p-2 outline-none transition
         ${darkMode
-          ? "bg-gradient-to-br from-[#151a28] to-[#222d44] border-blue-900 text-white"
-          : "bg-white border-gray-200 text-gray-900"}
+          ? "bg-[#151929] border-[#273864] text-white placeholder:text-blue-100 focus:ring-2 focus:ring-blue-700"
+          : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-400"}
       `}
-    >
-      <h2 className={`text-2xl font-bold mb-2 ${darkMode ? "text-blue-300" : "text-blue-700"}`}>
-        Upload First Aid Video
-      </h2>
-      <input
-        className={`
-          border rounded-lg p-3 outline-none transition
-          ${darkMode
-            ? "bg-[#192133] border-blue-900 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
-            : "bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"}
-        `}
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        required
-      />
-      <textarea
-        className={`
-          border rounded-lg p-3 outline-none transition resize-none min-h-[80px]
-          ${darkMode
-            ? "bg-[#192133] border-blue-900 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
-            : "bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"}
-        `}
-        placeholder="Description"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-      />
-      <select
-        value={type}
-        onChange={e => setType(e.target.value as "youtube"||"upload")}
-        className={`
-          border rounded-lg p-3 outline-none transition
-          ${darkMode
-            ? "bg-[#192133] border-blue-900 text-white focus:ring-2 focus:ring-blue-600"
-            : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500"}
-        `}
-      >
-        <option value="youtube">YouTube Link</option>
-        <option value="upload">Upload File</option>
-      </select>
-      {type === "youtube" ? (
-        <input
-          className={`
-            border rounded-lg p-3 outline-none transition
-            ${darkMode
-              ? "bg-[#192133] border-blue-900 text-white placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
-              : "bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500"}
-          `}
-          type="url"
-          placeholder="YouTube URL"
-          value={youtubeUrl}
-          onChange={e => setYoutubeUrl(e.target.value)}
-          required
-        />
-      ) : (
-        <input
-          className={`
-            border rounded-lg p-3 outline-none transition
-            file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-            file:text-sm file:font-semibold
-            ${darkMode
-              ? "bg-[#192133] border-blue-900 text-white file:bg-blue-800 file:text-white"
-              : "bg-gray-50 border-gray-300 text-gray-900 file:bg-blue-100 file:text-blue-700"}
-          `}
-          type="file"
-          accept="video/*"
-          onChange={handleVideoChange}
-          required
-        />
-      )}
-      <button
-        type="submit"
-        className={`
-          w-full py-3 rounded-lg font-semibold text-base shadow transition
-          ${darkMode
-            ? "bg-blue-700 hover:bg-blue-600 text-white"
-            : "bg-blue-600 hover:bg-blue-700 text-white"}
-        `}
-        disabled={uploading}
-      >
-        {uploading ? "Uploading..." : "Upload"}
-      </button>
-    </form>
+      type="url"
+      placeholder="YouTube URL"
+      value={youtubeUrl}
+      onChange={e => setYoutubeUrl(e.target.value)}
+      required
+    />
+  ) : (
+    <input
+      className={`
+        border rounded-md p-2 outline-none transition file:mr-3 file:py-1.5 file:px-3 file:rounded
+        file:border-0 file:text-sm file:font-medium
+        ${darkMode
+          ? "bg-[#151929] border-[#273864] text-white file:bg-blue-900 file:text-white"
+          : "bg-white border-slate-300 text-slate-900 file:bg-blue-100 file:text-blue-700"}
+      `}
+      type="file"
+      accept="video/*"
+      onChange={handleVideoChange}
+      required
+    />
+  )}
+  <button
+    type="submit"
+    className={`
+      w-full py-2.5 rounded-md font-semibold text-base shadow transition
+      ${darkMode
+        ? "bg-blue-700 hover:bg-blue-600 text-white"
+        : "bg-blue-600 hover:bg-blue-700 text-white"}
+    `}
+    disabled={uploading}
+  >
+    {uploading ? "Uploading..." : "Upload"}
+  </button>
+</form>
+
   );
 }

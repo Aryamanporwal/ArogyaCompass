@@ -3,7 +3,6 @@ import {
   CalendarDays,
   Search,
   LogOut,
-  Settings,
   Home,
   ClipboardList,
   Sun,
@@ -35,6 +34,7 @@ import { getLabRecordsByUserId, getMedicineRecordsByUserId } from "@/lib/actions
 import { generateMedicalHistoryPDF } from "@/lib/utils/generateMedicalHistoryPDF";
 import FirstAidShortsFeed from "./ui/firsAidFeed";
 import FirstAidShortsSection from "./ui/firstAidShortsSection";
+import ReportProblem from "./ui/ReportProblem";
 
 
 type Document = Models.Document;
@@ -342,15 +342,6 @@ export default function PatientDashboard({ userId }: Props) {
                 onClick={() => setSelectedNav("Book_Appointment")}
                 disabled = {false}
                 />
-
-              <NavItem
-                icon={<Settings size={20} />}
-                label="Settings"
-                active={selectedNav === "Settings"}
-                open={sidebarOpen}
-                onClick={() => setSelectedNav("Settings")}
-                disabled = {false}
-              />
 
             </nav>
           </div>
@@ -964,7 +955,7 @@ export default function PatientDashboard({ userId }: Props) {
             </>
             )}
         {selectedNav === "Report_Problem" && (
-            <></>
+            <ReportProblem />
             )}
         {selectedNav === "First_Aid" && (
             <>
@@ -984,9 +975,9 @@ export default function PatientDashboard({ userId }: Props) {
               })()
             
             )}
-        {selectedNav === "Settings" && (
+        {/* {selectedNav === "Settings" && (
          <></>
-            )}
+            )} */}
             </main>
         </div>
 

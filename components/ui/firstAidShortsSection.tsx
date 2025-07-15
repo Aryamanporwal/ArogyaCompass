@@ -34,58 +34,64 @@ export default function FirstAidShortsSection({ userId, darkMode }: { userId: st
   }
 
   return (
-    <div className="flex flex-col min-h-[90vh]">
-      {/* Feed */}
-      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 p-4">
-        {videos.map(video => (
-          <div
-            key={video.$id}
-            className={`
-              relative rounded-2xl shadow-lg border flex flex-col gap-2 p-4
-              ${darkMode
-                ? "bg-[#151a28] border-blue-900 text-white"
-                : "bg-white border-gray-200 text-gray-900"}
-            `}
-          >
-            {/* Delete Icon */}
-            <button
-              className="absolute top-4 right-4 text-red-500 hover:text-red-700"
-              onClick={() => handleDelete(video)}
-              disabled={deletingId === video.$id}
-              title="Delete video"
+      <div className="flex flex-col min-h-[90vh]">
+        {/* Feed Grid */}
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+          {videos.map(video => (
+            <div
+              key={video.$id}
+              className={`
+                relative rounded-xl shadow-md border p-3 flex flex-col gap-2
+                transition-transform hover:scale-[1.01]
+                ${darkMode
+                  ? "bg-[#10131B] border-[#2B3A57] text-white"
+                  : "bg-white border-slate-200 text-gray-900"}
+              `}
             >
-              <Trash2 size={22} />
-            </button>
-            <div className="w-full aspect-[9/16] bg-black rounded-lg flex items-center justify-center mb-2">
-              {video.type === "youtube" ? (
-                <iframe
-                  className="w-full h-full rounded-lg"
-                  src={`https://www.youtube.com/embed/${extractYouTubeId(video.youtubeUrl ?? "")}`}
-                  title={video.title}
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
-              ) : (
-                <video
-                  src={video.videoUrl || undefined}
-                  controls
-                  autoPlay
-                  muted
-                  loop
-                  className="w-full h-full rounded-lg"
-                />
-              )}
+              {/* Delete Icon */}
+              <button
+                title="Delete"
+                onClick={() => handleDelete(video)}
+                disabled={deletingId === video.$id}
+                className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+              >
+                <Trash2 size={20} />
+              </button>
+
+              {/* Video / Thumbnail */}
+              <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+                {video.type === "youtube" ? (
+                  <iframe
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${extractYouTubeId(video.youtubeUrl ?? "")}`}
+                    title={video.title}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                    loading="lazy"
+                  />
+                ) : (
+                  <video
+                    src={video.videoUrl || undefined}
+                    controls
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+
+              {/* Title & Description */}
+              <div className="flex-1">
+                <div className="font-semibold text-base truncate">{video.title}</div>
+                <p className="text-sm opacity-70 line-clamp-2">{video.description}</p>
+              </div>
             </div>
-            <div className="font-semibold text-lg">{video.title}</div>
-            <div className="text-gray-400 text-sm">{video.description}</div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* Upload Form Section */}
+        <div className="mt-8 mb-4 max-w-3xl mx-auto w-full px-4">
+          <FirstAidUpload userId={userId} darkMode={darkMode} onUploadSuccess={handleUploadSuccess} />
+        </div>
       </div>
-      {/* Upload Form at the bottom */}
-      <div className="mt-8 mb-4">
-        <FirstAidUpload userId={userId} darkMode={darkMode} onUploadSuccess={handleUploadSuccess} />
-      </div>
-    </div>
   );
 }
 

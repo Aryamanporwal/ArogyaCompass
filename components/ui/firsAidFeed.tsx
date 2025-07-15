@@ -60,6 +60,7 @@ import { getFirstAidVideos, FirstAidVideo } from "@/lib/actions/firstAidFeed.act
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Mousewheel } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
+import { Heart, Share2, Bookmark } from "lucide-react";
 import "swiper/css";
 import "swiper/css/mousewheel";
 
@@ -67,6 +68,9 @@ export default function FirstAidShortsFeed() {
   const [videos, setVideos] = useState<FirstAidVideo[]>([]);
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
   const swiperRef = useRef<SwiperType | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [likedVideos, setLikedVideos] = useState<Record<string, boolean>>({});
+
 
   // Fetch videos
   useEffect(() => {
@@ -77,7 +81,7 @@ export default function FirstAidShortsFeed() {
     fetchVideos();
   }, []);
 
-  // Autoplay first video after videos are loaded
+  // Autoplay the first video when videos are loaded
   useEffect(() => {
     if (videos.length > 0) {
       setTimeout(() => {
@@ -85,22 +89,56 @@ export default function FirstAidShortsFeed() {
         if (firstVideo) {
           firstVideo.play().catch(() => {});
         }
-      }, 300); // Delay to ensure DOM is ready
+      }, 300);
     }
   }, [videos]);
 
-  // Handle video playback on active slide change
+  // Handle slide change: only play active video
   const handleActiveIndexChange = (swiper: SwiperType) => {
-    videoRefs.current.forEach((video, index) => {
+    setActiveIndex(swiper.activeIndex);
+    videoRefs.current.forEach((video, idx) => {
       if (!video) return;
-      if (index === swiper.activeIndex) {
+      if (idx === swiper.activeIndex) {
         video.play().catch(() => {});
+        video.muted = false;
       } else {
         video.pause();
         video.currentTime = 0;
+        video.muted = true;
       }
     });
   };
+
+  //like button 
+  const toggleLike = (videoId: string) => {
+  setLikedVideos((prev) => ({
+    ...prev,
+    [videoId]: !prev[videoId],
+  }));
+};
+  // Share function
+  function handleShare(video: FirstAidVideo) {
+    const shareUrl =
+      video.type === "youtube"
+        ? video.youtubeUrl ?? window.location.href
+        : video.videoUrl ?? window.location.href;
+
+    const shareData = {
+      title: video.title,
+      text: video.description,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {
+        navigator.clipboard.writeText(shareUrl);
+        alert("Link copied to clipboard!");
+      });
+    } else {
+      navigator.clipboard.writeText(shareUrl);
+      alert("Link copied to clipboard!");
+    }
+  }
 
   return (
     <Swiper
@@ -117,32 +155,74 @@ export default function FirstAidShortsFeed() {
     >
       {videos.map((video, index) => (
         <SwiperSlide key={video.$id}>
-          <div className="h-screen w-full flex flex-col items-center justify-center bg-black text-white">
-            <div className="w-full max-w-xs aspect-[9/16] rounded-lg shadow-lg overflow-hidden">
-              {video.type === "youtube" ? (
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${extractYouTubeId(video.youtubeUrl ?? "")}?autoplay=1&mute=1`}
-                  title={video.title}
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
-              ) : (
-                <video
-                  ref={(el) => {
-                    videoRefs.current[index] = el;
-                  }}
-                  src={video.videoUrl || undefined}
-                  controls={false}
-                  muted = {false}
-                  loop
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              )}
+          <div className="relative h-screen w-full bg-black overflow-hidden">
+            {/* Centered Video */}
+            <div className="absolute inset-0 flex justify-center items-center">
+              <div className="w-full max-w-[400px] aspect-[9/16] relative rounded-lg overflow-hidden shadow-lg">
+                {video.type === "youtube" ? (
+                  <iframe
+                    className="w-full h-full absolute inset-0"
+                    src={`https://www.youtube.com/embed/${extractYouTubeId(video.youtubeUrl ?? "")}?autoplay=1&mute=1`}
+                    title={video.title}
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    ref={(el) => {
+                      videoRefs.current[index] = el;
+                    }}
+                    src={video.videoUrl || undefined}
+                    controls={false}
+                    loop
+                    muted={index !== activeIndex}
+                    playsInline
+                    autoPlay={index === activeIndex}
+                    className="w-full h-full object-cover absolute inset-0"
+                  />
+                )}
+
+                {/* Bottom Overlay with Title & Description */}
+                <div className="absolute bottom-0 w-full px-4 py-6 bg-gradient-to-t from-black/80 to-transparent text-white pointer-events-none">
+                  <h2 className="text-lg font-semibold mb-1 line-clamp-2">
+                    {video.title}
+                  </h2>
+                  <p className="text-sm text-gray-300 line-clamp-3">
+                    {video.description}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="absolute right-4 bottom-28 flex flex-col items-center space-y-6 text-white z-10">
+                  <button
+                    className="hover:scale-110 transition active:scale-95 bg-black/40 rounded-full p-2"
+                    title="Like"
+                    onClick={() => toggleLike(video.$id)}
+                  >
+                    <Heart
+                      size={28}
+                      className={`transition-colors duration-200 ${
+                        likedVideos[video.$id] ? "text-pink-500 fill-pink-500" : "text-white"
+                      }`}
+                    />
+                  </button>
+                  <button
+                    className="hover:scale-110 transition active:scale-95 bg-black/40 rounded-full p-2"
+                    title="Share"
+                    onClick={() => handleShare(video)}
+                  >
+                    <Share2 size={28} />
+                  </button>
+                  <button
+                    className="hover:scale-110 transition active:scale-95 bg-black/40 rounded-full p-2"
+                    title="Save"
+                    onClick={() => alert("Saved 🔖")}
+                  >
+                    <Bookmark size={28} />
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="mt-4 text-xl font-bold">{video.title}</div>
-            <div className="text-gray-400 text-sm px-4 text-center">{video.description}</div>
           </div>
         </SwiperSlide>
       ))}
@@ -152,6 +232,8 @@ export default function FirstAidShortsFeed() {
 
 // Helper to extract YouTube video ID
 function extractYouTubeId(url: string) {
-  const match = url.match(/(?:youtube\.com.*v=|youtu\.be\/)([\w-]+)/);
+  const match = url.match(
+    /(?:youtube\.com.*[?&]v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/
+  );
   return match ? match[1] : "";
 }
