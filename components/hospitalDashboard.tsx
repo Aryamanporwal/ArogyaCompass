@@ -16,6 +16,7 @@ import {
   User,
   CalendarCheck2,
   UserCog,
+  Flame,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -29,6 +30,7 @@ import { getTodaysAppointmentsByHospitalId } from "@/lib/actions/appointment.act
 import DoctorAttendanceChart from "./ui/DoctorAttendanceChart";
 import AssistantAttendanceChart from "./ui/AssistantAttendanceChart";
 import HospitalComparisonChart from "@/components/ui/HospitalComparisonChart";
+import HospitalHeatMap from "./HospitalHeatMap";
 
 interface PageProps {
   params: {
@@ -550,13 +552,46 @@ useEffect(() => {
             )}                 
             </>
           )}
+      {selectedNav === "Statics" && (
+        <div className="space-y-8 mb-10">
+          {/* Section Header */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+              <BarChart2 className="text-blue-600" size={22} />
+              Statistics Overview
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Compare hospital performance and visualize appointment activity across the city.
+            </p>
+          </div>
 
+          {/* Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Hospital Comparison Card */}
+            <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart2 className="text-green-600" size={20} />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Hospital Comparison
+                </h3>
+              </div>
+              <HospitalComparisonChart city={hospital?.city || "Unknown"} />
+            </div>
 
-        {selectedNav === "Statics" && (
-            <>
-                <HospitalComparisonChart city={hospital?.city || "Unknown"} />
-            </>
-            )}
+            {/* Heatmap Card */}
+            <div className="bg-white dark:bg-[#1e1e1e] p-6 rounded-xl shadow-md">
+              <div className="flex items-center gap-2 mb-4">
+                <Flame className="text-red-600" size={20} />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  City Heatmap
+                </h3>
+              </div>
+              <HospitalHeatMap />
+            </div>
+          </div>
+        </div>
+      )}
+
         {selectedNav === "Attendance Record" && (
             <>
             </>

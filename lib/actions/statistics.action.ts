@@ -2,7 +2,7 @@
 
 import { DATABASE_ID, APPOINTMENT_COLLECTION_ID, databases } from "@/lib/appwrite.config";
 import { Query } from "node-appwrite";
-import { getAllHospitals, getHospitalById } from "./hospital.action"; // Adjust path as needed
+import { getHospitalById } from "./hospital.action"; // Adjust path as needed
 
 
 export const getAppointmentsByCityGroupedByHospital = async (city: string) => {
@@ -49,25 +49,5 @@ export const getAppointmentsByCityGroupedByHospital = async (city: string) => {
 };
 
 
-export const getHospitalsWithAppointmentCount = async () => {
-  try {
-    const hospitals = await getAllHospitals(); // from your existing hospital.action.ts
-    const appointments = await databases.listDocuments(DATABASE_ID!, APPOINTMENT_COLLECTION_ID!);
 
-    const hospitalMap: Record<string, number> = {};
-    appointments.documents.forEach((appt) => {
-      if (appt.hospitalId) {
-        hospitalMap[appt.hospitalId] = (hospitalMap[appt.hospitalId] || 0) + 1;
-      }
-    });
-
-    return hospitals.map((hospital) => ({
-      ...hospital,
-      appointmentCount: hospitalMap[hospital.$id] || 0,
-    }));
-  } catch (err) {
-    console.error("Error fetching heatmap data:", err);
-    return [];
-  }
-};
 

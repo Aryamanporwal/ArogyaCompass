@@ -1,7 +1,7 @@
 "use server";
 
 import { ID } from "node-appwrite";
-import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID, ENDPOINT, BUCKET_ID, PROJECT_ID } from "@/lib/appwrite.config";
+import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID, ENDPOINT, BUCKET_ID, PROJECT_ID, APPOINTMENT_COLLECTION_ID } from "@/lib/appwrite.config";
 import { Query } from "node-appwrite";
 import { storage } from "@/lib/appwrite.config";
 import { InputFile } from "node-appwrite/file";
@@ -223,3 +223,24 @@ export const getHospitalById = async (hospitalId: string) => {
   return res;
 };
 
+export const getHospitalsWithAppointmentCount = async () => {
+  try {
+    const hospitals = await getAllHospitals(); // from your existing hospital.action.ts
+    const appointments = await databases.listDocuments(DATABASE_ID!, APPOINTMENT_COLLECTION_ID!);
+
+    const hospitalMap: Record<string, number> = {};
+    appointments.documents.forEach((appt) => {
+      if (appt.hospitalId) {
+        hospitalMap[appt.hospitalId] = (hospitalMap[appt.hospitalId] || 0) + 1;
+      }
+    });
+
+    return hospitals.map((hospital) => ({
+      ...hospital,
+      appointmentCount: hospitalMap[hospital.$id] || 0,
+    }));
+  } catch (err) {
+    console.error("Error fetching heatmap data:", err);
+    return [];
+  }
+};
