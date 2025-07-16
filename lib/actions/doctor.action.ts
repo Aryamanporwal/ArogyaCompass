@@ -1,11 +1,12 @@
 "use server";
-import { databases, DATABASE_ID, DOCTOR_COLLECTION_ID, APPOINTMENT_COLLECTION_ID, MEDICINE_RECORD_COLLECTION_ID } from "@/lib/appwrite.config";
+import { databases, DATABASE_ID, DOCTOR_COLLECTION_ID, APPOINTMENT_COLLECTION_ID, MEDICINE_RECORD_COLLECTION_ID, BUCKET_ID, storage, ENDPOINT, PROJECT_ID } from "@/lib/appwrite.config";
 import { Models, Query, ID } from "node-appwrite";
 import { generatePasskey } from "../utils/generatePasskey";
 import { generatePasskeyPDF } from "../utils/generatePasskeyPDF";
 import { sendEmailWithPDF } from "./sendEmailwithPDF";
 import { generateMedicalPDF } from "../utils/generateMedicalPDF";
 import { sendMedicalEmailWithPDF } from "./sendMedicalEmailwithPDF";
+import { InputFile } from "node-appwrite/file";
 
 export interface Doctor {
   $id: string;
@@ -242,3 +243,77 @@ export const getDoctorsByHospitalId = async (
     return [];
   }
 };
+
+
+type DoctorParams = {
+  Name: string;
+  Email: string;
+  phone: string;
+  Address: string;
+  City: string;
+  licenseNumber: string;
+  speciality: string[];
+  availability: string[];
+  experience: number;
+  hospitalId: string;
+};
+
+export const registerDoctor = async (
+  doctorData: DoctorParams,
+  logoFile?: File
+) => {
+  try {
+    const doctorId = ID.unique();
+    let logoResult;
+
+    // ✅ Upload doctor logo if provided
+    if (logoFile) {
+      const arrayBuffer = await logoFile.arrayBuffer();
+      const inputFile = InputFile.fromBuffer(Buffer.from(arrayBuffer), logoFile.name);
+      logoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
+    }
+
+    // ✅ Generate passkey and default password
+    const doctorPasskey = generatePasskey();
+    const doctorPassword = 'DOCT' + doctorData.Name.slice(-2).toUpperCase(); // e.g., DOCTSH
+
+    // ✅ Create Doctor in Appwrite
+    const newDoctor = await databases.createDocument(
+      DATABASE_ID!,
+      DOCTOR_COLLECTION_ID!,
+      doctorId,
+      {
+        ...doctorData,
+        logoUrl: logoResult
+          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${logoResult.$id}/view?project=${PROJECT_ID}`
+          : null,
+        logoId: logoResult?.$id ?? null,
+        logo: logoResult?.name ?? null,
+        passkey: doctorPasskey,
+      }
+    );
+
+    // ✅ Generate PDF & Send Email
+    const pdfBlob = await generatePasskeyPDF({
+      name: doctorData.Name,
+      email: doctorData.Email,
+      role: "Doctor",
+      passkey: doctorPasskey,
+      password: doctorPassword,
+    });
+
+    await sendEmailWithPDF({
+      to: doctorData.Email,
+      name: doctorData.Name,
+      role: "Doctor",
+      pdfBlob,
+    });
+
+    return { success: true, doctor: newDoctor };
+  } catch (error) {
+    console.error("❌ Error registering doctor:", error);
+    return { success: false, error };
+  }
+};
+
+

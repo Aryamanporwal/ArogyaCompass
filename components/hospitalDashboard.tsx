@@ -17,6 +17,7 @@ import {
   CalendarCheck2,
   UserCog,
   Flame,
+  Trash2,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -31,6 +32,8 @@ import DoctorAttendanceChart from "./ui/DoctorAttendanceChart";
 import AssistantAttendanceChart from "./ui/AssistantAttendanceChart";
 import HospitalComparisonChart from "@/components/ui/HospitalComparisonChart";
 import HospitalHeatMap from "./HospitalHeatMap";
+import DoctorRegisterForm from "@/components/form/DoctorRegisterForm"; // adjust the path as needed
+
 
 interface PageProps {
   params: {
@@ -275,17 +278,17 @@ useEffect(() => {
               />
               <NavItem
                 icon={<BarChart2 size={20} />}
-                label="Statics"
+                label="Statistics"
                 active={selectedNav === "Statics"}
                 open={sidebarOpen}
                 onClick={() => setSelectedNav("Statics")}
               />
               <NavItem
                 icon={<CalendarCheck size={20} />}
-                label="Attendance Record"
-                active={selectedNav === "Attendance Record"}
+                label="Add Doctor"
+                active={selectedNav === "Add Doctor"}
                 open={sidebarOpen}
-                onClick={() => setSelectedNav("Attendance Record")}
+                onClick={() => setSelectedNav("Add Doctor")}
               />
               <NavItem
                 icon={<FileEdit size={20} />}
@@ -592,10 +595,74 @@ useEffect(() => {
         </div>
       )}
 
-        {selectedNav === "Attendance Record" && (
-            <>
-            </>
-            )}
+      {selectedNav === "Add Doctor" && (
+          <div className="w-full flex flex-col md:flex-row gap-8">
+            {/* LEFT: List of Doctor Cards */}
+            <div className="md:w-2/3 w-full">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                All Registered Doctors
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-h-[75vh] overflow-y-auto pr-2">
+                {doctors.length === 0 ? (
+                  <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-10">
+                    No doctors registered yet.
+                  </div>
+                ) : (
+                  doctors.map((doctor) => (
+                    <div
+                      key={doctor.$id}
+                      className="flex items-center gap-4 bg-white dark:bg-[#23272c] rounded-xl shadow group px-5 py-4 hover:shadow-lg transition"
+                    >
+                      <Image
+                        src={doctor.logoUrl || "/doctor-avatar.png"}
+                        alt={doctor.Name}
+                        width={56}
+                        height={56}
+                        className="rounded-full object-cover border-2 border-blue-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
+                            Dr. {doctor.Name}
+                          </h3>
+                          {doctor.isVerified && (
+                            <span className="ml-1 px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded">
+                              Verified
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                          {doctor.Email}
+                        </p>
+                        <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
+                          {Array.isArray(doctor.speciality)
+                            ? doctor.speciality.join(", ")
+                            : doctor.speciality}
+                        </p>
+                        {doctor.City && (
+                          <p className="text-xs text-gray-400 mt-1">{doctor.City}</p>
+                        )}
+                      </div>
+                      <button
+                        aria-label="Delete doctor"
+                        className="ml-2 p-2 rounded-full transition bg-red-50 hover:bg-red-100 dark:bg-[#25292c] dark:hover:bg-red-900 group-hover:bg-red-100 group-hover:dark:bg-red-900"
+                        // onClick={() => handleDelete(doctor.$id)}
+                      >
+                        <Trash2 className="h-5 w-5 text-red-500 dark:text-red-400" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT: Doctor Registration Form */}
+            <div className="md:w-1/3 w-full">
+              <DoctorRegisterForm hospitalId={params.hospitalId} />
+            </div>
+          </div>
+        )}
+
 
         {selectedNav === "Update Details" && (
             <></>
