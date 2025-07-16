@@ -21,11 +21,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { handleResetPasskey } from "@/lib/actions/lab.action";
+import { handleResetPasskey } from "@/lib/actions/hospital.action";
 import { useRouter } from "next/navigation";
 import { getHospitalById } from "@/lib/actions/payment.action";
 import { getPendingAppointmentsByHospitalId } from "@/lib/actions/appointment.action";
-import { getDoctorsByHospitalId } from "@/lib/actions/doctor.action";
+import { deleteDoctorById, getDoctorsByHospitalId } from "@/lib/actions/doctor.action";
 import { getAssistantsByHospitalId } from "@/lib/actions/assistant.action";
 import { getTodaysAppointmentsByHospitalId } from "@/lib/actions/appointment.action";
 import DoctorAttendanceChart from "./ui/DoctorAttendanceChart";
@@ -146,10 +146,9 @@ useEffect(() => {
         router.push("/"); // redirect to home
     };
 
-    const handleResetLabPasskey = async () => {
+    const handleResetHospitalPasskey = async () => {
         const confirmed = confirm("Are you sure you want to reset your passkey?");
         if (!confirmed) return;
-        // Call Appwrite function or backend logic here
         const res = await handleResetPasskey(params.hospitalId);
         if (res) {
             alert(res.message || "Passkey reset successfully. Please check your email for the new passkey.");
@@ -170,6 +169,17 @@ useEffect(() => {
 
   fetchTodaysAppointments();
 }, [params.hospitalId]);
+
+    const handleDeleteDoctor = async (doctorId: string) => {
+    const res = await deleteDoctorById(doctorId);
+    if (res.success) {
+      // refresh doctor list or show toast
+      console.log(res.message);
+    } else {
+      console.error(res.message);
+    }
+  };
+
 
       useEffect(() => {
     const fetchPendingAppointments = async () => {
@@ -596,82 +606,79 @@ useEffect(() => {
       )}
 
       {selectedNav === "Add Doctor" && (
-          <div className="w-full flex flex-col md:flex-row gap-8">
-            {/* LEFT: List of Doctor Cards */}
-            <div className="md:w-2/3 w-full">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                All Registered Doctors
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-h-[75vh] overflow-y-auto pr-2">
-                {doctors.length === 0 ? (
-                  <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-10">
-                    No doctors registered yet.
-                  </div>
-                ) : (
-                  doctors.map((doctor) => (
-                    <div
-                      key={doctor.$id}
-                      className="flex items-center gap-4 bg-white dark:bg-[#23272c] rounded-xl shadow group px-5 py-4 hover:shadow-lg transition"
-                    >
-                      <Image
-                        src={doctor.logoUrl || "/doctor-avatar.png"}
-                        alt={doctor.Name}
-                        width={56}
-                        height={56}
-                        className="rounded-full object-cover border-2 border-blue-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
-                            Dr. {doctor.Name}
-                          </h3>
-                          {doctor.isVerified && (
-                            <span className="ml-1 px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded">
-                              Verified
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                          {doctor.Email}
-                        </p>
-                        <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
-                          {Array.isArray(doctor.speciality)
-                            ? doctor.speciality.join(", ")
-                            : doctor.speciality}
-                        </p>
-                        {doctor.City && (
-                          <p className="text-xs text-gray-400 mt-1">{doctor.City}</p>
+        <section className="w-full max-w-6xl mx-auto px-2 md:px-4 flex flex-col gap-8">
+          {/* Doctor Cards List */}
+          <div>
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+              All Registered Doctors
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto pr-2">
+              {doctors.length === 0 ? (
+                <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-20">
+                  No doctors registered yet.
+                </div>
+              ) : (
+                doctors.map((doctor) => (
+                  <div
+                    key={doctor.$id}
+                    className="flex items-center gap-4 bg-white dark:bg-[#1e1e1e]  rounded-xl shadow px-5 py-4 hover:shadow-lg transition border border-gray-100 dark:border-[#32394a]"
+                  >
+                    <Image
+                      src={doctor.logoUrl || "/doctor-avatar.png"}
+                      alt={doctor.Name}
+                      width={56}
+                      height={56}
+                      className="rounded-full object-cover border-2 border-blue-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                          Dr. {doctor.Name}
+                        </h3>
+                        {doctor.isVerified && (
+                          <span className="ml-1 px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded">
+                            Verified
+                          </span>
                         )}
                       </div>
-                      <button
-                        aria-label="Delete doctor"
-                        className="ml-2 p-2 rounded-full transition bg-red-50 hover:bg-red-100 dark:bg-[#25292c] dark:hover:bg-red-900 group-hover:bg-red-100 group-hover:dark:bg-red-900"
-                        // onClick={() => handleDelete(doctor.$id)}
-                      >
-                        <Trash2 className="h-5 w-5 text-red-500 dark:text-red-400" />
-                      </button>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                        {doctor.Email}
+                      </p>
+                      <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
+                        {Array.isArray(doctor.speciality)
+                          ? doctor.speciality.join(", ")
+                          : doctor.speciality}
+                      </p>
+                      {doctor.City && (
+                        <p className="text-xs text-gray-400 mt-1">{doctor.City}</p>
+                      )}
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* RIGHT: Doctor Registration Form */}
-            <div className="md:w-1/3 w-full">
-              <DoctorRegisterForm hospitalId={params.hospitalId} />
+                    <button
+                      aria-label="Delete doctor"
+                      className="ml-2 p-2 rounded-full transition bg-red-50 hover:bg-red-100 dark:bg-[#25292c] dark:hover:bg-red-900"
+                      onClick={() => handleDeleteDoctor(doctor.$id)}
+                    >
+                      <Trash2 className="h-5 w-5 text-red-500 dark:text-red-400" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
-        )}
+
+          {/* Doctor Registration Form at Bottom */}
+          <div className="w-full mb-10">
+              <DoctorRegisterForm hospitalId={params.hospitalId} />
+          </div>
+        </section>
+      )}
 
 
         {selectedNav === "Update Details" && (
-            <></>
-        )}
-
-        {selectedNav === "Donate" && (
+            <>
           <div className="flex flex-col mb-6 sm:flex-row gap-6">
             {/* <div className="hidden lg:block lg:min-w-[250px]" /> */}
-          <div className="bg-white dark:bg-[#1e1e1e] mb-6 p-6 sm:p-10 rounded-2xl shadow-xl w-full sm:max-w-4xl mx-auto space-y-10">
+          <div className="bg-white dark:bg-[#1e1e1e] mb-6 p-6 sm:p-10 rounded-2xl shadow-xl w-full mx-auto space-y-10">
             
             {/* Header */}
             <div className="text-center">
@@ -739,7 +746,7 @@ useEffect(() => {
                     const expectedKey = `HOSP${firstTwo}`;
 
                     if (passkey === expectedKey) {
-                      handleResetLabPasskey();
+                      handleResetHospitalPasskey();
                     } else {
                       alert("Invalid passkey. Please try again.");
                     }
@@ -775,6 +782,11 @@ useEffect(() => {
             </div>
           </div>
            </div>
+            </>
+        )}
+
+        {selectedNav === "Donate" && (
+           <></>
            )}
             </main>
         </div>

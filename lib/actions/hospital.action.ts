@@ -244,3 +244,62 @@ export const getHospitalsWithAppointmentCount = async () => {
     return [];
   }
 };
+
+
+
+export const updateLabPasskey = async (
+  hospitalId: string,
+  updates: { passkey: string }
+) => {
+  try {
+    await databases.updateDocument(
+      DATABASE_ID!,
+      HOSPITAL_COLLECTION_ID!,
+      hospitalId,
+      updates
+    );
+  } catch (error) {
+    console.error("Failed to update Lab passkey:", error);
+    throw error;
+  }
+};
+
+export const handleResetPasskey = async (labId : string) => {
+    try {
+        const hospital = await getHospitalById(labId);
+        if (!hospital || !hospital.email || !hospital.name) {
+        throw new Error("Hospital info is incomplete");
+        }
+
+    // 1. Generate new passkey & password
+    const newPasskey = generatePasskey();
+    const newPassword = "HOSP" + hospital.name.slice(0,2).toUpperCase();
+
+    await updateLabPasskey(hospital.$id, {
+      passkey: newPasskey,
+    });
+
+    // 3. Generate new PDF
+    const newPDF = await generatePasskeyPDF({
+      name: hospital.name,
+      email: hospital.email,
+      role: "Hospital",
+      passkey: newPasskey,
+      password: newPassword,
+    });
+
+    // 4. Send email with new PDF
+    await sendEmailWithPDF({
+      to: hospital.email,
+      name: hospital.name,
+      role: "Hospital",
+      pdfBlob: newPDF,
+    });
+
+    return { success: true, message: "New passkey generated and emailed successfully." };
+  } catch (err) {
+    console.error("Error resetting passkey:", err);
+      return { success: false, message: "Failed to reset passkey." };  }
+
+};
+

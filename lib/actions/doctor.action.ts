@@ -266,18 +266,15 @@ export const registerDoctor = async (
     const doctorId = ID.unique();
     let logoResult;
 
-    // ✅ Upload doctor logo if provided
     if (logoFile) {
       const arrayBuffer = await logoFile.arrayBuffer();
       const inputFile = InputFile.fromBuffer(Buffer.from(arrayBuffer), logoFile.name);
       logoResult = await storage.createFile(BUCKET_ID!, ID.unique(), inputFile);
     }
 
-    // ✅ Generate passkey and default password
     const doctorPasskey = generatePasskey();
     const doctorPassword = 'DOCT' + doctorData.Name.slice(-2).toUpperCase(); // e.g., DOCTSH
 
-    // ✅ Create Doctor in Appwrite
     const newDoctor = await databases.createDocument(
       DATABASE_ID!,
       DOCTOR_COLLECTION_ID!,
@@ -293,7 +290,6 @@ export const registerDoctor = async (
       }
     );
 
-    // ✅ Generate PDF & Send Email
     const pdfBlob = await generatePasskeyPDF({
       name: doctorData.Name,
       email: doctorData.Email,
@@ -316,4 +312,21 @@ export const registerDoctor = async (
   }
 };
 
+export const deleteDoctorById = async (doctorId: string) => {
+  try {
+    const doctor = await getDoctorById(doctorId);
+    if (!doctor) throw new Error("Doctor not found");
+
+    if (doctor.logoId) {
+      await storage.deleteFile(BUCKET_ID!, doctor.logoId);
+    }
+
+    await databases.deleteDocument(DATABASE_ID!, DOCTOR_COLLECTION_ID!, doctorId);
+
+    return { success: true, message: "Doctor and associated logo deleted successfully." };
+  } catch (error) {
+    console.error("❌ Error deleting doctor and logo:", error);
+    return { success: false, message: "Failed to delete doctor.", error };
+  }
+};
 
