@@ -612,7 +612,7 @@ export default function DoctorDashboard({ params }: PageProps) {
                 </div>
                 </div>
                 <div className="mt-4">
-                    {doctor && <AssistantRegistration doctorId={params.doctorId} />}
+                    {doctor && <AssistantRegistration doctorId={params.doctorId} hospitalId = {doctor?.hospitalId}/>}
                 </div>
             </>
             )}

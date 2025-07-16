@@ -148,3 +148,58 @@ export async function markAppointmentDone(appointmentId: string) {
     return false;
   }
 }
+
+
+export const getPendingAppointmentsByHospitalId = async (hospitalId: string) => {
+  if (!hospitalId) {
+    throw new Error("Hospital ID is required");
+  }
+
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+        Query.equal("hospitalId", hospitalId),
+        Query.equal("status", "pending"),
+        Query.orderDesc("timestamp"),
+      ]
+    );
+
+    return response.documents; // Returns Appointment[]
+  } catch (error) {
+    console.error("❌ Error fetching pending appointments by hospitalId:", error);
+    return [];
+  }
+};
+
+
+export const getTodaysAppointmentsByHospitalId = async (hospitalId: string) => {
+  if (!hospitalId) {
+    throw new Error("Hospital ID is required");
+  }
+
+  const now = DateTime.now().setZone("Asia/Kolkata");
+  const startOfDay = now.startOf("day").toISO() as string;
+  const endOfDay = now.endOf("day").toISO() as string;
+
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      [
+        Query.equal("hospitalId", hospitalId),
+        Query.greaterThanEqual("timestamp", startOfDay),
+        Query.lessThan("timestamp", endOfDay),
+        Query.orderDesc("timestamp"),
+      ]
+    );
+
+    return response.documents;
+  } catch (error) {
+    console.error("❌ Error fetching today's appointments by hospitalId:", error);
+    return [];
+  }
+};
+
+

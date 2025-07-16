@@ -17,14 +17,16 @@ interface Assistant {
   timestamp: string;
   labId?: string;
   doctorId?: string;
+  hospitalId?: string;
 }
 
 interface AssistantRegistrationProps {
   doctorId?: string;
   labId?: string;
+  hospitalId?: string;
 }
 
-export default function AssistantRegistration({ doctorId, labId }: AssistantRegistrationProps) {
+export default function AssistantRegistration({ doctorId, labId , hospitalId }: AssistantRegistrationProps) {
 //   const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [formData, setFormData] = useState<Partial<Assistant>>({
     name: "",
@@ -42,6 +44,7 @@ export default function AssistantRegistration({ doctorId, labId }: AssistantRegi
       ...formData,
       doctorId: doctorId || "",
       labId: labId || "",
+      hospitalId : hospitalId || "",
       logoUrl: formData.logoUrl || "",
       logo: formData.logo || "",
       logoId: formData.logoId || "",

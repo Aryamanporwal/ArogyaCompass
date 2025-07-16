@@ -238,3 +238,19 @@ export const handleResetPasskey = async (assistantId : string) => {
       return { success: false, message: "Failed to reset passkey." };  }
 
 };
+
+
+export const getAssistantsByHospitalId = async (hospitalId: string) => {
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      ASSISTANT_COLLECTION_ID!,
+      [Query.equal("hospitalId", hospitalId)]
+    );
+
+    return response.documents;
+  } catch (error) {
+    console.error("Error fetching assistants by hospitalId:", error);
+    return [];
+  }
+};

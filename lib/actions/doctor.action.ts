@@ -221,3 +221,24 @@ export const handleResetPasskey = async (doctorId : string) => {
       return { success: false, message: "Failed to reset passkey." };  }
 
 };
+
+export const getDoctorsByHospitalId = async (
+  hospitalId: string
+): Promise<Doctor[]> => {
+  if (!hospitalId) {
+    throw new Error("Hospital ID is required");
+  }
+
+  try {
+    const response = await databases.listDocuments(
+      DATABASE_ID!,
+      DOCTOR_COLLECTION_ID!,
+      [Query.equal("hospitalId", hospitalId)]
+    );
+
+    return response.documents as unknown as  Doctor[];
+  } catch (error) {
+    console.error("Error fetching doctors by hospitalId:", error);
+    return [];
+  }
+};

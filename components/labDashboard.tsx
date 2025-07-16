@@ -467,6 +467,7 @@ export default function LabDashboard({ params }: PageProps) {
               value={assistants?.length || 0}
             />
           </div>
+          
 
           {/* Appointments & Patients */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10">
