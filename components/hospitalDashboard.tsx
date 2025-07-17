@@ -33,6 +33,8 @@ import AssistantAttendanceChart from "./ui/AssistantAttendanceChart";
 import HospitalComparisonChart from "@/components/ui/HospitalComparisonChart";
 import HospitalHeatMap from "./HospitalHeatMap";
 import DoctorRegisterForm from "@/components/form/DoctorRegisterForm"; // adjust the path as needed
+import { useKeenSlider } from "keen-slider/react"
+import "keen-slider/keen-slider.min.css"
 
 
 interface PageProps {
@@ -788,40 +790,44 @@ useEffect(() => {
         {selectedNav === "Donate" && (
           <div className="w-full  mx-auto px-4 py-8 flex flex-col gap-8">
             {/* Emotional Image Banner */}
-            <div className="w-full flex flex-col md:flex-row gap-6 items-center">
-              <Image
-                src="/assets/images/donate2.jpg"
-                alt="Poor child hoping for help"
-                className="w-full md:w-1/2 h-56 object-cover rounded-xl shadow-md"
-                style={{ minWidth: 220, maxHeight: 220 }}
-                width = {220}
-                height = {220}
-              />
-              <Image
-                src="/assets/images/donate3.jpg"
-                alt="Children needing medical care"
-                className="hidden md:block w-1/2 h-56 object-cover rounded-xl shadow-md"
-                style={{ minWidth: 220, maxHeight: 220 }}
-                width = {220}
-                height = {220}
-              />
-              <Image
-                src="/assets/images/donate4.jpg"
-                alt="Children needing medical care"
-                className="hidden md:block w-1/2 h-56 object-cover rounded-xl shadow-md"
-                style={{ minWidth: 220, maxHeight: 220 }}
-                width = {220}
-                height = {220}
-              />
-              <Image
-                src="/assets/images/donate1.jpg"
-                alt="Children needing medical care"
-                className="hidden md:block w-1/2 h-56 object-cover rounded-xl shadow-md"
-                style={{ minWidth: 220, maxHeight: 220 }}
-                width = {220}
-                height = {220}
-              />
-            </div>
+              <div className="w-full">
+                {/* Mobile Slider */}
+                <div className="block md:hidden">
+                  <MobileImageSlider />
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden md:flex flex-row gap-6 items-center">
+                  <Image
+                    src="/assets/images/donate2.jpg"
+                    alt="Poor child hoping for help"
+                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
+                    width={220}
+                    height={220}
+                  />
+                  <Image
+                    src="/assets/images/donate3.jpg"
+                    alt="Children needing medical care"
+                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
+                    width={220}
+                    height={220}
+                  />
+                  <Image
+                    src="/assets/images/donate4.jpg"
+                    alt="Children needing medical care"
+                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
+                    width={220}
+                    height={220}
+                  />
+                  <Image
+                    src="/assets/images/donate1.jpg"
+                    alt="Children needing medical care"
+                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
+                    width={220}
+                    height={220}
+                  />
+                </div>
+              </div>
 
             {/* Data & Facts about Poverty and Sickness in India */}
             <section>
@@ -936,3 +942,36 @@ const StatCard = ({ icon, title, value }: { icon: React.ReactNode; title: string
     </div>
   </div>
 );
+
+const MobileImageSlider = () => {
+  const [sliderRef] = useKeenSlider<HTMLDivElement>({
+    loop: true,
+    mode: "snap",
+    slides: { perView: 1 },
+    renderMode: "performance",
+    drag: true,
+  })
+
+  const images = [
+    "/assets/images/donate2.jpg",
+    "/assets/images/donate3.jpg",
+    "/assets/images/donate4.jpg",
+    "/assets/images/donate1.jpg",
+  ]
+
+  return (
+    <div ref={sliderRef} className="keen-slider rounded-xl overflow-hidden">
+      {images.map((src, idx) => (
+        <div key={idx} className="keen-slider__slide">
+          <Image
+            src={src}
+            alt={`Donation image ${idx + 1}`}
+            width={500}
+            height={220}
+            className="w-full h-56 object-cover rounded-xl"
+          />
+        </div>
+      ))}
+    </div>
+  )
+}

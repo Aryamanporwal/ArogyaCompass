@@ -60,10 +60,8 @@ export default function Payments() {
           alert("✅ Coupon applied. Lab verified.");
           router.push(`/lab/${id}/dashboard`);
         }
-        return; // ✅ Exit early
+        return; 
       }
-
-      // ✅ CASE 2: No or invalid coupon → initiate payment
       try {
         setLoading(true);
 
