@@ -33,6 +33,7 @@ import AssistantAttendanceChart from "./ui/AssistantAttendanceChart";
 import HospitalComparisonChart from "@/components/ui/HospitalComparisonChart";
 import HospitalHeatMap from "./HospitalHeatMap";
 import DoctorRegisterForm from "@/components/form/DoctorRegisterForm"; // adjust the path as needed
+import DonateDialog from "@/components/ui/DonateDailog"
 import { useKeenSlider } from "keen-slider/react"
 import "keen-slider/keen-slider.min.css"
 
@@ -123,6 +124,7 @@ export default function HospitalDashboard({ params }: PageProps) {
    const [showAll, setShowAll] = useState(false);
    const [selectedDoctorId , setSelectedDoctorId] = useState<string | null>(null);
    const [selectedAssistantId , setSelectedAssistantId] = useState< string | null > (null);
+   const [showDonateDialog, setShowDonateDialog] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -676,7 +678,7 @@ useEffect(() => {
       )}
 
 
-        {selectedNav === "Update Details" && (
+          {selectedNav === "Update Details" && (
             <>
           <div className="flex flex-col mb-6 sm:flex-row gap-6">
             {/* <div className="hidden lg:block lg:min-w-[250px]" /> */}
@@ -785,116 +787,119 @@ useEffect(() => {
           </div>
            </div>
             </>
-        )}
+            )}
 
-        {selectedNav === "Donate" && (
-          <div className="w-full  mx-auto px-4 py-8 flex flex-col gap-8">
-            {/* Emotional Image Banner */}
-              <div className="w-full">
-                {/* Mobile Slider */}
-                <div className="block md:hidden">
-                  <MobileImageSlider />
+            {selectedNav === "Donate" && (
+              <div className="w-full  mx-auto px-4 py-8 flex flex-col gap-8">
+                {/* Emotional Image Banner */}
+                  <div className="w-full">
+                    {/* Mobile Slider */}
+                    <div className="block md:hidden">
+                      <MobileImageSlider />
+                    </div>
+
+                    {/* Desktop Layout */}
+                    <div className="hidden md:flex flex-row gap-4 mr-10 items-center">
+                      <Image
+                        src="/assets/images/donate2.jpg"
+                        alt="Poor child hoping for help"
+                        className="w-1/4 h-56 object-cover rounded-xl shadow-md"
+                        width={220}
+                        height={220}
+                      />
+                      <Image
+                        src="/assets/images/donate3.jpg"
+                        alt="Children needing medical care"
+                        className="w-1/4 h-56 object-cover rounded-xl shadow-md"
+                        width={220}
+                        height={220}
+                      />
+                      <Image
+                        src="/assets/images/donate4.jpg"
+                        alt="Children needing medical care"
+                        className="w-1/4 h-56 object-cover rounded-xl shadow-md"
+                        width={220}
+                        height={220}
+                      />
+                      <Image
+                        src="/assets/images/donate1.jpg"
+                        alt="Children needing medical care"
+                        className="w-1/4 h-56 object-cover rounded-xl shadow-md"
+                        width={220}
+                        height={220}
+                      />
+                    </div>
+                  </div>
+
+                {/* Data & Facts about Poverty and Sickness in India */}
+                <section>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight" style={{ fontFamily: "Inter, sans-serif" }}>
+                    India’s Healthcare & Poverty Reality
+                  </h2>
+                  <ul className="list-disc ml-6 text-base md:text-lg text-gray-700 dark:text-gray-300 leading-relaxed" style={{ fontFamily: "Inter, sans-serif" }}>
+                    <li>
+                      <span className="font-semibold text-red-600 dark:text-red-400">63 million</span> Indians fall into poverty every year due to catastrophic health expenses—most cannot afford critical treatment<sup>[5]</sup>.
+                    </li>
+                    <li>
+                      Still, <span className="font-semibold">over 2.35% (33.6 million)</span> Indians live below the poverty line<sup>[3]</sup>, risking health and security.
+                    </li>
+                    <li>
+                      Poor and rural families face special hardship: outpatient care costs alone can push them into poverty<sup>[6]</sup>.
+                    </li>
+                  </ul>
+                </section>
+
+                {/* Campaign Message */}
+                <section className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-[#18191e] dark:via-[#3c425c] dark:to-[#1a1e2b] rounded-xl shadow-sm px-6 py-7 flex flex-col gap-3">
+                  <h3 className="text-xl font-bold text-blue-700 dark:text-blue-200 mb-1" style={{ fontFamily: "Inter, sans-serif" }}>
+                    Join ArogyaCompass in Transforming Lives
+                  </h3>
+                  <p className="text-lg text-gray-800 dark:text-gray-200" style={{ fontFamily: "Inter, sans-serif", lineHeight: 1.6 }}>
+                    <span className="font-semibold text-blue-600 dark:text-blue-200">ArogyaCompass</span> has taken an oath to help as many Indians as possible access healthcare and a healthy lifestyle.
+                    <br />
+                    <span className="font-semibold">Will you be a part of this campaign?</span>
+                  </p>
+                  <p className="text-base text-gray-700 dark:text-gray-300" style={{ fontFamily: "Inter, sans-serif" }}>
+                    We believe in the power of community and user experience. <span className="font-bold text-green-700 dark:text-green-400">Donate more than <span style={{ fontFamily: "inherit", fontWeight: 700 }}>₹2100</span> and unlock ArogyaCompass Pro!</span>
+                  </p>
+                </section>
+
+                {/* Pro Features Card */}
+                <div  className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-[#18191e] dark:via-[#3c425c] dark:to-[#1a1e2b] rounded-xl shadow-sm px-6 py-7 flex flex-col gap-3">
+                  <h4 className="text-lg md:text-xl font-semibold mb-2 text-blue-700 dark:text-blue-200" style={{ fontFamily: "Inter, sans-serif" }}>
+                    ArogyaCompass Pro: Your Exclusive Advantage
+                  </h4>
+                  <ul className="list-disc ml-5 text-gray-800 dark:text-gray-200" style={{ fontFamily: "Inter, sans-serif" }}>
+                    <li>Unlimited access to daily healthcare research and real-time news</li>
+                    <li>AI-powered suggestions to boost your business and personal wellbeing</li>
+                    <li>Advanced analytics to track growth and get personalized insights</li>
+                    <li>Direct access to our powerful Medical Bot for instant answers, anytime</li>
+                    <li>Enjoy all exclusive features for <span className="font-semibold text-green-700 dark:text-green-400">three months</span></li>
+                  </ul>
                 </div>
 
-                {/* Desktop Layout */}
-                <div className="hidden md:flex flex-row gap-6 items-center">
-                  <Image
-                    src="/assets/images/donate2.jpg"
-                    alt="Poor child hoping for help"
-                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
-                    width={220}
-                    height={220}
-                  />
-                  <Image
-                    src="/assets/images/donate3.jpg"
-                    alt="Children needing medical care"
-                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
-                    width={220}
-                    height={220}
-                  />
-                  <Image
-                    src="/assets/images/donate4.jpg"
-                    alt="Children needing medical care"
-                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
-                    width={220}
-                    height={220}
-                  />
-                  <Image
-                    src="/assets/images/donate1.jpg"
-                    alt="Children needing medical care"
-                    className="w-1/2 h-56 object-cover rounded-xl shadow-md"
-                    width={220}
-                    height={220}
-                  />
+                {/* Call To Action */}
+                <div className="text-center mt-6">
+                  <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2" style={{ fontFamily: "Inter, sans-serif" }}>
+                    Why wait? No more questions, just become a hero for Indian healthcare.
+                  </p>
+                  <button
+                    className="inline-block mt-3 px-8 py-3 rounded-lg shadow bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg  transition-all duration-200"
+                    style={{ fontFamily: "Inter, sans-serif", letterSpacing: 0.2 }}
+                     onClick={() => setShowDonateDialog(true)}// Hook up your donation handler here
+                  >
+                    Donate Now
+                  </button>
+                  <div className="mt-2 text-gray-600 dark:text-gray-400 text-sm">Help Indians and unlock exclusive Pro features.</div>
                 </div>
               </div>
-
-            {/* Data & Facts about Poverty and Sickness in India */}
-            <section>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight" style={{ fontFamily: "Inter, sans-serif" }}>
-                India’s Healthcare & Poverty Reality
-              </h2>
-              <ul className="list-disc ml-6 text-base md:text-lg text-gray-700 dark:text-gray-300 leading-relaxed" style={{ fontFamily: "Inter, sans-serif" }}>
-                <li>
-                  <span className="font-semibold text-red-600 dark:text-red-400">63 million</span> Indians fall into poverty every year due to catastrophic health expenses—most cannot afford critical treatment<sup>[5]</sup>.
-                </li>
-                <li>
-                  Still, <span className="font-semibold">over 2.35% (33.6 million)</span> Indians live below the poverty line<sup>[3]</sup>, risking health and security.
-                </li>
-                <li>
-                  Poor and rural families face special hardship: outpatient care costs alone can push them into poverty<sup>[6]</sup>.
-                </li>
-              </ul>
-            </section>
-
-            {/* Campaign Message */}
-            <section className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-[#18191e] dark:via-[#3c425c] dark:to-[#1a1e2b] rounded-xl shadow-sm px-6 py-7 flex flex-col gap-3">
-              <h3 className="text-xl font-bold text-blue-700 dark:text-blue-200 mb-1" style={{ fontFamily: "Inter, sans-serif" }}>
-                Join ArogyaCompass in Transforming Lives
-              </h3>
-              <p className="text-lg text-gray-800 dark:text-gray-200" style={{ fontFamily: "Inter, sans-serif", lineHeight: 1.6 }}>
-                <span className="font-semibold text-blue-600 dark:text-blue-200">ArogyaCompass</span> has taken an oath to help as many Indians as possible access healthcare and a healthy lifestyle.
-                <br />
-                <span className="font-semibold">Will you be a part of this campaign?</span>
-              </p>
-              <p className="text-base text-gray-700 dark:text-gray-300" style={{ fontFamily: "Inter, sans-serif" }}>
-                We believe in the power of community and user experience. <span className="font-bold text-green-700 dark:text-green-400">Donate more than <span style={{ fontFamily: "inherit", fontWeight: 700 }}>₹2100</span> and unlock ArogyaCompass Pro!</span>
-              </p>
-            </section>
-
-            {/* Pro Features Card */}
-            <div  className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-[#18191e] dark:via-[#3c425c] dark:to-[#1a1e2b] rounded-xl shadow-sm px-6 py-7 flex flex-col gap-3">
-              <h4 className="text-lg md:text-xl font-semibold mb-2 text-blue-700 dark:text-blue-200" style={{ fontFamily: "Inter, sans-serif" }}>
-                ArogyaCompass Pro: Your Exclusive Advantage
-              </h4>
-              <ul className="list-disc ml-5 text-gray-800 dark:text-gray-200" style={{ fontFamily: "Inter, sans-serif" }}>
-                <li>Unlimited access to daily healthcare research and real-time news</li>
-                <li>AI-powered suggestions to boost your business and personal wellbeing</li>
-                <li>Advanced analytics to track growth and get personalized insights</li>
-                <li>Direct access to our powerful Medical Bot for instant answers, anytime</li>
-                <li>Enjoy all exclusive features for <span className="font-semibold text-green-700 dark:text-green-400">three months</span></li>
-              </ul>
-            </div>
-
-            {/* Call To Action */}
-            <div className="text-center mt-6">
-              <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-2" style={{ fontFamily: "Inter, sans-serif" }}>
-                Why wait? No more questions, just become a hero for Indian healthcare.
-              </p>
-              <button
-                className="inline-block mt-3 px-8 py-3 rounded-lg shadow bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg  transition-all duration-200"
-                style={{ fontFamily: "Inter, sans-serif", letterSpacing: 0.2 }}
-                // onClick={() => handleDonate()} // Hook up your donation handler here
-              >
-                Donate Now
-              </button>
-              <div className="mt-2 text-gray-600 dark:text-gray-400 text-sm">Help Indians and unlock exclusive Pro features.</div>
-            </div>
-          </div>
-        )}
+            )}
 
             </main>
         </div>
+        {showDonateDialog && (
+        <DonateDialog onClose={() => setShowDonateDialog(false)} />
+      )}
     </div>
 
   );
