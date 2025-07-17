@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { SuccessfulPayment } from "./SuccessfulPayment";
+import Confetti from "react-confetti";
 
 interface DonateDialogProps {
   onClose: () => void;
@@ -8,13 +8,33 @@ interface DonateDialogProps {
 
 const VALID_COUPONS = ["AROGYACOMPASS", "AROGYADONATE"];
 
+function useWindowSize() {
+  const [windowSize, setWindowSize] = React.useState({ width: 0, height: 0 });
+
+  React.useEffect(() => {
+    function handleResize() {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize;
+}
+
 export default function DonateDialog({ onClose }: DonateDialogProps) {
   const [amount, setAmount] = useState<string>("");
   const [coupon, setCoupon] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string>("");
-  const [paymentSuccess , setPaymentSuccess] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const { width, height } = useWindowSize();
 
   // Load Razorpay script
   const loadRazorpayScript = (): Promise<boolean> =>
@@ -30,20 +50,16 @@ export default function DonateDialog({ onClose }: DonateDialogProps) {
       document.body.appendChild(script);
     });
 
-  // Handle payment
   const handlePayment = async () => {
     setErrorMsg("");
     setSuccessMsg("");
 
-    
     if (coupon && VALID_COUPONS.includes(coupon.trim().toUpperCase())) {
-        setSuccessMsg(
-            "Thank you! Coupon accepted, your Pro access is granted."
-        );
-        setPaymentSuccess(true)
-        setLoading(false)
-         console.log("Coupon valid — paymentSuccess set true");
-        return;
+      setSuccessMsg("Thank you! Coupon accepted, your Pro access is granted.");
+      setPaymentSuccess(true);
+      setLoading(false);
+      console.log("Coupon valid — paymentSuccess set true");
+      return;
     }
     if (!amount || isNaN(Number(amount)) || Number(amount) < 1) {
       setErrorMsg("Please enter a valid donation amount.");
@@ -76,39 +92,64 @@ export default function DonateDialog({ onClose }: DonateDialogProps) {
         description: "Donate to ArogyaCompass",
         order_id: data.orderId,
         handler: function (response: { razorpay_payment_id: string }) {
-          // The 'response' is used here but you can add more logic if needed
-          console.log(response)
+          console.log(response);
           setSuccessMsg("Payment successful! Thank you for your support.");
-          setPaymentSuccess(true)
-        //   setTimeout(() => onClose(), 2000);
+          setPaymentSuccess(true);
         },
         prefill: {},
-        theme: {
-          color: "#2563eb",
-        },
+        theme: { color: "#2563eb" },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.open();
-    } catch  {
-      setErrorMsg(
-        "Something went wrong. Please try again or contact support."
-      );
+    } catch {
+      setErrorMsg("Something went wrong. Please try again or contact support.");
       setLoading(false);
     }
   };
 
   const handleUnlock = () => {
-    //I should add logic,  what will happen on closing
     onClose();
-  }
-  if (paymentSuccess) {
-      console.log("Rendering SuccessfulPayment component");
-      return <SuccessfulPayment onUnlock={handleUnlock} />;
-    }
+  };
 
+  // Conditionally render success UI with Confetti
+  if (paymentSuccess) {
+    return (
+      <div className="fixed inset-0 z-30 bg-black/40 backdrop-blur flex items-center justify-center p-4">
+        {/* Confetti */}
+        <Confetti width={width} height={height} recycle={false} numberOfPieces={250} />
+
+        <div
+          className="relative flex flex-col items-center justify-center gap-6 p-8 rounded-2xl bg-white dark:bg-[#121212] shadow-lg max-w-md mx-auto text-center"
+          style={{ fontFamily: "Inter, sans-serif" }}
+        >
+          <h2 className="text-2xl font-extrabold text-purple-700 dark:text-purple-400">
+            Thank You for Your Generous Donation!
+          </h2>
+          <p className="text-lg text-gray-800 dark:text-gray-300 leading-relaxed font-medium">
+            You donated to save the life of one child.
+          </p>
+          <p className="text-base text-gray-700 dark:text-gray-400 italic">
+            ArogyaCompass appreciates your love for India.
+          </p>
+          <p className="font-semibold text-gray-900 dark:text-white mt-2">
+            You are rewarded with a Pro subscription of ArogyaCompass.
+          </p>
+
+          <button
+            onClick={handleUnlock}
+            className="mt-6 px-12 py-3 bg-gradient-to-r from-purple-600 to-indigo-700 rounded-lg text-white font-semibold shadow-lg hover:from-purple-700 hover:to-indigo-800 transition"
+          >
+            UNLOCK
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Default donation form
   return (
-    <div className="fixed inset-0 z-30 bg-black/40 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-30 bg-black/40 flex items-center backdrop-blur justify-center p-4">
       <div
         className="w-full max-w-md rounded-2xl shadow-2xl bg-white dark:bg-[#1e1e21] relative flex flex-col gap-6 px-6 py-8"
         style={{ fontFamily: "Inter, sans-serif" }}
