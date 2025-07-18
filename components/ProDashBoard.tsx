@@ -265,10 +265,12 @@ useEffect(() => {
           } border-r p-2.5 flex flex-col justify-between transition-all duration-300 ease-in-out`}
         >
           <div>
-            <div
-              className="flex items-center gap-3 cursor-pointer mb-10"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
+          <div
+            className="relative mb-10 cursor-pointer"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            style={{ minHeight: 50 }}  // Make sure there's enough height for the badge
+          >
+            <div className="flex items-center gap-3">
               <Image
                 src="/assets/icons/logo.png"
                 alt="Lab"
@@ -279,10 +281,40 @@ useEffect(() => {
                 className={`text-xl font-semibold transition-all duration-300 ${
                   sidebarOpen ? "opacity-100" : "opacity-0 w-0"
                 }`}
+                style={{
+                  whiteSpace: 'nowrap'
+                }}
               >
                 ArogyaCompass
               </span>
             </div>
+            {/* Absolute pro badge - bottom left OF NAME */}
+            <span
+              className={`
+                absolute
+                right-[5px]  // 50px (logo) + 4px gap, adjust if needed
+                bottom-[-11px]  // Overlaps bottom edge a bit, can tweak
+                px-2.5 py-0.5
+                font-bold text-base
+                transition-all duration-300
+                bg-cyan-400 text-gray-900
+                rounded-[8px_14px_8px_8px]
+                ${sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
+              `}
+              style={{
+                background: "#22D3EE",
+                color: "#232629",
+                borderRadius: "0 14px 14px 0",
+                fontFamily: "Inter, sans-serif",
+                letterSpacing: "0.5px",
+                textTransform: "lowercase",
+                lineHeight: "1.15",
+                zIndex: 2
+              }}
+            >
+              pro
+            </span>
+          </div>
             <nav className="space-y-6">
               <NavItem
                 icon={<LayoutDashboard size={20} />}
@@ -408,17 +440,73 @@ useEffect(() => {
                     </button>
                   </div>
               </div>
-
-
-            <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-gray-500 shadow-lg">
-              {/* ------- */}
-              <Image
-                src={hospital?.logoUrl || "/assets/images/dr-cameron.png"}
-                alt="Hospital"
-                className="border w-full h-full object-cover"
-                width={18}
-                height={18}
-              />
+              <div
+                style={{
+                  position: "relative",
+                  height: "48px",
+                  width: "48px",
+                  borderRadius: "9999px",
+                  // padding: "1px",
+                  background: "#22D3EE", // Burgundy to purple gradient
+                  boxShadow: "0 2px 12px 0 rgba(160,32,240,0.14)", // Soft purple shadow
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    background: "#fff",
+                    borderRadius: "inherit",
+                    width: "100%",
+                    height: "100%",
+                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}
+                >
+                  <Image
+                    src={hospital?.logoUrl || "/assets/images/dr-cameron.png"}
+                    alt="Hospital"
+                    style={{
+                      borderRadius: "9999px",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block"
+                    }}
+                    width={48}
+                    height={48}
+                  />
+                </div>
+                {/* PRO Badge - bottom center */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "-12px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "#22D3EE",            // Cyan tone, almost identical to image
+                color: "#232629",                 // Very dark for strong contrast
+                // borderRadius: "8px 14px 8px 8px", // Custom border radius for soft cut corner
+                fontFamily: "Inter, sans-serif",
+                letterSpacing: "0.5px",
+                textTransform: "lowercase",
+                lineHeight: "1.25",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    padding: "3px 9px",
+                    borderRadius: "9px",
+                    whiteSpace: "nowrap",
+                    boxShadow: "0 1px 6px rgba(160, 32, 240, 0.12)",
+                    // border: "1px solid #fff",
+                    // letterSpacing: 0.5,
+                    zIndex: 1,
+                  }}
+                >
+                  PRO
+                </div>
               </div>
             </div>        
           </div>  
