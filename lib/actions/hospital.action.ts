@@ -1,13 +1,14 @@
 "use server";
 
 import { ID } from "node-appwrite";
-import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID, ENDPOINT, BUCKET_ID, PROJECT_ID, APPOINTMENT_COLLECTION_ID } from "@/lib/appwrite.config";
+import { databases, DATABASE_ID, HOSPITAL_COLLECTION_ID, DOCTOR_COLLECTION_ID, ENDPOINT, BUCKET_ID, PROJECT_ID, APPOINTMENT_COLLECTION_ID, USERS_COLLECTION_ID } from "@/lib/appwrite.config";
 import { Query } from "node-appwrite";
 import { storage } from "@/lib/appwrite.config";
 import { InputFile } from "node-appwrite/file";
 import { generatePasskey } from "../utils/generatePasskey";
 import { generatePasskeyPDF } from "../utils/generatePasskeyPDF";
 import { sendEmailWithPDF } from "./sendEmailwithPDF";
+import { cookies } from "next/headers";
 type Doctor = {
   Name: string;
   Email: string;
@@ -123,6 +124,7 @@ export const registerHospital = async (
         doctors: [],
       }
     );
+
     const hospitalPDF = await generatePasskeyPDF({
         name: hospitalData.name,
         email: hospitalData.email,
@@ -171,6 +173,17 @@ export const registerHospital = async (
           pdfBlob: doctorPDF,
         });
     }
+
+      await databases.createDocument(
+      DATABASE_ID!,
+      USERS_COLLECTION_ID!,   
+      newHospital.$id,     
+      {
+        name: hospitalData.name,
+        email: hospitalData.email,
+        proUser: false,   // default flag
+      }
+    );
 
     return { hospital: newHospital, hospitalId };
   } catch (error) {
@@ -303,3 +316,43 @@ export const handleResetPasskey = async (labId : string) => {
 
 };
 
+
+export const getHospitalIdFromCookie = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  return cookieStore.get("hospitalId")?.value ?? null;
+};
+
+
+export const checkProUserStatus = async (hospitalId: string) => {
+  try {
+
+    const userDoc = await databases.getDocument(
+      DATABASE_ID!,
+      USERS_COLLECTION_ID!,
+      hospitalId,
+    );
+
+    return userDoc?.proUser ?? false;
+  } catch (error) {
+    console.error("Failed to fetch Pro user status:", error);
+    return false;
+  }
+};
+
+export const grantProAccessToUser = async (hospitalId: string) => {
+  try {
+    if (!hospitalId) throw new Error("Hospital ID not found");
+    await databases.updateDocument(
+      DATABASE_ID!,
+      USERS_COLLECTION_ID!,
+      hospitalId,
+      {
+        proUser: true,
+      }
+    );
+    return true;
+  } catch (error) {
+    console.error("Error granting pro access to hospital:", error);
+    return false;
+  }
+};

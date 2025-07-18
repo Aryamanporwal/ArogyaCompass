@@ -18,6 +18,7 @@ export const {
   DOCTOR_ATTENDANCE_COLLECTION_ID,
   REVIEW_COLLECTION_ID,
   FIRST_AID_VIDEO_UPLOAD_COLLECTION_ID,
+  USERS_COLLECTION_ID,
 } = process.env;
 
 const client = new sdk.Client();

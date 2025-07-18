@@ -1,6 +1,6 @@
 "use server"
 import { ID, Query } from "node-appwrite"
-import { BUCKET_ID, DATABASE_ID, databases, ENDPOINT, PATIENT_COLLECTION_ID, PROJECT_ID, storage, users } from "../appwrite.config"
+import { BUCKET_ID, DATABASE_ID, databases, ENDPOINT, PATIENT_COLLECTION_ID, PROJECT_ID, storage, users} from "../appwrite.config"
 import { Resend } from "resend"; 
 type ErrorWithCode = {
     code: number;
@@ -53,6 +53,7 @@ export const createUser = async (user: CreateUserParams) => {
       undefined, 
       user.name
     );
+
     
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const cookieStore = await cookies();

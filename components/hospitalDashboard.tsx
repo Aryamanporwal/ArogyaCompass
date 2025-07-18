@@ -36,6 +36,8 @@ import DoctorRegisterForm from "@/components/form/DoctorRegisterForm"; // adjust
 import DonateDialog from "@/components/ui/DonateDailog"
 import { useKeenSlider } from "keen-slider/react"
 import "keen-slider/keen-slider.min.css"
+import { checkProUserStatus } from "@/lib/actions/hospital.action";
+// import { redirect } from "next/navigation";
 
 
 interface PageProps {
@@ -125,6 +127,22 @@ export default function HospitalDashboard({ params }: PageProps) {
    const [selectedDoctorId , setSelectedDoctorId] = useState<string | null>(null);
    const [selectedAssistantId , setSelectedAssistantId] = useState< string | null > (null);
    const [showDonateDialog, setShowDonateDialog] = useState(false);
+
+
+  useEffect(() => {
+  const checkAndRedirectPro = async () => {
+    try {
+      const isPro = await checkProUserStatus(params.hospitalId);
+      if (isPro) {
+        router.push(`/hospital/${params.hospitalId}/dashboard/pro`);
+      }
+    } catch (error) {
+      console.error("Failed to check Pro status:", error);
+    }
+  };
+
+  checkAndRedirectPro();
+}, [router, params.hospitalId]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -898,7 +916,7 @@ useEffect(() => {
             </main>
         </div>
         {showDonateDialog && (
-        <DonateDialog onClose={() => setShowDonateDialog(false)} />
+        <DonateDialog hospitalId={params.hospitalId} onClose={() => setShowDonateDialog(false)} />
       )}
     </div>
 

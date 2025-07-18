@@ -156,7 +156,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     alert("Hospital Created. Proceed to payment");
 
     if (result?.hospitalId) {
-      router.push(`/payment`);
+      router.push(`hospital/${result.hospitalId}/payment`);
     }
   } catch (error) {
     console.error("Registration failed:", error);

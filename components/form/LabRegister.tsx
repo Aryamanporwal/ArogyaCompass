@@ -99,9 +99,9 @@ export default function LabForm() {
     };
 
     try {
-      await registerLab(labData, logoFile[0]);
+      const result = await registerLab(labData, logoFile[0]);
       alert("Lab registered successfully!");
-      router.push(`/pay`);
+      router.push(`lab/${result.labId}/pay`);
     } catch (error) {
       console.error("Registration failed:", error);
       alert("Failed to register lab.");
@@ -192,6 +192,4 @@ return (
     </div>
   </div>
 );
-
-
 }

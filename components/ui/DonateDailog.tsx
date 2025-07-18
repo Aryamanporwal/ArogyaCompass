@@ -1,9 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React, {  useState } from "react";
 import Confetti from "react-confetti";
+import { grantProAccessToUser } from "@/lib/actions/hospital.action";
+import { useRouter } from "next/navigation";
 
 interface DonateDialogProps {
   onClose: () => void;
+  hospitalId : string;
 }
 
 const VALID_COUPONS = ["AROGYACOMPASS", "AROGYADONATE"];
@@ -26,16 +29,17 @@ function useWindowSize() {
   return windowSize;
 }
 
-export default function DonateDialog({ onClose }: DonateDialogProps) {
+export default function DonateDialog({ onClose , hospitalId}: DonateDialogProps) {
   const [amount, setAmount] = useState<string>("");
   const [coupon, setCoupon] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [successMsg, setSuccessMsg] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-
   const { width, height } = useWindowSize();
+  const router = useRouter();
 
+  
   // Load Razorpay script
   const loadRazorpayScript = (): Promise<boolean> =>
     new Promise((resolve) => {
@@ -55,6 +59,7 @@ export default function DonateDialog({ onClose }: DonateDialogProps) {
     setSuccessMsg("");
 
     if (coupon && VALID_COUPONS.includes(coupon.trim().toUpperCase())) {
+      await grantProAccessToUser(hospitalId); 
       setSuccessMsg("Thank you! Coupon accepted, your Pro access is granted.");
       setPaymentSuccess(true);
       setLoading(false);
@@ -91,7 +96,8 @@ export default function DonateDialog({ onClose }: DonateDialogProps) {
         name: "ArogyaCompass",
         description: "Donate to ArogyaCompass",
         order_id: data.orderId,
-        handler: function (response: { razorpay_payment_id: string }) {
+        handler: async function (response: { razorpay_payment_id: string }) {
+          await grantProAccessToUser(hospitalId);
           console.log(response);
           setSuccessMsg("Payment successful! Thank you for your support.");
           setPaymentSuccess(true);
@@ -110,6 +116,7 @@ export default function DonateDialog({ onClose }: DonateDialogProps) {
 
   const handleUnlock = () => {
     onClose();
+    router.push(`hospital/${hospitalId}/dashboard/pro`); 
   };
 
   // Conditionally render success UI with Confetti
@@ -146,6 +153,8 @@ export default function DonateDialog({ onClose }: DonateDialogProps) {
       </div>
     );
   }
+
+  
 
   // Default donation form
   return (
