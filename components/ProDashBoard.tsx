@@ -36,6 +36,7 @@ import HospitalComparisonChart from "@/components/ui/HospitalComparisonChart";
 import HospitalHeatMap from "./HospitalHeatMap";
 import DoctorRegisterForm from "@/components/form/DoctorRegisterForm"; // adjust the path as needed
 import "keen-slider/keen-slider.min.css"
+import MedicalBot from "./MedicalBot";
 // import { checkProUserStatus } from "@/lib/actions/hospital.action";
 // import { redirect } from "next/navigation";
 
@@ -894,6 +895,7 @@ useEffect(() => {
 
             {selectedNav === "Medical Bot" && (
              <>
+                 <MedicalBot />
              </>
             )}
             {selectedNav === "Research News" && (
