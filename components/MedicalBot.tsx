@@ -36,33 +36,46 @@ const MedicalBot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    setMessages((prev) => [...prev, { user: true, text: input }]);
-    setInput("");
-    setLoading(true);
+        const sendMessage = async () => {
+        if (!input.trim()) return;
+        const newMessages = [
+            ...messages,
+            { user: true, text: input }
+        ];
 
-    try {
-      const res = await axios.post("/api/medical-bot.ts", { message: input });
-      setMessages((prev) => [
-        ...prev,
-        {
-          user: false,
-          text: res.data.reply || "Sorry, I couldn't find an answer to that. 🩺",
-        },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          user: false,
-          text: "Sorry, something went wrong. Please try again.",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setMessages(newMessages);
+        setInput("");
+        setLoading(true);
+
+        try {
+            const formattedMessages = newMessages.slice(1).map(msg => ({
+            role: msg.user ? "user" : "assistant",
+            content: msg.text,
+            }));
+            const res = await axios.post(
+            `${window.location.origin}/api/medical-bot`,   
+            { messages: formattedMessages }
+            );
+            setMessages(prev => [
+            ...prev,
+            {
+                user: false,
+                text: res.data.reply || "Sorry, I couldn't find an answer to that. 🩺",
+            }
+            ]);
+        } catch {
+            setMessages(prev => [
+            ...prev,
+            {
+                user: false,
+                text: "Sorry, something went wrong. Please try again.",
+            }
+            ]);
+        } finally {
+            setLoading(false);
+        }
+        };
+
 
   function cn(light: string, dark: string) {
     return `${light} dark:${dark}`;
@@ -83,7 +96,8 @@ const MedicalBot = () => {
             height={70}
             className="mx-auto mb-3"
           />
-          <h1 className="text-5xl font-light tracking-tight text-center">ArogyaCompass</h1>
+          <h1 className="text-5xl font-light tracking-tight text-center">ArogyaCompass
+        </h1>
         </div>
       )}
 

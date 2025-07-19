@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb', // or '20mb'
     },
   },
+  env: {
+    HF_API_KEY: process.env.HF_API_KEY,
+  },
 };
 
 export default nextConfig;
