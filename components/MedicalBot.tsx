@@ -105,7 +105,7 @@ const MedicalBot = () => {
       {messages.length > 1 && (
         <div
           className={cn(
-            "w-full max-w-2xl px-5 mb-4 mt-6",
+            "w-full max-w-2xl px-5 mb-100 mt-6",
             "sm:px-6 lg:px-8"
           )}
         >
@@ -115,23 +115,44 @@ const MedicalBot = () => {
             Answer
           </div>
           <div className="border-b border-gray-300 dark:border-[#2e2e2e] mb-3" />
-          <div className="text-lg leading-relaxed">{messages[messages.length - 1].text}</div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-6 mt-4 text-[#888] text-sm items-center">
-            <button className="hover:underline flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor">
-                <path d="M8 12h8m0 0l-3-3m3 3l-3 3" />
-              </svg>
-              Share
-            </button>
-            <button className="hover:underline">Export</button>
-            <button className="hover:underline">Rewrite</button>
-            <div className="flex gap-2 ml-auto items-center">
-              <button>👍</button>
-              <button>👎</button>
+          <div
+            style={{
+              overflowY: "auto",
+              maxHeight: "100%",               // Doesn't restrict height, but allows scroll if needed
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",         // Firefox
+              msOverflowStyle: "none",        // IE/Edge
+            }}
+            className="custom-scroll-wrapper"
+          >
+            <div className="text-lg leading-relaxed">
+              {messages[messages.length - 1].text}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-6 mt-4 text-[#888] text-sm items-center">
+              <button className="hover:underline flex items-center gap-1">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor">
+                  <path d="M8 12h8m0 0l-3-3m3 3l-3 3" />
+                </svg>
+                Share
+              </button>
+              <button className="hover:underline">Export</button>
+              <button className="hover:underline">Rewrite</button>
+              <div className="flex gap-2 ml-auto items-center">
+                <button>👍</button>
+                <button>👎</button>
+              </div>
             </div>
           </div>
+
+          <style jsx>{`
+            .custom-scroll-wrapper::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+
         </div>
       )}
 
