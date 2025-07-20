@@ -1,7 +1,6 @@
 // app/api/medical-bot/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
-import { callHuggingFaceMedicalModel } from '@/lib/utils/huggingface';
+import { callGeminiMedicalModel } from '@/lib/utils/gemini'; 
 import { summarizeFromMedlinePlus, getDrugInfoFromRxNorm } from '@/lib/utils/medicalSources';
 
 type Message = {
@@ -13,16 +12,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const messages: Message[] = body.messages;
-    // Get latest user message
     const latestMessage = messages?.[messages.length - 1]?.content;
+
     if (!latestMessage) {
       return NextResponse.json({ reply: "No input received." }, { status: 400 });
     }
 
-    // Get reply from updated model call
-    const aiReply = await callHuggingFaceMedicalModel(latestMessage);
+    const aiReply = await callGeminiMedicalModel(latestMessage); 
 
-    // Optionally, get reference info
     const medlineSummary = await summarizeFromMedlinePlus(latestMessage);
     const rxnormInfo = await getDrugInfoFromRxNorm(latestMessage);
 
