@@ -906,6 +906,7 @@ useEffect(() => {
             )}
             {selectedNav === "AI Suggestions" && (
              <>
+              
              </>
             )}
 

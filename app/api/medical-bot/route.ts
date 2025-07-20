@@ -13,18 +13,16 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const messages: Message[] = body.messages;
-
+    // Get latest user message
     const latestMessage = messages?.[messages.length - 1]?.content;
     if (!latestMessage) {
       return NextResponse.json({ reply: "No input received." }, { status: 400 });
     }
 
-    const prompt = `You are a helpful medical assistant. Provide medically accurate information.\n\nQuestion: ${latestMessage}`;
-    
-    // AI response from HuggingFace model
-    const aiReply = await callHuggingFaceMedicalModel(prompt);
+    // Get reply from updated model call
+    const aiReply = await callHuggingFaceMedicalModel(latestMessage);
 
-    // Optional: Lookup trusted references
+    // Optionally, get reference info
     const medlineSummary = await summarizeFromMedlinePlus(latestMessage);
     const rxnormInfo = await getDrugInfoFromRxNorm(latestMessage);
 
