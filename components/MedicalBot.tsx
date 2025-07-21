@@ -132,11 +132,11 @@ const MedicalBot = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-6 mt-4 text-[#888] text-sm items-center">
-              <button className="hover:underline flex items-center gap-1">
+              <button className="hover:underline flex items-center gap-1 ">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor">
                   <path d="M8 12h8m0 0l-3-3m3 3l-3 3" />
                 </svg>
-                Share
+                Shared
               </button>
               <button className="hover:underline">Export</button>
               <button className="hover:underline">Rewrite</button>
