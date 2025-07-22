@@ -234,7 +234,7 @@ const handleMicClick = () => {
           </div>
 
           {/* Shimmer animation */}
-          <style jsx>{`
+          <style>{`
             .answer-animate {
               position: relative;
               overflow: hidden;
