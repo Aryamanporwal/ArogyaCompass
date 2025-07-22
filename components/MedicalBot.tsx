@@ -216,8 +216,7 @@ const handleMicClick = () => {
               {messages[messages.length - 2].text}
             </div>
             <div
-              className={`flex items-center gap-2 text-base font-semibold ${
-                loading ? "answer-animate" : ""
+              className={`flex items-center gap-2 text-base font-semibold 
               }`}
               style={{
                 minHeight: 28,
@@ -233,31 +232,6 @@ const handleMicClick = () => {
             <div className="border-b my-2 border-gray-300 dark:border-[#2e2e2e]" />
           </div>
 
-          {/* Shimmer animation */}
-          {/* <style jsx>{`
-            .answer-animate {
-              position: relative;
-              overflow: hidden;
-              background: linear-gradient(
-                90deg,
-                transparent,
-                #3fd8fa33 30%,
-                transparent 60%
-              );
-              background-size: 200% 100%;
-              animation: shimmer 1.2s linear infinite;
-            }
-            @keyframes shimmer {
-              0% {
-                background-position: -100% 0;
-              }
-              100% {
-                background-position: 200% 0;
-              }
-            }
-          `}</style> */}
-
-          {/* Scrollable Answer */}
           <div
             className="flex-1 pr-1 pb-28"
             style={{
