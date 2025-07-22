@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
-import { detectLanguage, speak, translate } from "@/lib/utils/gemini";
+import { detectLanguage, speak, stopSpeech, translate } from "@/lib/utils/gemini";
 
 const SpeechRecognition =
   typeof window !== "undefined"
@@ -58,6 +58,7 @@ const MedicalBot = () => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [spokenLang, setSpokenLang] = useState<"hi" | "en">("en");
   const [lastReply, setLastReply] = useState<string | null>(null);
+  
 
 useEffect(() => {
   if (typeof window !== "undefined") {
@@ -233,7 +234,7 @@ const handleMicClick = () => {
           </div>
 
           {/* Shimmer animation */}
-          <style jsx>{`
+          {/* <style jsx>{`
             .answer-animate {
               position: relative;
               overflow: hidden;
@@ -254,7 +255,7 @@ const handleMicClick = () => {
                 background-position: 200% 0;
               }
             }
-          `}</style>
+          `}</style> */}
 
           {/* Scrollable Answer */}
           <div
@@ -284,6 +285,7 @@ const handleMicClick = () => {
                 <button className="hover:underline">Rewrite</button>
 
                 {lastReply && (
+                  <>
                 <button
                   onClick={() =>
                     speak(lastReply, spokenLang === "hi" ? "hi-IN" : "en-IN")
@@ -292,6 +294,13 @@ const handleMicClick = () => {
                 >
                   Replay
                 </button>
+                    <button
+                  onClick={stopSpeech}
+                  className="hover:underline text-red-500"
+                >
+                   Stop
+                </button>
+                </>
               )}
                 <div className="flex gap-2 ml-auto items-center">
                   {/* Like */}

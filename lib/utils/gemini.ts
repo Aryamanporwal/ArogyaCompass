@@ -122,3 +122,8 @@ export const speak = (text: string, lang: "hi-IN" | "en-IN") => {
   window.speechSynthesis.speak(utterance);
 };
 
+export const stopSpeech = () => {
+  if (typeof window === "undefined") return;
+
+  window.speechSynthesis.cancel();
+};
