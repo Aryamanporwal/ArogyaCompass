@@ -286,7 +286,7 @@ export default function Page() {
               // <div className="max-w-lg mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 mb-4 pointer-events-auto">
                 
                 <div 
-                  className="w-full max-w-5xl mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 sm:p-8 mt-0 pointer-events-auto"
+                  className="hide-scrollbar w-full max-w-5xl mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 sm:p-8 mt-0 pointer-events-auto"
                   style={{
                     maxHeight: "80vh",
                     overflowY: "auto",
@@ -294,11 +294,11 @@ export default function Page() {
                     msOverflowStyle: "none",         // IE/Edge
                   }}
                 >
-                  <style jsx>{`
+                  {/* <style jsx>{`
                     div::-webkit-scrollbar {
                       display: none;
                     }
-                  `}</style>
+                  `}</style> */}
                     {/* Close Button */}
                     {/* <div className="flex justify-end">
                       <button onClick={onClose} className="text-gray-700 dark:text-gray-300 hover:text-red-500">
@@ -450,7 +450,7 @@ export default function Page() {
             )}
           {selectedNav === "Contact" && (
             <div
-              className="w-full max-w-3xl mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 sm:p-8 mt-0 pointer-events-auto"
+              className="hide-scrollbar w-full max-w-3xl mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 sm:p-8 mt-0 pointer-events-auto"
               style={{
                 maxHeight: "80vh",
                 overflowY: "auto",
@@ -458,11 +458,11 @@ export default function Page() {
                 msOverflowStyle: "none",         // IE/Edge
               }}
             >
-              <style jsx>{`
+              {/* <style jsx>{`
                 div::-webkit-scrollbar {
                   display: none;
                 }
-              `}</style>
+              `}</style> */}
 
               {/* Logo */}
               <div className="flex flex-col items-center justify-center mb-5">
@@ -554,7 +554,7 @@ export default function Page() {
 
         {selectedNav === "Review" && (
           <div
-            className="w-full max-w-3xl mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 sm:p-8 mt-0 pointer-events-auto"
+            className=" hide-scrollbar w-full max-w-3xl mx-auto bg-white/80 dark:bg-[#232323]/80 rounded-xl shadow p-6 sm:p-8 mt-0 pointer-events-auto"
             style={{
               maxHeight: "80vh",
               overflowY: "auto",
@@ -562,11 +562,11 @@ export default function Page() {
               msOverflowStyle: "none",
             }}
           >
-            <style jsx>{`
+            {/* <style jsx>{`
               div::-webkit-scrollbar {
                 display: none;
               }
-            `}</style>
+            `}</style> */}
             <ReviewSection />
           </div>
         )}

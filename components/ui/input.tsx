@@ -17,7 +17,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         )}
         {...props}
       />
-      <style jsx>{`
+      <style>{`
         /* Chrome, Edge, Safari: style the calendar icon */
         input.custom-date-icon::-webkit-calendar-picker-indicator {
           filter: invert(1) sepia(1) saturate(5) hue-rotate(180deg);
