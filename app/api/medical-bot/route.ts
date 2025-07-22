@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { callGeminiMedicalModel } from '@/lib/utils/gemini'; 
 import { summarizeFromMedlinePlus, getDrugInfoFromRxNorm } from '@/lib/utils/medicalSources';
 
+
 type Message = {
   role: 'user' | 'assistant';
   content: string;

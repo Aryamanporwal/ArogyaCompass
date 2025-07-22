@@ -89,3 +89,36 @@ export async function callGeminiMedicalModel(userMessage: string) {
     throw new Error("Failed to fetch response from Gemini.");
   }
 }
+
+
+export const detectLanguage = async (text: string): Promise<"hi" | "en"> => {
+  const hindiReg = /[^\u0000-\u007F\u0900-\u097F]/;
+  const isHindi = hindiReg.test(text);
+  return isHindi ? "hi" : "en";
+};
+
+export const translate = async (text: string, toLang: "hi" | "en"): Promise<string> => {
+  const res = await fetch("https://libretranslate.com/translate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      q: text,
+      source: toLang === "en" ? "hi" : "en",
+      target: toLang,
+      format: "text",
+    }),
+  });
+
+  const data = await res.json();
+  return data.translatedText;
+};
+
+export const speak = (text: string, lang: "hi-IN" | "en-IN") => {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+};
+
