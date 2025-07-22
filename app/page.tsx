@@ -294,7 +294,7 @@ export default function Page() {
                     msOverflowStyle: "none",         // IE/Edge
                   }}
                 >
-                  <style jsx>{`
+                  <style>{`
                     div::-webkit-scrollbar {
                       display: none;
                     }
@@ -458,7 +458,7 @@ export default function Page() {
                 msOverflowStyle: "none",         // IE/Edge
               }}
             >
-              <style jsx>{`
+              <style >{`
                 div::-webkit-scrollbar {
                   display: none;
                 }
@@ -562,7 +562,7 @@ export default function Page() {
               msOverflowStyle: "none",
             }}
           >
-            <style jsx>{`
+            <style >{`
               div::-webkit-scrollbar {
                 display: none;
               }
