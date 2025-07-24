@@ -116,7 +116,7 @@ export default function DonateDialog({ onClose , hospitalId}: DonateDialogProps)
 
   const handleUnlock = () => {
     onClose();
-    router.push(`hospital/${hospitalId}/dashboard/pro`); 
+    router.push(`/pro`); 
   };
 
   // Conditionally render success UI with Confetti
