@@ -10,7 +10,7 @@ export const sendReportEmailWithPDF = async (
 ) => {
   try {
     await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: "support@arogyacompass.cloud",
       to,
       subject: "Your Medical Report",
       html: `<!DOCTYPE html>

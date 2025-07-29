@@ -14,7 +14,7 @@ export const sendMedicalEmailWithPDF = async (
     const base64PDF = Buffer.from(buffer).toString("base64");
 
     await resend.emails.send({
-      from: 'onboarding@resend.dev', // Setup verified domain in Resend
+      from: 'support@arogyacompass.cloud', // Setup verified domain in Resend
       to,
       subject: "Your Medical Report",
       html: `<!DOCTYPE html>

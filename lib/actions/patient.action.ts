@@ -217,7 +217,7 @@ export const createUser = async (user: CreateUserParams) => {
 </html>`
     
     await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: "support@arogyacompass.cloud",
       to: user.email,
       subject: "Your Email Verification Code",
       html: emailHTML
@@ -393,7 +393,7 @@ export const createUser = async (user: CreateUserParams) => {
       });
 
       await resend.emails.send({
-        from: "onboarding@resend.dev",
+        from: "support@arogyacompass.cloud",
         to: user.email,
         subject: "Your Verification Code",
         html: emailHTML

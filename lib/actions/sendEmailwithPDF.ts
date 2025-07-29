@@ -18,7 +18,7 @@ export async function sendEmailWithPDF({
   const pdfBase64 = Buffer.from(arrayBuffer).toString("base64");
 
   return await resend.emails.send({
-    from: 'onboarding@resend.dev', // ⚠️ Needs verified domain
+    from: 'support@arogyacompass.cloud', // ⚠️ Needs verified domain
     to,
     subject: `${role} Access Passkey`,
     html: `<!DOCTYPE html>
