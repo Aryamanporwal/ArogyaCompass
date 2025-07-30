@@ -253,9 +253,9 @@ export default function Page() {
             </nav>
           </div>
           
-          <div className="flex flex-col gap-3 mt-6">
+          <div className="flex flex-col gap-3 mt-auto">
             <button
-              className="flex items-center mb-8 gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
               onClick={() => setDarkMode(!darkMode)}
             >
               {darkMode ? <Sun size={18} /> : <Moon size={16} />}
