@@ -46,27 +46,12 @@ export type RegisterUserParams = {
 
 export const createUser = async (user: CreateUserParams) => {
   const resend = new Resend(process.env.RESEND_API_KEY);
-  try {
-    const newUser = await users.create(
-      ID.unique(), 
-      user.email, 
-      user.phone, 
-      undefined, 
-      user.name
-    );
 
-    
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const cookieStore = await cookies();
-    cookieStore.set("userId", newUser.$id, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+  // Generate a 6-digit verification code
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const emailHTML = `<!DOCTYPE html>
+  // Function to build the email HTML
+  const getVerificationEmailHTML = (name: string, code: string) =>`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -192,11 +177,11 @@ export const createUser = async (user: CreateUserParams) => {
                         <p>Smart App for Faster Care</p>
                     </div>
                     <div class="main-content">
-                        <h2>Hello ${user.name},</h2>
+                        <h2>Hello ${name},</h2>
                         <p>Thank you for signing up. Please use the following verification code to complete your registration:</p>
                         
                         <div class="code-box">
-                            <h2>${verificationCode}</h2>
+                            <h2>${code}</h2>
                         </div>
 
                         <p class="footer-note">This code will expire in 10 minutes. If you did not request this code, you can safely ignore this email.</p>
@@ -215,14 +200,33 @@ export const createUser = async (user: CreateUserParams) => {
     </table>
 </body>
 </html>`
-    
-    await resend.emails.send({
-      from: "support@arogyacompass.cloud",
-      to: user.email,
-      subject: "Your Email Verification Code",
-      html: emailHTML
+  try {
+    const newUser = await users.create(
+      ID.unique(), 
+      user.email || undefined, 
+      user.phone || undefined, 
+      undefined, 
+      user.name
+    );
+
+    const cookieStore = await cookies();
+    cookieStore.set("pendingUserId", newUser.$id, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 10 
     });
 
+    if (user.email) {
+      await resend.emails.send({
+        from: "support@arogyacompass.cloud",
+        to: user.email,
+        subject: "Your Email Verification Code",
+        html: getVerificationEmailHTML(user.name, verificationCode)
+      });
+    }
+  
     return { user: newUser, code: verificationCode };
 
   } catch (error: unknown) {
@@ -233,157 +237,11 @@ export const createUser = async (user: CreateUserParams) => {
       
       // For existing users, generate a new verification code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      if (!existingUser.users.length) {
+        throw new Error("User already exists but could not be found by email");
+      }
       const cookieStore = await cookies();
 
-          const emailHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>ArogyaCompass - Email Verification</title>
-    <style>
-        /* Basic Reset */
-        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-        img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
-        table { border-collapse: collapse !important; }
-        body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-        
-        /* Main Styles */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-            background-color: #f1f5f9; /* slate-100 */
-        }
-
-        .container {
-            padding: 20px;
-        }
-
-        .content-card {
-            background-color: #ffffff;
-            border: 1px solid #e2e8f0; /* slate-200 */
-            border-radius: 12px;
-            max-width: 600px;
-            margin: 0 auto;
-            overflow: hidden;
-        }
-        
-        .header {
-            text-align: center;
-            padding: 40px 20px;
-            border-bottom: 1px solid #e2e8f0; /* slate-200 */
-        }
-        
-        .header img {
-            height: 80px;
-            width: 80px;
-            margin-bottom: 6px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: #2563eb; 
-            margin: 0;
-        }
-
-        .header p {
-            font-size: 14px;
-            color: #3b82f6;
-            margin: 4px 0 0;
-        }
-
-        .main-content {
-            padding: 32px 40px;
-            text-align: left;
-        }
-
-        .main-content h2 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #334155; /* slate-700 */
-            margin-top: 0;
-            margin-bottom: 16px;
-        }
-
-        .main-content p {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #475569; /* slate-600 */
-            margin: 0 0 24px;
-        }
-
-        .code-box {
-            background-color: #f8fafc; /* slate-50 */
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .code-box h2 {
-            font-size: 36px;
-            font-weight: 700;
-            color: #0f172a; /* slate-900 */
-            letter-spacing: 8px;
-            margin: 0;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .footer-note {
-            font-size: 14px;
-            color: #64748b; /* slate-500 */
-        }
-
-        .footer {
-            padding: 20px 40px;
-            text-align: center;
-            font-size: 12px;
-            color: #94a3b8; /* slate-400 */
-        }
-
-    </style>
-</head>
-<body style="background-color: #f1f5f9; margin: 0 !important; padding: 0 !important;">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-        <tr>
-            <td align="center" class="container">
-                <!--[if (gte mso 9)|(IE)]>
-                <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
-                <tr>
-                <td align="center" valign="top" width="600">
-                <![endif]-->
-                <div class="content-card">
-                    <div class="header">
-                        <img src="https://fra.cloud.appwrite.io/v1/storage/buckets/686138bf0019a96102f4/files/688255f9002c8b126dd8/view?project=686136ad00033a8b1a47&mode=admin" alt="ArogyaCompass Logo">
-                        <h1>ArogyaCompass</h1>
-                        <p>Smart App for Faster Care</p>
-                    </div>
-                    <div class="main-content">
-                        <h2>Hello ${user.name},</h2>
-                        <p>Thank you for signing up. Please use the following verification code to complete your registration:</p>
-                        
-                        <div class="code-box">
-                            <h2>${verificationCode}</h2>
-                        </div>
-
-                        <p class="footer-note">This code will expire in 10 minutes. If you did not request this code, you can safely ignore this email.</p>
-                    </div>
-                </div>
-                <!--[if (gte mso 9)|(IE)]>
-                </td>
-                </tr>
-                </table>
-                <![endif]-->
-                <div class="footer">
-                    &copy; 2025 ArogyaCompass. All rights reserved.
-                </div>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>`
       cookieStore.set("userId", existingUser.users[0].$id, {
         httpOnly: true,
         secure: true,
@@ -392,12 +250,14 @@ export const createUser = async (user: CreateUserParams) => {
         maxAge: 60 * 60 * 24 * 7,
       });
 
-      await resend.emails.send({
-        from: "support@arogyacompass.cloud",
-        to: user.email,
-        subject: "Your Verification Code",
-        html: emailHTML
-      });
+      if (user.email) {
+        await resend.emails.send({
+          from: "support@arogyacompass.cloud",
+          to: user.email,
+          subject: "Your Verification Code",
+          html: getVerificationEmailHTML(user.name, verificationCode)
+        });
+      }
       
       return { user: existingUser.users[0], code: verificationCode };
     }
@@ -409,6 +269,8 @@ export const createUser = async (user: CreateUserParams) => {
 
 export async function  verifyPatient(userId : string){
   try{
+    await users.updateEmailVerification(userId, true);
+    await users.updatePhoneVerification(userId, true);
     const update = await databases.updateDocument(
       process.env.DATABASE_ID!,
       process.env.PATIENT_COLLECTION_ID!,
