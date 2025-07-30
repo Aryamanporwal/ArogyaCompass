@@ -45,7 +45,7 @@ export type RegisterUserParams = {
 
 
 export const createUser = async (user: CreateUserParams) => {
-  const resend = new Resend('re_PFSSmak7_FrQaPKiRyRjLH8n3fQ84eBjd');
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const newUser = await users.create(
       ID.unique(), 
