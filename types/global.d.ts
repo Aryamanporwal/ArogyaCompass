@@ -1,6 +1,30 @@
+
 interface Window {
-  webkitSpeechRecognition: typeof SpeechRecognition;
-}
+    webkitSpeechRecognition: typeof SpeechRecognition;
+    Pose: any;
+    POSE_CONNECTIONS: any;
+    Camera: new (
+      videoElement: HTMLVideoElement,
+      options: {
+        onFrame: () => Promise<void> | void;
+        width?: number;
+        height?: number;
+      }
+    ) => { start: () => void; stop: () => void };
+
+    drawConnectors: (
+      ctx: CanvasRenderingContext2D,
+      landmarks: any,
+      connections: any,
+      style?: { color?: string; lineWidth?: number }
+    ) => void;
+
+    drawLandmarks: (
+      ctx: CanvasRenderingContext2D,
+      landmarks: any,
+      style?: { color?: string; lineWidth?: number }
+    ) => void;
+  }
 
 interface SpeechRecognition extends EventTarget {
   lang: string;
